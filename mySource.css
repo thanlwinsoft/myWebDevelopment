@@ -1,0 +1,70 @@
+/*
+Copyright 2006 ThanLwinSoft.org
+
+You are free to use this on your website and modify it 
+subject to a Creative Commons license. 
+However, please add a link to www.thanlwinsoft.org 
+on every page that uses this script. For more info
+and contact details see www.thanlwinsoft.org.
+
+This copyright statement must not be removed.
+
+Version:       0.1
+Author:        Keith Stribley (KRS)
+Contributors:  
+
+Change History:
+23-09-2006	KRS	Initial Version
+
+Script to display source in a web page.
+It assumes that the folloing divs are present.
+
+<div class="source" style="display:none;">
+<h2>HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>CSS Source</h2>
+<iframe id="css"></iframe>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<iframe id="js">
+</iframe>
+</div>
+
+*/
+
+/*
+.testSpace {
+  height: 500px;
+}
+*/
+
+div.source {
+  border-top-width: 1px;
+  border-top-style: solid;
+  width: 99%;
+}
+
+pre {
+background-color: #ffd0ff;
+overflow: scroll;
+width: 98%;
+}
+
+.source  pre {
+background-color: #ffd0ff;
+overflow: scroll;
+height: 200px;
+width: 98%;
+}
+
+iframe {
+width: 99%;
+height: 200px;
+overflow: scroll;
+background-color: #ffd0ff;
+}
+
