@@ -1,0 +1,169 @@
+/*
+Copyright 2005 ThanLwinSoft.org
+
+You are free to use this on your website and modify it 
+subject to a Creative Commons license. 
+However, please add a link to www.thanlwinsoft.org 
+on every page that uses this script. For more info
+and contact details see www.thanlwinsoft.org.
+
+This copyright statement must not be removed.
+---------------------------------------------------------
+
+The keyboard will not be displayed until you click on a 
+link which calls java script code similar to:
+
+<a href="javascript:toggleKeyboard()">
+ခလုတ်ကွက်ပြ
+</a>
+
+These links can be added automatically if you add the following onload tag:
+<body onload="myK.registerKeyboard('my');">
+
+You will also need to add a link to the accompanying script
+in your page header. The page uses the UTF-8 Unicode Encoding.
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="myKeyboard.js"></script>
+</head>
+*/
+table.consonants, table.vowels {
+
+  padding: .2em;
+  background-color:#aaaaaa;/* button */
+  border-collapse: collapse;
+  border-spacing: 0.4em;
+}
+
+col.consonants {
+  width: 2em;
+}
+col.vowels {
+  width: 2em;
+}
+col.consWide {
+  width: 2.5em;
+}
+col.wideCol {
+  width: 3em;
+}
+
+td.keyboard {
+  text-align: center;
+  padding: 0.1em; 
+  border-width: .1em; 
+  border-color: #ffffff; /*background*/
+  border-style: solid;
+  font-size: 1.2em;
+  height: 1.5em;
+}
+
+td.keyButton {
+  text-align: right;
+  padding: 0.1em; 
+  border-width: .1em; 
+  background-color: #aaaaaa;/* button */
+  border-color: #ffffff;/* background */
+  border-style: solid;
+  font-size: 1.2em;
+  font-weight: bold;
+  height: 1.5em;
+}
+
+div.keyboard {
+  position: absolute; /* uncomment to place at fixed position at top of page*/
+  text-align: center;
+  border-width: 2px;
+  border-style: solid; 
+  border-color: black;
+  background-color: #ffffff; /* background */
+  margin: 0px;
+  padding: 0px;
+  z-index: 10;
+}
+
+.thanlwinsoft {
+    display: block;
+    text-align: right;
+    font-size: small;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: black;
+	margin: 0px;
+    padding: 0px;
+}
+
+.keyboardTopBar {
+	text-align: left;
+	background-color: #0000ff;
+	color: black;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: black;
+	margin-top: 0px;
+	margin: 0px;
+    padding: 0px;
+	line-height: 1em;
+}
+
+
+.keyboardTopBar p {
+	margin: 0px;
+    padding: 0px;
+	text-align: right;
+	vertical-align: top;
+	font-size: small;
+}
+
+.keyboardTopBar span {
+}
+
+.keyboardTopBar a:link,  .keyboardTopBar a:visited, .keyboardTopBar a:active{
+    color: black;
+	text-decoration: none;
+	border-style: none;
+}
+
+a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
+    color: white;
+	font-family: Arial;
+	font-weight: bold;
+	margin-left: 0.5em;
+	vertical-align: top;
+	font-size: small;
+}
+.keyboardTopBar img {
+  border-style: none;
+}
+
+.my, a.keyboard:link, a.keyboard:visited, a.keyboard:active {
+  text-decoration: none;
+  font-family: PadaukOT, Myanmar2, Padauk;
+}
+
+input, textarea {
+  font-family: PadaukOT, Myanmar2, Padauk;
+}
+
+/** for Unicode support detection*/
+.myUniTest {
+        font-family: PadaukOT, Myanmar2, Padauk;
+        font-size: 1em; /* don't make it so small that rounding errors give problems */
+        color: white; /* should be same as background to make it invisible */
+}
+	
+.arrow {
+  font-family: arial;
+}
+
+.myOverlay {/*ignored by IE on DHTML */
+    font-family: PadaukOT, Myanmar2, Padauk;
+    z-index: 9; /* just below keyboard*/
+    position: absolute;
+	
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+	
+}
