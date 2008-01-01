@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+Most computers do not have a  Myanmar Unicode Input Method installed. 
+Even if people have one, they may not be familiar with typing in Myanmar. 
+To get around these problems you can use a visual keyboard like this.
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Myanmar Unicode Virtual Keyboard</title>
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="myKeyboard.js"></script>
+<script type="text/javascript" src="mySource.js"></script>
+<script type="text/javascript" src="PadaukOT.js"></script>
+<script type="text/javascript" src="myDetection.js"></script>
+
+<link type="text/css" rel="stylesheet" href="myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="mySource.css"/>
+</head>
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<body id='body' onload="myUnicode.initParse('');myK.registerKeyboard('ksw');myK.registerKeyboard('my');">
+<h1>Myanmar Unicode Virtual Keyboard</h1>
+<script type="text/javascript">
+function showUnicodes(input)
+{
+  //var input = document.getElementById('textInput');
+  var unicodeDump = document.getElementById("unicodeDump");
+  while (unicodeDump.hasChildNodes())
+  {
+    unicodeDump.removeChild(unicodeDump.lastChild);
+  }
+  var text = input.value;
+  for (var i = 0; i<text.length; i++)
+  {
+    var num = document.createTextNode("&#" + text.charCodeAt(i) + ";");
+    unicodeDump.appendChild(num);
+  }
+}
+myK.afterKey = showUnicodes;
+</script>
+<form>
+<input type="text" onmouseover="showUnicodes(this)" id="textInput" class="my" name="a"></input><br />
+<textarea cols="50" rows="4" class="my" onmouseover="showUnicodes(this)" name="b"></textarea>
+<br />
+<span id="unicodeDump">Click on some characters to see their codes.</span><br />
+</form>
+
+<p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 
+<a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>
+<span class="myUniTest" id="myWidth2">ကက</span>
+<span class="myUniTest" id="myWidth1">က္က</span>
+</p>
+<script type="text/javascript">
+myUnicode.check();
+
+</script>
+<p>If you want to include this in your own web pages add a few extra lines to the header as below and append a call to <tt>myK.initKeyboard()</tt> or <tt>myK.registerKeyboard()</tt> to the onload function. The first argument to <tt>myK.initKeyboard()</tt> is the path to the keyboard, javascript files and images. Muliple onload functions can be separated by ";". For example, you may want to combine it with the myDetection code <tt>myUnicode.initParse('/styles/')</tt>.</p>
+
+<pre>...
+&lt;meta content="text/html; charset=UTF-8" http-equiv="content-type" /&gt;
+&lt;link type="text/css" rel="stylesheet" href="/styles/myKeyboard.css" /&gt;
+&lt;script type="text/javascript" src="/styles/myKeyboards.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="/styles/xmlRequest.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body  onload="myK.initKeyboard('/styles/','my');" &gt;
+...
+</pre>
+<p><a href="javascript:getSourceFile('source','myKeyboard.html')">View the Source HTML</a>, 
+<a href="javascript:getSourceFile('keySrc','myKeyboard.php')"> the Keyboard HTML</a>, 
+<a href="javascript:getSourceFile('js','myKeyboard.js')">Javascript</a> and  
+<a href="javascript:getSourceFile('cssPre','myKeyboard.css')">CSS</a> 
+for more instructions on how to use in your own pages.</p>
+<p>This script can be combined with <tt>myUnicode.initParse('/styles/');</tt> to allow the Myanmar text to be converted to images automatically when Unicode support is not available. If your browser supports Myanmar Unicode you can <a href="javascript:{ myUnicode.isSupported=false; myUnicode.parseDoc(); }">force the conversion</a> of Myanmar <span class="my">[မြန်မာ]</span> text to images. 
+</p>
+<p>An overlay div is used to contain the images, which is placed on top of text-input and textarea tags. The content of the input box is left as real text so that the form submission is still correct, though it may be displayed wrongly. The div overlay is only displayed when the Myanmar keyboard is visible. The overlay is not used at all when image conversion is not needed.</p>
+<p>See also the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>. </p>
+<div class="testSpace"></div>
+
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="my" href='http://www.thanlwinsoft.org'>သံလွင်Soft.org <img src='ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<!-- Creative Commons License -->
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
+<!-- /Creative Commons License -->
+</p>
+
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
+</License>
+
+</rdf:RDF>
+
+-->
+<div class="source" style="display:none;">
+<h2>Page HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source" style="display:none;">
+<h2>Keyboard HTML Source</h2>
+<pre id="keySrc" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>CSS Source</h2>
+<pre id="cssPre" style="display:none;">
+</pre>
+</div>
+</body>
+</html>

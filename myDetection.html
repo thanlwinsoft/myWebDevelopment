@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+A simple detection algorithm based on the fact that a Myanmar Unicode enabled browser 
+renders U+1000 U+1039 U+1000 with the 2 consonants stacked on top of each other. 
+It should therefore have half the width of U+1000 U+1000.
+A non-compliant browser will not interpret the 
+U+1039 correctly and so renders it as 2 consonants of twice the width. 
+If a Myanmar font is not installed, it will actually have 3 times the width.
+Obviously, there are lots of possible variations for this test. 
+
+You can append the 2 test spans to any text in your page where it will not get in the way.
+The style class makes it invisible. 
+Note: the <span>s must be before the script, so they are available as the page loads. 
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Test Myanmar Unicode Support</title>
+<style>
+    .myUniTest {
+        font-family: PadaukOT, Myanmar2, Padauk;
+        font-size: 1em; /* don't make it so small that rounding errors give problems */
+        color: white; /* should be same as background to make it invisible */
+    }
+    .myWarning {
+        color: red;
+    }
+    .myText {
+        font-family: PadaukOT, Myanmar2, Padauk;
+        font-size: 1em;
+    }
+    .myTextMsg {
+        text-align: center;
+    }
+    .myGood {
+        color: green;
+    }
+    .myThanLwin {
+        display: block;
+        text-align: right;
+        font-size: small;
+    }
+    .thanlwinsoft {
+      display: block;
+      text-align: right;
+      font-size: small;
+      border-top-style: solid;
+      border-top-width: 1px;
+      border-top-color: black;
+    }
+</style>
+
+<script type="text/javascript" src="PadaukOT.js"></script>
+<script type="text/javascript" src="myDetection.js"></script>
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="mySource.js"></script>
+<link type="text/css" rel="stylesheet" href="mySource.css"/>
+</head>
+<body onload="myUnicode.initParse('');">
+
+<h1>Myanmar Unicode Test<span class="myUniTest" id="myWidth2">ကက</span>
+<span class="myUniTest" id="myWidth1">က္က</span></h1>
+
+<script type="text/javascript">
+myUnicode.checkWithMsg();
+if (myUnicode.isSupported == false)
+{
+// do something
+}
+</script>
+<!-- End of Myanmar Unicode Support Testing -->
+<p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>.</p>
+<p>To use this script on your site you need to:
+<ul><li>include a few scripts e.g. in the /styles directory</li> 
+<li>add 2 spans with the test text</li><li>add an onload function</li></ul>
+</p>
+<pre>
+...
+&lt;meta content="text/html; charset=UTF-8" http-equiv="content-type" /&gt;
+&lt;script type="text/javascript" src="/styles/PadaukOT.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="/styles/myDetection.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="/styles/xmlRequest.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body  onload="myUnicode.initParse('/styles/');" &gt;
+&lt;span style="font-family: 'PadaukOT','Myanmar2','Padauk'" id="myWidth2"&gt;ကက&lt;/span&gt;
+&lt;span style="font-family: 'PadaukOT','Myanmar2','Padauk'" id="myWidth1"&gt;က္က&lt;/span&gt;
+...
+</pre>
+<p>Change the styles directory as appropriate for your website. 
+The Text2Image conversion relies on the images files being in a subdirectory of /styles/ or whatever you specify as the argument to initParse. 
+For more details <a href="javascript:getSourceFile('source','myDetection.html')">View the Source HTML, CSS</a> and <a href="javascript:mySource.getSourceFile('js','myDetection.js')">Javascript</a> for instructions on how to use in your own pages.</p>
+
+<p>If the conversion fails, Myanmar <span class="my">[မြန်မာ]</span> text should automatically be converted to images. If your browser supports Myanmar Unicode you can still <a href="javascript:{ myUnicode.isSupported=false; myUnicode.parseDoc(); }">force the conversion</a>.</p>
+<p>If you want support for Myanmar Unicode in text input fields you can use the <a href="myKeyboard.html">Myanmar Keyboard</a>.</p>
+
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<!-- Creative Commons License -->
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
+<!-- /Creative Commons License -->
+</p>
+
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
+</License>
+
+</rdf:RDF>
+
+-->
+<div class="source" style="display:none;">
+<h2>HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js">
+</pre>
+</div>
+
+</body>
+</html>
