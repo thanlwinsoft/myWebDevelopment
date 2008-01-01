@@ -38,11 +38,15 @@ Change History:
 var myK =  {
 pathStem : "", /* change to give the path of the  keyboard stylesheet and images */
 inputId : 'textInput',
+inputType : "",
+inputIndex : "",
 inputNode : -1,
 consMode : 0,
 numLevels : 14,
-lang : 'my',
+lang : '',
 keyboardIcon : "Keyboard.png",
+keyboardOffIcon : "KeyboardOff.png",
+keyboardVisible : false,
 keyboardSrc : "Keyboard.xml",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
@@ -79,25 +83,21 @@ initKeyboard: function(path, lang)
 * Looks for the text held in the syllable array at the end of the 
 * specified input element
 * @param inputElement handle to input Element
+* @param cursor {selectionStart, selectionEnd}
 * @internal
 */
-findOldText: function(inputElement)
+findOldText: function(inputElement, cursor)
 {
-  var oldText = inputElement.value;
+  var oldText = inputElement.value.substring(0, cursor.selectionEnd);
+  this.suffix = inputElement.value.substring(cursor.selectionEnd);
   // strip off current syllable
   var oldSyllable = myK.syllableToString();
   var oldIndex = -1;
-  if (oldSyllable.length > 0) oldText.lastIndexOf(oldSyllable);
-  if (oldIndex > -1 && (oldIndex + oldSyllable.length == oldText.length))
-  {
-    oldText = oldText.substring(0, oldIndex);
-  }
-  else // currentSyllable and input box are out of sync
-  {
-    oldText = myK.findEndSyllable(oldText, false);
-  }
+  oldText = myK.findEndSyllable(oldText, false);
+
   //alert("oldText " + oldText + "(" + inputElement.value + ")" + oldIndex);
-  return oldText;
+  this.prefix = oldText;
+  return this;
 },
 
 /**
@@ -112,7 +112,19 @@ typeChar: function(charValue, pos)
 {
   var characters = charValue;
   var inputElement = myK.inputNode; //document.getElementById(inputId);
-  var oldText = myK.findOldText(inputElement);
+  var cursor = myK.getCursorPosition();
+  var oldSelectedText = inputElement.value.substring(cursor.selectionStart, 
+                                                     cursor.selectionEnd);
+  var oldText = myK.findOldText(inputElement, cursor);
+  if (oldSelectedText != myK.syllableToString())
+  {
+    // delete the selection, it must have been selected by the user, not us
+    myK.resetSyllable();
+    oldText.prefix = inputElement.value.substring(0, cursor.selectionStart);
+    inputElement.value = oldText.prefix + oldText.suffix;
+    cursor.selectionEnd = cursor.selectionStart;
+    oldText = myK.findOldText(inputElement, cursor);
+  }
   
   if (pos == 1)
   {
@@ -120,10 +132,10 @@ typeChar: function(charValue, pos)
     {
       if (myK.currentSyllable[pos] != "" && myK.currentSyllable[pos] != "\u25cc")
       {
-        oldText = oldText + myK.syllableToString();
+        oldText.prefix = oldText.prefix + myK.syllableToString();
         myK.resetSyllable();
       }
-      else if (myK.currentSyllable[6] != "")
+      //else if (myK.currentSyllable[6] != "")
       {
         myK.enable('u1031');
       }
@@ -150,13 +162,13 @@ typeChar: function(charValue, pos)
     // u1031
     if (pos == 6 && myK.currentSyllable[1] != "")
     {
-      oldText = oldText + myK.syllableToString();
+      oldText.prefix = oldText.prefix + myK.syllableToString();
       myK.resetSyllable();
       myK.currentSyllable[pos] = characters;
     }
     else
     {
-	  // sepcial case for contrations
+	  // special case for contrations
 	  if (myK.currentSyllable[11] == "\u103a" && pos > 2 && pos < 9)
 	  {
 		myK.currentSyllable[2] = myK.currentSyllable[11];
@@ -166,12 +178,15 @@ typeChar: function(charValue, pos)
       var ids = myK.positionNodes[pos];
       for (var j = 0; j < ids.length; j++)
       {
-        myK.disable(ids[j]);
+          myK.disable(ids[j]);
       }
     }
   }
-  inputElement.value = oldText + myK.syllableToString();
-  window.status = inputElement.value + " Syllable = " + myK.syllableToString() + 
+  var newSyllable = myK.syllableToString();
+  inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
+  myK.setCursorPosition(oldText.prefix.length, oldText.prefix.length + 
+                        newSyllable.length);
+  window.status = inputElement.value + " Syllable = " + newSyllable + 
     " " + myK.currentSyllable.length;
   // update overlay if there is one
   myK.updateOverlay(inputElement);
@@ -182,12 +197,12 @@ typeChar: function(charValue, pos)
 /**
 * Deletes the last character typed by the user at the end of the
 * string. This may actually consist of several unicode code
-* points e.g. for medials.
+* points e.g. for kinsi.
 */
 deleteChar: function()
 {
   var inputElement = myK.inputNode;//document.getElementById(inputId);
-  var oldText = myK.findOldText(inputElement);
+  var oldText = myK.findOldText(inputElement, myK.getCursorPosition());
   var deleted = false;
   var lastOfSyllable = false;
   for (var i = myK.currentSyllable.length - 1; i>=0; i--)
@@ -211,9 +226,12 @@ deleteChar: function()
   if (!deleted || lastOfSyllable)
   {
     // need to update oldText and move to previous syllable
-    oldText = myK.findEndSyllable(oldText, !deleted);
+    oldText.prefix = myK.findEndSyllable(oldText.prefix, !deleted);
   }
-  inputElement.value = oldText + myK.syllableToString();
+  var newSyllable = myK.syllableToString();
+  inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
+  myK.setCursorPosition(oldText.prefix.length, oldText.prefix.length + 
+                        newSyllable.length);
   // update overlay if there is one
   myK.updateOverlay(inputElement);
   if (myK.afterKey)
@@ -282,9 +300,12 @@ findEndSyllable: function(oldText, forDelete)
           myK.currentSyllable[order] = oldText.substr(charIndex + 1,
                                                 myK.lastTokenLength);
           var ids = myK.positionNodes[order];
-          for (var j = 0; j < ids.length; j++)
+          if (order != 6) 
           {
-            myK.disable(ids[j]);
+            for (var j = 0; j < ids.length; j++)
+            {
+                myK.disable(ids[j]);
+            }
           }
           if (order == 2 || order == 0) 
           {
@@ -496,7 +517,7 @@ disable: function(id)
 
 /**
 *
-* hides the element with the given id
+* shows the element with the given id
 * will silently fail if id does not exist
 * @param id of element
 */
@@ -631,21 +652,34 @@ hideKeyboard: function(lang)
 /**
 * toggles display of the keyboard on or off
 */
-toggleLangKeyboard: function(lang)
+toggleLangKeyboard: function(lang, type, index)
 {
   if (lang != myK.lang)
-    myK.hideKeyboard(myK.lang);
-  var keyboard = document.getElementById(lang + '_keyboard');
-  if (keyboard.style.display == "none")
   {
+    myK.hideKeyboard(myK.lang);
+    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
+    if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
+    img = document.getElementById(myK.langIcon(type, index, lang));
+    if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
     myK.lang = lang;
+  }
+  else
+  {
+    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, lang));
+    if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardOffIcon);
+    myK.lang = '';
+  }
+  myK.switchInputByIndex(type, index);
+  var keyboard = document.getElementById(lang + '_keyboard');
+  if (myK.keyboardVisible && keyboard.style.display == "none")
+  {
     keyboard.style.display = "";
     myKeyboardMover.keyboardId = lang + '_keyboard';
   }
   else
   {
     keyboard.style.display = "none";
-    myK.hideOverlay(myK.inputNode);
+    //myK.hideOverlay(myK.inputNode);
   }
 },
 
@@ -662,7 +696,7 @@ switchInput: function(newId)
   if (newInput)
   { 
     myK.inputNode = newInput;
-    myK.findOldText(newInput);
+    myK.findOldText(newInput, myK.getCursorPosition());
     myKeyboardMover.inputId = newId;
     myKeyboardMover.inputNode = newInput;
     myKeyboardMover.moveBelowInput();
@@ -693,8 +727,12 @@ switchInputByIndex: function(tagName, index)
     var newInput = elements[index];
     if (newInput)
     { 
+        var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
+        if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
         myK.inputNode = newInput;
-        myK.findOldText(newInput);
+	    if (newInput.id)
+          myK.inputId = newInput.id;
+        myK.findOldText(newInput, myK.getCursorPosition());
         myKeyboardMover.inputId = "";
         myKeyboardMover.inputNode = newInput;
         myKeyboardMover.moveBelowInput();
@@ -708,6 +746,10 @@ switchInputByIndex: function(tagName, index)
                 myK.updateOverlay(myK.inputNode);
             }
         }
+        myK.inputType = tagName;
+        myK.inputIndex = index;
+        img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
+        if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardIcon);
     }
   }
 },
@@ -720,7 +762,6 @@ registerKeyboard: function(lang)
     myK.findPathStem();
     var inputCount = 0;
     var textareaNodes = document.getElementsByTagName('textarea');
-    myK.lang = lang;
     for (var i = 0; i < textareaNodes.length; i++)
     {
         myK.addOnEventLink(textareaNodes[i], 'textarea', i, lang);
@@ -800,22 +841,27 @@ toUnicodes: function(text)
         request.onreadystatechange = returnFunc;
         request.send("");
     },
+    langIcon: function(type, index, lang)
+    {
+        return "myK." + type + index + lang + "Icon";
+    },
 
     addOnEventLink: function(node, type, index, lang)
     {
         var link = document.createElement('a');
         node.onclick = function() { myK.switchInputByIndex(type , index);};
         link.setAttribute('href',"javascript:{myK.toggleLangKeyboard('" + lang + 
-            "');myK.switchInputByIndex('" + type + "'," + 
+            "','" + type + "'," + 
             index + ");}");
         var img = document.createElement('img');
-        img.setAttribute('src', myK.pathStem + lang + myK.keyboardIcon);
+        img.setAttribute('src', myK.pathStem + lang + myK.keyboardOffIcon);
         var name = "Myanmar";
         if (lang == 'ksw')
         {
             name = "Sgaw Karen";
         }
         img.setAttribute('alt', "[" + lang + "] ");
+        img.setAttribute('id', myK.langIcon(type, index, lang));
         img.setAttribute('title', "Show visual " + name + " keyboard");
         if (node.nextSibling)
         {
@@ -903,8 +949,75 @@ toUnicodes: function(text)
             style.setAttribute("href","myKeyboard.css");
             head.appendChild(style);
         }*/
-    }
+    },
+    getCursorPosition : function()
+    { 
+        var cursorDisplay = document.getElementById('cursor');
+        var inputObject = myK.inputNode;//document.getElementById(myK.inputId);
+        if (!inputObject) 
+        {
+          if (cursorDisplay)
+            cursorDisplay.innerHTML = '-';
+          return;
+        }
+        this.selectionStart = -1;
+        this.selectionEnd = -1;
+        if (document.selection)
+        {
+            obj.focus();
+            var range = document.selection.createRange();
+            if (range.parentElement() != inputObject)
+            {
+                if (cursorDisplay)
+                    cursorDisplay.innerHTML = '-';
+                return;
+            }
+            var prefixRange = inputObject.createTextRange();
+            prefixRange = prefixRange.setEndPoint("EndToStart", range);
+            var suffixRange = inputObject.createTextRange();
+            suffixRange = suffixRange.setEndPoint("StartToEnd", range);
+            this.selectionStart = prefixRange.text.length;
+            this.selectionEnd = inputObject.value.length - suffixRange.text.length;
+        }
+        else
+        {
+            this.selectionStart = inputObject.selectionStart;
+            this.selectionEnd = inputObject.selectionEnd;        
+        }
 
+        if (this.selectionStart > -1)
+        {
+          if (cursorDisplay)
+            cursorDisplay.innerHTML = ' ' + this.selectionStart + ':' + this.selectionEnd;
+        }
+        else
+        {
+          if (cursorDisplay)
+            cursorDisplay.innerHTML = '';
+        }
+        return this;
+    },
+    setCursorPosition : function(start, end)
+    {
+        if (!myK.inputNode) 
+        {
+            return;
+        }
+        if (document.selection)
+        {
+            myK.inputNode.focus();
+            var range = myK.inputNode.createTextRange();
+	        range.move('character', start); 
+            if (end > start)
+                range.moveEnd('character', end - start);
+	        range.select();
+        }
+        else
+        {
+            myK.inputNode.focus();
+            myK.inputNode.setSelectionRange(start, end);
+        }
+    }
 };// end MyKeyboard
 
 
@@ -1113,7 +1226,7 @@ var myKeyboardMover = {
         var event;
         if (window.event) event = window.event;
         else event = e;
-        myKeyboardMover.moveTo(event.clientX, event.clientY);
+        myKeyboardMover.moveTo(evt.clientX, evt.clientY);
     },
     
     moveBelowInput:function()
@@ -1163,3 +1276,93 @@ var myKeyboardMover = {
         }
     }
 };
+
+var myKeyMapper = {
+    my_map : {
+        //:"",:"",:"",:"",
+        _32:" ",_48:"၀",_49:"၁",_50:"၂",_51:"၃",_52:"၄",_53:"၅",_54:"၆",_55:"၇",_56:"၈",_57:"၉",
+        _126:"\u1039",_192:"\u1039",
+        q:"ဆ",w:"တ",e:"န",r:"မ",t:"အ",y:"ပ",u:"က",i:"င",o:"သ",p:"စ",_91:"ဟ",_93:"‘",_92:"၏",
+        a:"‌ေ",s:"ျ",d:"ိ",f:"်",g:"ါ",h:"့",j:"ြ",k:"ု",l:"ူ",_59:"း",_39:"ဒ",
+        z:"ဖ",x:"ထ",c:"ခ",v:"လ",b:"ဘ",n:"ည",m:"ာ",/*_44:"ယ",_46:".",_47:"။",*/_188:"ယ",_190:".",_191:"။"
+    },
+    my_mapShift : {
+        
+    },
+    my_mapCtrl : {
+    },
+    my_mapAlt : {
+    },
+    my_mapCtrlAlt : {
+    },
+    my_mapCtrlShift : {
+    },
+    my_mapAltShift : {
+    },
+    my_mapCtrlAltShift : {
+    },
+    // TODO Sgaw Karen
+    ksw_map : {  
+    },
+    ksw_mapShift : {
+    },
+    ksw_mapCtrl : {
+    },
+    ksw_mapAlt : {
+    },
+    ksw_mapCtrlAlt : {
+    },
+    ksw_mapCtrlShift : {
+    },
+    ksw_mapAltShift : {
+    },
+    ksw_mapCtrlAltShift : {
+    },
+
+    keyDown : function(e)
+    {
+        var evt = e || window.event;
+        if (myK.lang == '') return true;
+        if (evt.keyCode <= 20) 
+        {
+            var cursor = myK.getCursorPosition();
+            myK.setCursorPosition(cursor.selectionEnd, cursor.selectionEnd);
+            return true;
+        }
+        var theChar = String.fromCharCode(evt.keyCode);
+        var lookup = myK.lang + "_map" + (evt.ctrlKey ? "Ctrl" : "") + (evt.altKey ? " Alt" : "") +
+            (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
+        if (evt.keyCode < 'A'.charCodeAt(0) || evt.keyCode > 'z'.charCodeAt(0) || 
+            (evt.keyCode > 'Z'.charCodeAt(0) && evt.keyCode < 'a'.charCodeAt(0)))
+        {
+            lookup = myK.lang + "_map" + (evt.ctrlKey ? "Ctrl" : "") + (evt.altKey ? " Alt" : "") +
+                (evt.shiftKey ? "Shift._" : "._") + evt.keyCode;
+        }
+        var debugText = (evt.ctrlKey ? " Ctrl" : "") + (evt.altKey ? " Alt" : "") +
+            (evt.shiftKey ? " Shift" : "") + evt.keyCode + "(" + 
+            String.fromCharCode(evt.keyCode) +")";
+        //if (evt.keyCode > 20) alert(debugText);
+        try
+        {
+            var keyCodeMap = eval("myKeyMapper." + lookup);
+            if (keyCodeMap != undefined)
+            {
+                myK.typeChar(keyCodeMap, myK.getCharOrder(keyCodeMap, 0));
+                return false;
+            }
+        }
+        catch (theException) 
+        {
+            // for debugging
+            alert(lookup);
+        }
+        
+        // remove the selection to prevent overwriting
+        var cursor = myK.getCursorPosition();
+        myK.setCursorPosition(cursor.selectionEnd, cursor.selectionEnd);
+        // for debugging
+        alert(debugText);
+        return true;
+    }
+};
+

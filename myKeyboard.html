@@ -50,9 +50,10 @@ myK.afterKey = showUnicodes;
 </script>
 <form>
 <input type="text" onmouseover="showUnicodes(this)" id="textInput" class="my" name="a"></input><br />
-<textarea cols="50" rows="4" class="my" onmouseover="showUnicodes(this)" name="b"></textarea>
+<textarea cols="50" rows="4" class="my" onmouseover="showUnicodes(this)" name="b" id="areaInput" onkeydown="return myKeyMapper.keyDown(event)"></textarea>
 <br />
 <span id="unicodeDump">Click on some characters to see their codes.</span><br />
+<p onmouseover='showCursorPosition()'>Cursor<span id="cursor"></span></p>
 </form>
 
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 
@@ -92,7 +93,51 @@ for more instructions on how to use in your own pages.</p>
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
 <!-- /Creative Commons License -->
 </p>
+<script type="text/javascript">
+<!--
+function showCursorPosition()
+{ 
+    var cursorDisplay = document.getElementById('cursor');
+    if (!cursorDisplay)
+    {
+      return;
+    }
+    var inputObject = myK.inputNode;//document.getElementById(myK.inputId);
+    if (!inputObject) 
+    {
+      cursorDisplay.innerHTML = '-';
+      return;
+    }
+    var selectionStart = -1;
+    var selectionEnd = -1;
+    if (document.selection)
+    {
+        obj.focus();
+        var range = document.selection.createRange();
+        if (range.parentElement() != inputObject)
+        {
+            cursorDisplay.innerHTML = '-';
+            return;
+        }
+        
+    }
+    else
+    {
+        selectionStart = inputObject.selectionStart;
+        selectionEnd = inputObject.selectionEnd;        
+    }
 
+    if (selectionStart > -1)
+    {
+      cursorDisplay.innerHTML = ' ' + selectionStart + ':' + selectionEnd;
+    }
+    else
+    {
+      cursorDisplay.innerHTML = '';
+    }
+}
+-->
+</script>
 <!--
 
 <rdf:RDF xmlns="http://web.resource.org/cc/"
