@@ -9,7 +9,7 @@ and contact details see www.thanlwinsoft.org.
 
 This copyright statement must not be removed.
 
-Version:       0.1
+Version:       0.4
 Author:        Keith Stribley (KRS)
 Contributors:  
 
@@ -17,15 +17,9 @@ Change History:
 08-07-2005    KRS    Initial Version
 24-07-2006    KRS    Modified for new Unicode Proposal
 23-07-2006    KRS    Keyboard can now be dragged around browser window
-
+01-01-2008    KRS    Enable characters to be typed with normal keyboard
 
 */
-// you may need to override the myK.inputId value to match the id on your 
-// input box. You can do this inside script tags after you have
-// included this script.
-// If you are using more than one input box, then set the onclick event
-// of each input box to call myK.switchInput('inputId') where inputId must
-// be different for each input box.
 
 /**
 * The algorithm used here uses the syllable structure from Unicode 4
@@ -654,6 +648,7 @@ hideKeyboard: function(lang)
 */
 toggleLangKeyboard: function(lang, type, index)
 {
+  var keyboard = document.getElementById(myK.lang + '_keyboard');
   if (lang != myK.lang)
   {
     myK.hideKeyboard(myK.lang);
@@ -662,6 +657,7 @@ toggleLangKeyboard: function(lang, type, index)
     img = document.getElementById(myK.langIcon(type, index, lang));
     if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
     myK.lang = lang;
+    if (keyboard) keyboard.style.display == "none";
   }
   else
   {
@@ -669,8 +665,8 @@ toggleLangKeyboard: function(lang, type, index)
     if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardOffIcon);
     myK.lang = '';
   }
-  myK.switchInputByIndex(type, index);
-  var keyboard = document.getElementById(lang + '_keyboard');
+  
+  keyboard = document.getElementById(lang + '_keyboard');
   if (myK.keyboardVisible && keyboard.style.display == "none")
   {
     keyboard.style.display = "";
@@ -681,6 +677,9 @@ toggleLangKeyboard: function(lang, type, index)
     keyboard.style.display = "none";
     //myK.hideOverlay(myK.inputNode);
   }
+  myK.switchInputByIndex(type, index);
+  if (myK.inputNode)
+    myK.inputNode.focus();
 },
 
 /** Change the active input box for the keyboard.
@@ -719,6 +718,8 @@ switchInput: function(newId)
 */
 switchInputByIndex: function(tagName, index)
 {
+    if (myK.inputType == tagName && myK.inputIndex == index)
+        return;
   myK.inputId = "";// not used
   myK.resetSyllable();
   var elements = document.getElementsByTagName(tagName);
@@ -848,8 +849,29 @@ toUnicodes: function(text)
 
     addOnEventLink: function(node, type, index, lang)
     {
-        var link = document.createElement('a');
         node.onclick = function() { myK.switchInputByIndex(type , index);};
+        var alphabetWindowId = "myK." + type + index + "alphabetWindowIcon";
+        var alphabetWindow = document.getElementById(alphabetWindowId);
+        if (!alphabetWindow)
+        {
+            var link = document.createElement('a');
+            var img = document.createElement('img');
+            img.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
+            img.setAttribute('id', alphabetWindowId);
+            img.setAttribute('alt', "Show Alphabet");
+            img.setAttribute('title', "Show Alphabet");
+            link.appendChild(img);
+            link.setAttribute('href',"javascript:{myK.toggleAlphabetWindow();}");
+            if (node.nextSibling)
+            {
+                node.parentNode.insertBefore(link, node.nextSibling);
+            }
+            else
+            {
+                node.parentNode.appendChild(link);
+            }
+        }
+        var link = document.createElement('a');
         link.setAttribute('href',"javascript:{myK.toggleLangKeyboard('" + lang + 
             "','" + type + "'," + 
             index + ");}");
@@ -862,7 +884,7 @@ toUnicodes: function(text)
         }
         img.setAttribute('alt', "[" + lang + "] ");
         img.setAttribute('id', myK.langIcon(type, index, lang));
-        img.setAttribute('title', "Show visual " + name + " keyboard");
+        img.setAttribute('title', "" + name + " keyboard");
         if (node.nextSibling)
         {
             var sibling = node.nextSibling;
@@ -873,6 +895,29 @@ toUnicodes: function(text)
             node.parentNode.appendChild(link);
         }
         link.appendChild(img);
+        
+    },
+    toggleAlphabetWindow : function()
+    {
+        var keyboard = document.getElementById(myK.lang + '_keyboard');
+        var alphabetWindow = "myK." + myK.inputType + myK.inputIndex + "alphabetWindowIcon";
+        img = document.getElementById(alphabetWindow);
+        if (keyboard && img)
+        {
+            myKeyboardMover.keyboardId = myK.lang + '_keyboard';
+            if (myK.keyboardVisible)
+            {
+                myK.keyboardVisible = false;
+                keyboard.style.display = "none";
+                img.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
+            }
+            else
+            {
+                myK.keyboardVisible = true; 
+                keyboard.style.display = "";
+                img.setAttribute('src', myK.pathStem + "alphabetWindow.png");
+            }
+        }
     },
 
     keyboardReadyA: function(e)
@@ -1223,9 +1268,9 @@ var myKeyboardMover = {
     
     activeMove:function(e)
     {
-        var event;
-        if (window.event) event = window.event;
-        else event = e;
+        var evt;
+        if (window.event) evt = window.event;
+        else evt = e;
         myKeyboardMover.moveTo(evt.clientX, evt.clientY);
     },
     
@@ -1287,6 +1332,7 @@ var myKeyMapper = {
         z:"ဖ",x:"ထ",c:"ခ",v:"လ",b:"ဘ",n:"ည",m:"ာ",/*_44:"ယ",_46:".",_47:"။",*/_188:"ယ",_190:".",_191:"။"
     },
     my_mapShift : {
+        Q:"ဩ",W:"ဝ",E:"ဿ",R:"ဣ",T:"ဤ",Y:"၌",U:"ဉ",I:"၍",O:"ဥ",P:"ဏ",_123:"ဧ",_124:"’",
         
     },
     my_mapCtrl : {
