@@ -105,7 +105,7 @@ findOldText: function(inputElement, cursor)
 typeChar: function(charValue, pos)
 {
   var characters = charValue;
-  var inputElement = myK.inputNode; //document.getElementById(inputId);
+  var inputElement = myK.inputNode;
   var cursor = myK.getCursorPosition();
   var oldSelectedText = inputElement.value.substring(cursor.selectionStart, 
                                                      cursor.selectionEnd);
@@ -178,8 +178,9 @@ typeChar: function(charValue, pos)
   }
   var newSyllable = myK.syllableToString();
   inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
-  myK.setCursorPosition(oldText.prefix.length, oldText.prefix.length + 
-                        newSyllable.length);
+  // Move cursor to end of syllable
+  myK.setCursorPosition(oldText.prefix.length + newSyllable.length, 
+                        oldText.prefix.length + newSyllable.length);
   window.status = inputElement.value + " Syllable = " + newSyllable + 
     " " + myK.currentSyllable.length;
   // update overlay if there is one
@@ -637,8 +638,11 @@ toggleStack: function(prefix)
 */
 hideKeyboard: function(lang)
 {
-  myK.disable(lang + '_keyboard');
-  myK.hideOverlay(myK.inputNode);
+    myK.disable(lang + '_keyboard');
+    myK.keyboardVisible = false;
+    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
+    if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
+//  myK.hideOverlay(myK.inputNode);
 },
 
 
@@ -667,10 +671,10 @@ toggleLangKeyboard: function(lang, type, index)
   }
   
   keyboard = document.getElementById(lang + '_keyboard');
+  myKeyboardMover.keyboardId = lang + '_keyboard';
   if (myK.keyboardVisible && keyboard.style.display == "none")
   {
     keyboard.style.display = "";
-    myKeyboardMover.keyboardId = lang + '_keyboard';
   }
   else
   {
@@ -704,8 +708,9 @@ switchInput: function(newId)
         // see if there is an overlay that should have some text added
         if (myK.inputNode.previousSibling && myK.inputNode.previousSibling.style)
         {
-            var keyboard = document.getElementById(myK.lang + '_keyboard');
-             myK.inputNode.previousSibling.style.display = keyboard.style.display;
+            //var keyboard = document.getElementById(myK.lang + '_keyboard');
+            // myK.inputNode.previousSibling.style.display = keyboard.style.display;
+            myK.inputNode.previousSibling.style.display = '';
             myK.updateOverlay(myK.inputNode);
         }
     }
@@ -723,7 +728,7 @@ switchInputByIndex: function(tagName, index)
   myK.inputId = "";// not used
   myK.resetSyllable();
   var elements = document.getElementsByTagName(tagName);
-  if (elements.length)
+  if (elements.length && index < elements.length)
   {
     var newInput = elements[index];
     if (newInput)
@@ -740,10 +745,10 @@ switchInputByIndex: function(tagName, index)
         if (myUnicode != undefined && myUnicode.isSupported == false)
         {
             // see if there is an overlay that should have some text added
-            if (myK.inputNode.previousSibling)
+            if (myK.inputNode && myK.inputNode.previousSibling)
             {
                 var keyboard = document.getElementById(myK.lang + '_keyboard');
-                myK.inputNode.previousSibling.style.display = keyboard.style.display;
+                myK.inputNode.previousSibling.style.display = '';
                 myK.updateOverlay(myK.inputNode);
             }
         }
@@ -847,9 +852,42 @@ toUnicodes: function(text)
         return "myK." + type + index + lang + "Icon";
     },
 
+    voidFunctionPair : function(a, b)
+    {
+        this.a = a;
+        this.b = b;
+        this.f = function(e) { this.a(e); return this.b(e); };
+        return this;
+    },
+    boolFunctionPair : function(a, b)
+    {
+        this.a = a;
+        this.b = b;
+        this.f = function(e) { return (this.a(e))? this.b(e) : false; };
+        return this;
+    },
+
     addOnEventLink: function(node, type, index, lang)
     {
-        node.onclick = function() { myK.switchInputByIndex(type , index);};
+        if (node.onclick != undefined && String(node.onclick).indexOf('myK.switchInputByIndex') == -1)
+        {
+            var oldOnClick = node.onclick;
+            node.onclick = function() {
+                myK.switchInputByIndex(type , index); oldOnClick(); 
+            };
+        }
+        else node.onclick = function() { myK.switchInputByIndex(type , index);};
+        if (node.onkeypress != undefined && String(node.onkeypress).indexOf('myKeyMapper') == -1)
+        {
+            var oldOnKeyPress = node.onkeypress;
+            node.onkeypress = function(e) { return (myKeyMapper.keyPress(e))? oldOnKeyPress(e) : false; };
+            //     alert("onclick/onkeypress handler already exists on " + type + " " + 
+            //        index + node.onkeypress);
+        }
+        else
+        {
+            node.onkeypress = function(event) { return myKeyMapper.keyPress(event); };
+        }
         var alphabetWindowId = "myK." + type + index + "alphabetWindowIcon";
         var alphabetWindow = document.getElementById(alphabetWindowId);
         if (!alphabetWindow)
@@ -1007,9 +1045,9 @@ toUnicodes: function(text)
         }
         this.selectionStart = -1;
         this.selectionEnd = -1;
-        if (document.selection)
+        if (document.selection && inputObject.selectionStart == undefined)
         {
-            obj.focus();
+            inputObject.focus();
             var range = document.selection.createRange();
             if (range.parentElement() != inputObject)
             {
@@ -1087,7 +1125,7 @@ var myKeyboardMover = {
     moveEndX : 0,
     moveEndY : 0,
     moveSrc: 0,
-    keyboardId: "my_keyboard",
+    keyboardId: "",
     inputId: "textInput",
     inputNode: 0,
     
@@ -1192,6 +1230,7 @@ var myKeyboardMover = {
     {
         document.body.onmousemove = null;
         document.body.onmouseup = null;
+        myK.inputNode.focus();// restore focus & remove any unwanted selection
         //alert(myKeyboardMover.moveSrc + "Moved by " + myKeyboardMover.dialog.x + "," + myKeyboardMover.dialog.y + " " );
     },
     
@@ -1324,70 +1363,57 @@ var myKeyboardMover = {
 
 var myKeyMapper = {
     my_map : {
-        //:"",:"",:"",:"",
         _32:" ",_48:"၀",_49:"၁",_50:"၂",_51:"၃",_52:"၄",_53:"၅",_54:"၆",_55:"၇",_56:"၈",_57:"၉",
-        _126:"\u1039",_192:"\u1039",
+        _96:"\u1039",
         q:"ဆ",w:"တ",e:"န",r:"မ",t:"အ",y:"ပ",u:"က",i:"င",o:"သ",p:"စ",_91:"ဟ",_93:"‘",_92:"၏",
         a:"‌ေ",s:"ျ",d:"ိ",f:"်",g:"ါ",h:"့",j:"ြ",k:"ု",l:"ူ",_59:"း",_39:"ဒ",
-        z:"ဖ",x:"ထ",c:"ခ",v:"လ",b:"ဘ",n:"ည",m:"ာ",/*_44:"ယ",_46:".",_47:"။",*/_188:"ယ",_190:".",_191:"။"
+        z:"ဖ",x:"ထ",c:"ခ",v:"လ",b:"ဘ",n:"ည",m:"ာ",_44:"ယ",_46:".",_47:"။"
     },
     my_mapShift : {
-        Q:"ဩ",W:"ဝ",E:"ဿ",R:"ဣ",T:"ဤ",Y:"၌",U:"ဉ",I:"၍",O:"ဥ",P:"ဏ",_123:"ဧ",_124:"’",
-        
+        _32:"\u200B",
+                _33:"ဍ",_64:"ဎ",_35:"ဋ",_36:"ကျပ်",_53:"%",_94:"/",_38:"ရ",_42:"ဂ",//_57:"(",_48:")",
+        Q:"ဩ",W:"ဝ",E:"ဿ",R:"ဣ",T:"ဤ",Y:"၌",U:"ဉ",I:"၍",O:"ဥ",P:"ဏ",_123:"ဧ",_125:"’",_124:"ဋ္ဌ",
+        A:"ဗ",S:"ှ",D:"ီ",F:"င်္",G:"ွ",H:"ံ",J:"ဲ",K:"ု",L:"ူ",_58:"ါ်",_34:"ဓ",
+        Z:"ဇ",X:"ဌ",C:"ဃ",V:"ဠ",B:"ဦ",N:"ဈ",M:"ဪ",_60:",",_62:"၎",_63:"၊"
     },
-    my_mapCtrl : {
-    },
-    my_mapAlt : {
-    },
-    my_mapCtrlAlt : {
-    },
-    my_mapCtrlShift : {
-    },
-    my_mapAltShift : {
-    },
-    my_mapCtrlAltShift : {
-    },
+    
     // TODO Sgaw Karen
     ksw_map : {  
+        //:"",:"",:"",:"",
     },
     ksw_mapShift : {
     },
-    ksw_mapCtrl : {
-    },
-    ksw_mapAlt : {
-    },
-    ksw_mapCtrlAlt : {
-    },
-    ksw_mapCtrlShift : {
-    },
-    ksw_mapAltShift : {
-    },
-    ksw_mapCtrlAltShift : {
-    },
 
-    keyDown : function(e)
+    keyPress : function(e)
     {
         var evt = e || window.event;
-        if (myK.lang == '') return true;
-        if (evt.keyCode <= 20) 
+        if (myK.lang == '') 
         {
-            var cursor = myK.getCursorPosition();
-            myK.setCursorPosition(cursor.selectionEnd, cursor.selectionEnd);
+            setTimeout("myK.updateOverlay(myK.inputNode);", 100);
             return true;
         }
-        var theChar = String.fromCharCode(evt.keyCode);
-        var lookup = myK.lang + "_map" + (evt.ctrlKey ? "Ctrl" : "") + (evt.altKey ? " Alt" : "") +
-            (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
-        if (evt.keyCode < 'A'.charCodeAt(0) || evt.keyCode > 'z'.charCodeAt(0) || 
-            (evt.keyCode > 'Z'.charCodeAt(0) && evt.keyCode < 'a'.charCodeAt(0)))
+        var key = evt.charCode || evt.keyCode;
+        // ignore ctrl/alt combinations and control characters
+        if (key <= 20 || evt.ctrlKey || evt.altKey) 
         {
-            lookup = myK.lang + "_map" + (evt.ctrlKey ? "Ctrl" : "") + (evt.altKey ? " Alt" : "") +
-                (evt.shiftKey ? "Shift._" : "._") + evt.keyCode;
+            setTimeout("myK.updateOverlay(myK.inputNode);", 100);
+            return true;
         }
+        var theChar = String.fromCharCode(key);
+        var lookup = myK.lang + "_map" + 
+            (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
+        if (key < 'A'.charCodeAt(0) || key > 'z'.charCodeAt(0) || 
+            (key > 'Z'.charCodeAt(0) && key < 'a'.charCodeAt(0)))
+        {
+            lookup = myK.lang + "_map" + 
+                (evt.shiftKey ? "Shift._" : "._") + key;
+        }
+/*
         var debugText = (evt.ctrlKey ? " Ctrl" : "") + (evt.altKey ? " Alt" : "") +
             (evt.shiftKey ? " Shift" : "") + evt.keyCode + "(" + 
             String.fromCharCode(evt.keyCode) +")";
-        //if (evt.keyCode > 20) alert(debugText);
+        alert(debugText);
+*/
         try
         {
             var keyCodeMap = eval("myKeyMapper." + lookup);
@@ -1404,10 +1430,9 @@ var myKeyMapper = {
         }
         
         // remove the selection to prevent overwriting
-        var cursor = myK.getCursorPosition();
-        myK.setCursorPosition(cursor.selectionEnd, cursor.selectionEnd);
+        setTimeout("myK.updateOverlay(myK.inputNode);", 100);
         // for debugging
-        alert(debugText);
+        //alert(debugText);
         return true;
     }
 };

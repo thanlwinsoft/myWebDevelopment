@@ -108,6 +108,7 @@ var myUnicode = {
 	            document.writeln(myUnsupported);
 	    }
 	},
+
 	/** tests the width of the myWidth1/2 spans to see if Myanmar 
     * Unicode support is available 
     */
@@ -115,7 +116,23 @@ var myUnicode = {
 	{
 	    
 	    var myW2 = document.getElementById('myWidth2');
+        if (!myW2)
+        {
+            myW2 = document.createElement("p");
+            myW2.setAttribute('class','myUniTest');
+            myW2.setAttribute("id","myWidth2");
+            document.body.appendChild(myW2);
+            myW2.innerHTML = "ကက";
+        }
 	    var myW1 = document.getElementById('myWidth1');
+        if (!myW1)
+        {
+            myW1 = document.createElement("p");
+            myW1.setAttribute('class','myUniTest');
+            myW1.setAttribute("id","myWidth1");
+            document.body.appendChild(myW1);
+            myW1.innerHTML = "က္က";
+        }
 	    var myW1Width = 0;
 	    var myW2Width = 0;
         if (myUnicode.checkFinished == true) return myUnicode.isSupported;
@@ -522,7 +539,8 @@ var myUnicode = {
     {
         var index = myUnicode.defaultFont;
         var elementName = node.tagName.toLowerCase();
-        while (elementName == "a" || elementName == "span")
+        while (elementName == "a" || elementName == "span" || 
+               elementName == "b" || elementName == "i")
         {
             node = node.parentNode;
             elementName = node.tagName.toLowerCase();
