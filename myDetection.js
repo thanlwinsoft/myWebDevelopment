@@ -540,7 +540,7 @@ var myUnicode = {
         var index = myUnicode.defaultFont;
         var elementName = node.tagName.toLowerCase();
         while (elementName == "a" || elementName == "span" || 
-               elementName == "b" || elementName == "i")
+               elementName == "b" || elementName == "i" || elementName == "emph")
         {
             node = node.parentNode;
             elementName = node.tagName.toLowerCase();

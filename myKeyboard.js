@@ -40,7 +40,7 @@ numLevels : 14,
 lang : '',
 keyboardIcon : "Keyboard.png",
 keyboardOffIcon : "KeyboardOff.png",
-keyboardVisible : false,
+keyboardVisible : true,
 keyboardSrc : "Keyboard.xml",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
@@ -124,7 +124,8 @@ typeChar: function(charValue, pos)
   {
     if (myK.consMode == 0)
     {
-      if (myK.currentSyllable[pos] != "" && myK.currentSyllable[pos] != "\u25cc")
+      if (myK.currentSyllable[pos] != "" && 
+          myK.currentSyllable[pos] != "\u25cc")
       {
         oldText.prefix = oldText.prefix + myK.syllableToString();
         myK.resetSyllable();
@@ -149,6 +150,28 @@ typeChar: function(charValue, pos)
     myK.currentSyllable[pos] = charValue;
     myK.disable('stack');
     myK.disable('kinzi');
+  }
+  else if (pos == 2 && charValue.length == 1) // u1039
+  {
+    if (oldText.prefix.length > 0 &&
+        myK.currentSyllable[1] != '' && myK.syllableToString().length == 1)
+    {
+        // stack the previous consonant
+        var lowerCons = charValue + myK.currentSyllable[1];
+        // move back one character and find the previous syllable
+        cursor.selectionStart = --cursor.selectionEnd;
+        oldText.prefix = myK.findEndSyllable(oldText.prefix, false);
+        if (myK.currentSyllable[2] == '')
+        {
+            myK.currentSyllable[2] = lowerCons;
+        }
+        else // can't have multiple stacks
+        {
+            oldText.prefix += myK.syllableToString();
+            myK.resetSyllable();
+            myK.currentSyllable[1] = lowerCons.charAt(1);
+        }
+    }
   }
   else
   {
@@ -348,7 +371,7 @@ setOrderIfPrevious1039: function(theText, charIndex, killOrder)
       order = killOrder;
       myK.lastTokenLength = 2;
     }
-    // now check the kiler doesn't belong to Kinzi if so the 
+    // now check the killer doesn't belong to Kinzi if so the 
     // order is still 1
     if (charIndex > 1)
     {
@@ -377,8 +400,14 @@ getCharOrder: function(theText, charIndex)
   myK.lastTokenLength = 1;
   switch (theChar)
   {
-    // kinzi is handled later
     case '\u1004':
+        if (theText.length > charIndex + 2 && 
+            theText.charAt(charIndex + 1) == "\u103A" &&
+            theText.charAt(charIndex + 2) == "\u1039")
+        {
+            order = 0;
+            break;
+        }
     case '\u103f':
       order =1;
       break;
@@ -416,13 +445,13 @@ getCharOrder: function(theText, charIndex)
       break;
     case '\u103b':
     case '\u103c':
-      order = 3;//myK.setOrderIfPrevious1039(theText, charIndex, 3);
+      order = 3;
       break;
     case '\u103d':
-      order = 4;//myK.setOrderIfPrevious1039(theText, charIndex, 4);
+      order = 4;
       break;
     case '\u103e':
-      order = 5;//myK.setOrderIfPrevious1039(theText, charIndex, 5);
+      order = 5;
       break;
     case '\u1031':
       order = 6;
@@ -443,9 +472,6 @@ getCharOrder: function(theText, charIndex)
     case '\u1036':
       order = 10;
       break;
-//    case '\u200c':
-//      order = myK.setOrderIfPrevious1039(theText, charIndex, 11);
-//      break;
     case '\u103a':
       order = 11;
       break;
@@ -457,6 +483,10 @@ getCharOrder: function(theText, charIndex)
       break;
     case '\u1039':
       order = 1;
+      if (theText.length == 1)
+      {
+        order = 2;
+      }
       // we expect this to only be seen if the previous character is Kinzi
       if (charIndex > 1)
       {
@@ -526,6 +556,23 @@ enable: function(id)
     element.style.display = "";
 },
 
+/**
+*
+* toggle display of the element with the given id
+* will silently fail if id does not exist
+* @param id of element
+*/
+toggle: function(id)
+{
+    var element = document.getElementById(id);
+    if  (element) 
+    {
+        if (element.style.display == "")
+            element.style.display = "none";
+        else
+            element.style.display = "";
+    }
+},
 /**
 * creates an empty syllable array
 * @internal
@@ -638,10 +685,7 @@ toggleStack: function(prefix)
 */
 hideKeyboard: function(lang)
 {
-    myK.disable(lang + '_keyboard');
-    myK.keyboardVisible = false;
-    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
-    if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
+    myK.toggleAlphabetWindow();
 //  myK.hideOverlay(myK.inputNode);
 },
 
@@ -655,13 +699,12 @@ toggleLangKeyboard: function(lang, type, index)
   var keyboard = document.getElementById(myK.lang + '_keyboard');
   if (lang != myK.lang)
   {
-    myK.hideKeyboard(myK.lang);
     var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
     if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
     img = document.getElementById(myK.langIcon(type, index, lang));
     if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
     myK.lang = lang;
-    if (keyboard) keyboard.style.display == "none";
+    if (keyboard) keyboard.style.display = "none";
   }
   else
   {
@@ -675,6 +718,9 @@ toggleLangKeyboard: function(lang, type, index)
   if (myK.keyboardVisible && keyboard.style.display == "none")
   {
     keyboard.style.display = "";
+    myKeyboardMover.inputId = "";
+    myKeyboardMover.inputNode = myK.inputNode;
+    myKeyboardMover.moveBelowInput();
   }
   else
   {
@@ -894,7 +940,7 @@ toUnicodes: function(text)
         {
             var link = document.createElement('a');
             var img = document.createElement('img');
-            img.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
+            img.setAttribute('src', myK.pathStem + "alphabetWindow" + ((myK.keyboardVisible)?"":"Off") + ".png");
             img.setAttribute('id', alphabetWindowId);
             img.setAttribute('alt', "Show Alphabet");
             img.setAttribute('title', "Show Alphabet");
@@ -940,20 +986,37 @@ toUnicodes: function(text)
         var keyboard = document.getElementById(myK.lang + '_keyboard');
         var alphabetWindow = "myK." + myK.inputType + myK.inputIndex + "alphabetWindowIcon";
         img = document.getElementById(alphabetWindow);
-        if (keyboard && img)
+        if (keyboard)
         {
             myKeyboardMover.keyboardId = myK.lang + '_keyboard';
+            var imgSrc = "";
             if (myK.keyboardVisible)
             {
                 myK.keyboardVisible = false;
                 keyboard.style.display = "none";
-                img.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
+                imgSrc = myK.pathStem + "alphabetWindowOff.png";
+                myKeyboardMover.inputId = "";
+                myKeyboardMover.inputNode = myK.inputNode;
+                myKeyboardMover.moveBelowInput();
             }
             else
             {
                 myK.keyboardVisible = true; 
                 keyboard.style.display = "";
-                img.setAttribute('src', myK.pathStem + "alphabetWindow.png");
+                imgSrc = myK.pathStem + "alphabetWindow.png";
+            }
+            for (var type = "input"; type != ""; (type == "input")? type = "textarea" : type = "")
+            {
+                var inputIndex = 0;
+                var alphabetWindow = "myK." + type + inputIndex + "alphabetWindowIcon";
+                var img = document.getElementById(alphabetWindow);
+                while (img)
+                {
+                    img.setAttribute("src", imgSrc);
+                    ++inputIndex;
+                    alphabetWindow = "myK." + type + inputIndex + "alphabetWindowIcon";
+                    img = document.getElementById(alphabetWindow);
+                }
             }
         }
     },
@@ -1223,6 +1286,7 @@ var myKeyboardMover = {
         }
         document.body.onmousemove = myKeyboardMover.activeMove;
         document.body.onmouseup = myKeyboardMover.endMove;
+        myK.inputNode.focus();
         //alert("Moved from " + this.moveStartX + "," + this.moveStartY + " " + this.dialog.x + "," + this.dialog.y);
     },
 
@@ -1384,6 +1448,34 @@ var myKeyMapper = {
     ksw_mapShift : {
     },
 
+    /** Add onclick handlers to the keys in the table layout 
+    * Doing this dynamically reduces the risk of them getting out of sync.
+    */
+    setupLayoutKeys : function(tableElement, shift){
+        var tds = tableElement.getElementsByTagName('td');
+        if (tds.item(0).onclick != undefined) return;
+        for (var i = 0; i < tds.length; i++)
+        {
+            if (tds.item(i).className == "special") continue;
+            tds.item(i).onclick=function(td)
+            {
+                var tdChild = this.firstChild;
+                while (tdChild && (tdChild.nodeType != 1 || tdChild.className != 'en'))
+                {
+                    tdChild = tdChild.nextSibling;
+                }
+                if (tdChild)
+                {
+                    var enText = (shift)? tdChild.innerHTML.toUpperCase() : tdChild.innerHTML;
+                    var enCode = enText.charCodeAt(0);
+                    var fakeEvent = { keyCode:enCode,ctrlKey:false,altKey:false,shiftKey:shift};
+                    myKeyMapper.keyPress(fakeEvent);
+                }
+            };
+            
+        }
+    },
+
     keyPress : function(e)
     {
         var evt = e || window.event;
@@ -1392,7 +1484,12 @@ var myKeyMapper = {
             setTimeout("myK.updateOverlay(myK.inputNode);", 100);
             return true;
         }
-        var key = evt.charCode || evt.keyCode;
+        var key = evt.keyCode;
+        // charCode should be defined for a keypress in Firefox, unless its a special key
+        if (evt.charCode != undefined)
+        {
+            key = evt.charCode;
+        }
         // ignore ctrl/alt combinations and control characters
         if (key <= 20 || evt.ctrlKey || evt.altKey) 
         {

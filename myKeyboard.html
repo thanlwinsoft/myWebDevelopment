@@ -42,7 +42,17 @@ function showUnicodes(input)
   var text = input.value;
   for (var i = 0; i<text.length; i++)
   {
-    var num = document.createTextNode("&#" + text.charCodeAt(i) + ";");
+    var decNum = text.charCodeAt(i);
+    while (decNum.length < 4) decNum = "0" + decNum;
+    var num = document.createTextNode("&#" + decNum + ";");
+    unicodeDump.appendChild(num);
+  }
+  unicodeDump.appendChild(document.createElement("br"));
+  for (var i = 0; i<text.length; i++)
+  {
+    var hexNum = text.charCodeAt(i).toString(16);
+    while (hexNum.length < 4) hexNum = "0" + hexNum;
+    var num = document.createTextNode("\\u" + hexNum + " ");
     unicodeDump.appendChild(num);
   }
 }
@@ -52,7 +62,7 @@ myK.afterKey = showUnicodes;
 <input type="text" onmouseover="showUnicodes(this)" id="textInput" class="my" name="a"></input><br />
 <textarea cols="50" rows="4" class="my" onmouseover="showUnicodes(this)" name="b" id="areaInput"></textarea>
 <br />
-<span id="unicodeDump">Click on some characters to see their codes.</span><br />
+<span id="unicodeDump" style="font-family: monospace; color: gray;">Click on some characters to see their codes.</span><br />
 </form>
 
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 

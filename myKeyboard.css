@@ -106,6 +106,7 @@ div.keyboard {
 	margin: 0px;
     padding: 0px;
 	line-height: 1em;
+    cursor: move;
 }
 
 
@@ -140,16 +141,16 @@ a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
 
 .my, a.keyboard:link, a.keyboard:visited, a.keyboard:active {
   text-decoration: none;
-  font-family: PadaukOT, Myanmar2, Padauk;
+  font-family: Padauk, Myanmar3, Myanmar2;font-weight: bold;
 }
 
 input, textarea {
-  font-family: PadaukOT, Myanmar2, Padauk;
+  font-family: Padauk, Myanmar3, Myanmar2;
 }
 
 /** for Unicode support detection*/
 .myUniTest {
-        font-family: PadaukOT, Myanmar2, Padauk;
+        font-family: Padauk, Myanmar3, Myanmar2;
         font-size: 1em; /* don't make it so small that rounding errors give problems */
         color: white; /* should be same as background to make it invisible */
 }
@@ -159,12 +160,29 @@ input, textarea {
 }
 
 .myOverlay {/*ignored by IE on DHTML */
-    font-family: PadaukOT, Myanmar2, Padauk;
+    font-family: Padauk, Myanmar3, Myanmar2;
     z-index: 9; /* just below keyboard*/
     position: absolute;
 	
     background-color: white;
     border-style: solid;
     border-width: 1px;
-	
 }
+
+/* Keyboard layout styles */
+table.keyboard { width: auto; padding: 1px; margin: 0px; border-width: 0px; font-size: 12px; }
+table.keyboard tr { padding: 0px; margin: 0px; }
+table.keyboard td { background-color: #707070; width: 2em; height: 2em; padding: 0em; 
+	border-style: solid; border-width: 0.1em; 
+	border-top-color: #808080; border-left-color: #808080; 
+	border-bottom-color: #606060; border-right-color: #606060; cursor: pointer;
+	}
+table.keyboard td.special { background-color: #505050; text-align: center; 
+    font-weight: bold; cursor: default; }
+table.keyboard span.en { font-family: sans-serif; }
+table.keyboard span.my { font-family: padauk, myanmar3; font-weight: bold; float: right; color: #f0f0ff; }
+
+div.keyboard p.keyboardTab { margin: 2px; border-width: 1px; border-style: solid; border-color: white; line-height: 1.4em; background-color: #0000ff;}
+div.keyboard span.tabOn { color: white; background-color: #6060ff; }
+div.keyboard a.tabOff {  color: white; padding: 0.1em; text-decoration: none;  }
+
