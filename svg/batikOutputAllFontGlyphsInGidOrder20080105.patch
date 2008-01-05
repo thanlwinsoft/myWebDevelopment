@@ -1,0 +1,67 @@
+--- batik-1.7/sources/org/apache/batik/svggen/font/SVGFont.java.orig	2008-01-04 23:09:03.000000000 +0000
++++ batik-1.7/sources/org/apache/batik/svggen/font/SVGFont.java	2008-01-05 00:10:16.000000000 +0000
+@@ -21,6 +21,7 @@
+ 
+ import java.io.FileOutputStream;
+ import java.io.PrintStream;
++import java.util.Arrays;
+ 
+ import org.apache.batik.svggen.font.table.CmapFormat;
+ import org.apache.batik.svggen.font.table.Feature;
+@@ -362,6 +363,8 @@
+                 if (!autoRange) last = DEFAULT_LAST;
+                 else            last = cmapFmt.getLast();
+             }
++            char [] glyphCharCode = new char[font.getNumGlyphs()];
++            Arrays.fill(glyphCharCode, '\0');
+ 
+             // Include our requested range
+             for (int i = first; i <= last; i++) {
+@@ -369,19 +372,40 @@
+                 //        ps.println(String.valueOf(i) + " -> " + String.valueOf(glyphIndex));
+                 //      if (font.getGlyphs()[glyphIndex] != null)
+                 //        sb.append(font.getGlyphs()[glyphIndex].toString() + "\n");
+-
+                 if (glyphIndex > 0) {
++                    glyphCharCode[glyphIndex] = (char)i;
++                    if (!autoRange) {
++                        ps.println(getGlyphAsSVG(
++                            font,
++                            font.getGlyph(glyphIndex),
++                            glyphIndex,
++                            horiz_advance_x,
++                            initialSubst, medialSubst, terminalSubst,
++                            (32 <= i && i <= 127) ?
++                            encodeEntities( String.valueOf( (char)i ) ) :
++                            XML_CHAR_REF_PREFIX + Integer.toHexString(i) + XML_CHAR_REF_SUFFIX));
++                    }
++                }
++
++            }
++            // output any glyphs in glyph index order
++            if (autoRange) {
++                // skip missing glyph 0, it is already handled
++                for (int i = 1; i < font.getNumGlyphs(); i++) {
++                    String encodedChar = "";
++                    if (glyphCharCode[i] != '\0') {
++                        encodedChar = (32 <= i && i <= 127) ?
++                            encodeEntities( String.valueOf(glyphCharCode[i]) ) :
++                            XML_CHAR_REF_PREFIX + Integer.toHexString(glyphCharCode[i]) + XML_CHAR_REF_SUFFIX;
++                    }
+                     ps.println(getGlyphAsSVG(
+                         font,
+-                        font.getGlyph(glyphIndex),
+-                        glyphIndex,
++                        font.getGlyph(i),
++                        i,
+                         horiz_advance_x,
+                         initialSubst, medialSubst, terminalSubst,
+-                        (32 <= i && i <= 127) ?
+-                        encodeEntities( String.valueOf( (char)i ) ) :
+-                        XML_CHAR_REF_PREFIX + Integer.toHexString(i) + XML_CHAR_REF_SUFFIX));
++                        encodedChar));
+                 }
+-
+             }
+ 
+             // Output kerning pairs from the requested range
