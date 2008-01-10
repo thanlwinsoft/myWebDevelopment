@@ -68,6 +68,8 @@ var myUnsupported = "<div class='myUnicodeTestFailed'>" +
 var myUnicode = {
     // config variables
     fontData  : "PadaukOT",// can be overridden
+    svgFont : "Padauk",
+    svgFontSize : 14,
     codeStart : 4096,// u1000 - inclusive
     codeEnd   : 4256,//u10A0 - exclusive
     imgPrefix : "",// prefix path to images
@@ -89,6 +91,8 @@ var myUnicode = {
     nodeCount : 0,
     threadStart : 0,
     threadEnd : 0,
+    isIe: false,
+    isGecko: false,
 	/** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
 	* message to the user.
@@ -180,9 +184,26 @@ var myUnicode = {
     */
     initParse : function(theImgPrefix)
     {
+        var userAgent =navigator.userAgent.toLowerCase();
+        myUnicode.isGecko = (userAgent.indexOf('gecko') != -1);
+        myUnicode.isIe = (userAgent.indexOf("msie")!=-1);
+        if (!myUnicode.isIe)
+        {
+            myUnicode.addScript(theImgPrefix + "svg/mySvgFont.js");
+            myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + ".js");
+            myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + "Rendered.js");
+        }
         myUnicode.imgPrefix = theImgPrefix;
         if (myUnicode.checkFinished == false) myUnicode.check();
         myUnicode.parseDoc();
+    },
+    addScript: function(src)
+    {
+        var head = document.getElementsByTagName("head")[0];
+        var script = document.createElement("script");
+        script.setAttribute("type","text/javascript");
+        script.setAttribute("src", src);
+        head.appendChild(script);
     },
 	/** normal entry port to start conversion from unicode to images */
     parseDoc : function()
@@ -346,7 +367,7 @@ var myUnicode = {
 	/** parse an element node and all its children - may be called by directly or recursively */
     parseNode : function (node)
     {
-        if (node == undefined) return;
+        if (node == undefined || node.nodeType != 1) return;
         myUnicode.nodeCount++;
         if (node.tagName != undefined && (node.tagName.toLowerCase() == "input"))
         {
@@ -385,7 +406,7 @@ var myUnicode = {
                     }
                     else
                     {
-                        id = child.id;
+                        childId = child.id;
                     }
                     if (childId != undefined && childId.length > 0 && child.hasChildNodes() && child.childNodes.length > 2) 
                     {
@@ -394,6 +415,11 @@ var myUnicode = {
                                         10 + myUnicode.threadStart * 100);
                     }
                     else myUnicode.parseNode(child);
+                }
+                else if (child.nodeType == 8) {} // ignore comments
+                else
+                {
+                    alert("node " + child + " type" + child.nodeType);
                 }
                 children = node.childNodes;
                 if (children.length > nodeCount)
@@ -482,6 +508,8 @@ var myUnicode = {
                 // was there a match?
                 if (lastMatchEnd > -1) // yes
                 {
+                    if (myUnicode.isIe)
+                    {
                     codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
                     var img;
                     if (document.createElementNS) img =
@@ -510,6 +538,8 @@ var myUnicode = {
                     // advance i
                     i = lastMatchEnd;
                     //alert(codeString);
+                    }
+                    else mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, myUnicode.svgFontSize, text.substring(i,lastMatchEnd + 1));
                 }
                 else
                 {

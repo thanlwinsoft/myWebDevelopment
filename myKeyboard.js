@@ -898,21 +898,6 @@ toUnicodes: function(text)
         return "myK." + type + index + lang + "Icon";
     },
 
-    voidFunctionPair : function(a, b)
-    {
-        this.a = a;
-        this.b = b;
-        this.f = function(e) { this.a(e); return this.b(e); };
-        return this;
-    },
-    boolFunctionPair : function(a, b)
-    {
-        this.a = a;
-        this.b = b;
-        this.f = function(e) { return (this.a(e))? this.b(e) : false; };
-        return this;
-    },
-
     addOnEventLink: function(node, type, index, lang)
     {
         if (node.onclick != undefined && String(node.onclick).indexOf('myK.switchInputByIndex') == -1)
@@ -942,8 +927,8 @@ toUnicodes: function(text)
             var img = document.createElement('img');
             img.setAttribute('src', myK.pathStem + "alphabetWindow" + ((myK.keyboardVisible)?"":"Off") + ".png");
             img.setAttribute('id', alphabetWindowId);
-            img.setAttribute('alt', "Show Alphabet");
-            img.setAttribute('title', "Show Alphabet");
+            img.setAttribute('alt', "Show Keyboard");
+            img.setAttribute('title', "Show Keyboard");
             link.appendChild(img);
             link.setAttribute('href',"javascript:{myK.toggleAlphabetWindow();}");
             if (node.nextSibling)
@@ -1054,7 +1039,7 @@ toUnicodes: function(text)
             if (myUnicode != undefined && myUnicode.isSupported == false)
             {
                 // switch to images if needed
-                myUnicode.parseNode(div);
+                myUnicode.parseNodeIfNeeded(div);
             }
         }
     },
@@ -1111,7 +1096,9 @@ toUnicodes: function(text)
         if (document.selection && inputObject.selectionStart == undefined)
         {
             inputObject.focus();
+			var orig = inputObject.value;
             var range = document.selection.createRange();
+			var oldRange = range.text;
             if (range.parentElement() != inputObject)
             {
                 if (cursorDisplay)
@@ -1119,11 +1106,21 @@ toUnicodes: function(text)
                 return;
             }
             var prefixRange = inputObject.createTextRange();
-            prefixRange = prefixRange.setEndPoint("EndToStart", range);
-            var suffixRange = inputObject.createTextRange();
-            suffixRange = suffixRange.setEndPoint("StartToEnd", range);
-            this.selectionStart = prefixRange.text.length;
-            this.selectionEnd = inputObject.value.length - suffixRange.text.length;
+			try
+			{
+				range.text= "\u200C";// Assume this won't occur naturally
+				var pos = inputObject.value.indexOf('\u200C');
+				inputObject.value = orig;//restore original value
+				//prefixRange = prefixRange.setEndPoint("EndToStart", range);
+				//var suffixRange = inputObject.createTextRange();
+				//suffixRange = suffixRange.setEndPoint("StartToEnd", range);
+				this.selectionStart = pos;
+				this.selectionEnd = pos + oldRange.length;
+			}
+			catch (e)
+			{
+				this.selectionEnd = this.selectionStart = inputObject.value.length;
+			}
         }
         else
         {
@@ -1430,7 +1427,7 @@ var myKeyMapper = {
         _32:" ",_48:"၀",_49:"၁",_50:"၂",_51:"၃",_52:"၄",_53:"၅",_54:"၆",_55:"၇",_56:"၈",_57:"၉",
         _96:"\u1039",
         q:"ဆ",w:"တ",e:"န",r:"မ",t:"အ",y:"ပ",u:"က",i:"င",o:"သ",p:"စ",_91:"ဟ",_93:"‘",_92:"၏",
-        a:"‌ေ",s:"ျ",d:"ိ",f:"်",g:"ါ",h:"့",j:"ြ",k:"ု",l:"ူ",_59:"း",_39:"ဒ",
+        a:"ေ",s:"ျ",d:"ိ",f:"်",g:"ါ",h:"့",j:"ြ",k:"ု",l:"ူ",_59:"း",_39:"ဒ",
         z:"ဖ",x:"ထ",c:"ခ",v:"လ",b:"ဘ",n:"ည",m:"ာ",_44:"ယ",_46:".",_47:"။"
     },
     my_mapShift : {

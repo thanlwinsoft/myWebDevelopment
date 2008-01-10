@@ -35,11 +35,11 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
 <div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
-<p style="float:left; display='';" id="myKeyboardLayoutOn" class="keyboardTab">
+<p style="float:left; display='';" id="myKeyboardLayoutOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
 <span class="tabOn">ခလုပ်ကွက်</span>
 <a class="tabOff" href="javascript:myK.toggle('my_keyboardLayoutUnshifted');myK.toggle('my_keyboardLayoutShifted');myK.toggle('my_alphabet');myK.toggle('myKeyboardLayoutOn');myK.toggle('myKeyboardAlphabetOn');" title="Show alphabet">အက္ခရာ</a>
 </p>
-<p style="float:left; display:none;" id="myKeyboardAlphabetOn" class="keyboardTab">
+<p style="float:left; display:none;" id="myKeyboardAlphabetOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
 <a class="tabOff" href="javascript:myK.toggle('my_alphabet');myK.toggle('my_keyboardLayoutUnshifted');myK.toggle('my_keyboardLayoutShifted');myK.toggle('myKeyboardLayoutOn');myK.toggle('myKeyboardAlphabetOn');" title="Show keyboard layout">ခလုပ်ကွက်</a>
 <span class="tabOn">အက္ခရာ</span>
 </p>
@@ -285,7 +285,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <td style="width:2em;"><span class="my">ဣ</span><span class="en">R</span></td>
 <td style="width:2em;"><span class="my">ဤ</span><span class="en">T</span></td>
 <td style="width:2em;"><span class="my">၌</span><span class="en">Y</span></td>
-<td style="width:2em;"><span class="my">ဉ &nbsp;</span><span class="en">U</span></td>
+<td style="width:2em;"><span class="my" style="font-size: 0.5em; margin-top: 0.5em;">ဉ</span><span class="en">U</span></td>
 <td style="width:2em;"><span class="my">၍</span><span class="en">I</span></td>
 <td style="width:2em;"><span class="my">ဥ</span><span class="en">O</span></td>
 <td style="width:2em;"><span class="my">ဏ</span><span class="en">P</span></td>

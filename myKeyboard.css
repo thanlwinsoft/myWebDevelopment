@@ -139,7 +139,7 @@ a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
   border-style: none;
 }
 
-.my, a.keyboard:link, a.keyboard:visited, a.keyboard:active {
+.my, a.keyboard:link, a.keyboard:visited, a.keyboard:active, div.keyboard p.keyboardTab {
   text-decoration: none;
   font-family: Padauk, Myanmar3, Myanmar2;font-weight: bold;
 }
