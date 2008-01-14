@@ -1,5 +1,10 @@
+// Copyright: Keith Stribley 2008 http://www.ThanLwinSoft.org/
+// License: GNU Lesser General Public License, version 2.1 or later.
+// http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 var mySvgFont = {
-    fontWarning:false,
+    fontWarning:true,
+    defaultFontSize:12,
+    maxContext:10,
     renderSvg: function(svg, fontName, text, size, color)
     {
         var fontData;
@@ -11,22 +16,24 @@ var mySvgFont = {
         }
         catch (e)
         {
-            if (!mySvgFont.fontWarning) alert(fontName + " SVG not found");
-            mySvgFont.fontWarning = true;
+            if (mySvgFont.fontWarning) alert(fontName + " SVG not found");
+            mySvgFont.fontWarning = false;
             return false;
         }
         var scaling = size / fontData.unitsPerEm;
         var scaledLineHeight = (fontData.ascent - fontData.descent) * scaling;
         
-        var scaleG = (document.createElementNS)?document.createElementNS("http://www.w3.org/2000/svg", "g"):
-			document.createElement("g");
+        var scaleG = (document.createElementNS)?
+            document.createElementNS("http://www.w3.org/2000/svg", "g"):document.createElement("svg:g");
         if (!scaleG) return false;
-//        var title = document.createElementNS("http://www.w3.org/2000/svg","title");
-//        if (title)
-//        {
-//            title.appendChild(document.createTextNode(text));
-//            scaleG.appendChild(title);
-//        }
+        var title = (document.createElementNS)?
+          document.createElementNS("http://www.w3.org/2000/svg","title"):
+			document.createElement("svg:title");
+        if (title)
+        {
+            title.appendChild(document.createTextNode(text));
+            scaleG.appendChild(title);
+        }
         scaleG.setAttribute("transform", "translate(0," + (fontData.ascent * scaling) + 
             ") scale(" + scaling + ",-" + scaling + ")");
         if (color != undefined)
@@ -35,49 +42,68 @@ var mySvgFont = {
         var lineCount = 1;
         var uText = "u";
         var gData;
-        var labelLengths = new Array(text.length);
-        var prevMatch = false;
         for (var i = 0; i < text.length; i++)
         {
-            var hex = text.charCodeAt(i).toString(16);
-            while (hex.length < 4) hex = "0" + hex;
-            uText += hex;
-            labelLengths[i] = uText.length;
-            try
+            uText = "u";
+            var prevMatch = false;
+            var lastMatchIndex = -1;    
+            for (var j = i; (j < text.length) && (j < i + mySvgFont.maxContext); j++)
             {
-                gData = eval("renderingData." + uText);                
-                prevMatch = gData;
-                if (i == text.length - 1) // last char
+                var hex = text.charCodeAt(j).toString(16);
+                while (hex.length < 4) hex = "0" + hex;
+                uText += hex;
+                try
                 {
-                    mySvgFont.appendGlyphPaths(scaleG, fontData, gData, width, 0);
-                    width += gData[gData.length - 1];
+                    gData = eval("renderingData." + uText);                
+                    if (gData != undefined)
+                    {
+                        prevMatch = gData;
+                        lastMatchIndex = j;
+                    }
+                }
+                catch (e)
+                {
+                     if (mySvgFont.fontWarning) alert("Error parsing " + text + " at " + i);
+                        mySvgFont.fontWarning = false;
                 }
             }
-            catch (e) 
+            if (lastMatchIndex > -1) // last char
             {
-                //if (!mySvgFont.fontWarning) alert(uText + " not found.");
-               // mySvgFont.fontWarning = true;
-                if (prevMatch)
+                mySvgFont.appendGlyphPaths(scaleG, fontData, prevMatch, width, 0);
+                width += prevMatch[prevMatch.length - 1];
+                i = lastMatchIndex;
+            }
+            else
+            {
+                // no contextual ligatures/reordering, just use the simple cmap lookup
+                var charGlyph = mySvgFont.findGlyph(fontData, text[i]);
+                mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
+                width += charGlyph[charGlyph.length - 1];
+            }
+/*
+                 if (prevMatch)
                 {
                     mySvgFont.appendGlyphPaths(scaleG, fontData, prevMatch, width, 0);
                     width += prevMatch[prevMatch.length - 1];
+                    uText = "u" + uText.substring(uText.length - 4);
                 }
                 else if (uText.length > 5)
                 {
                     // previous didn't match, just output the character's normal glyph
-                    var charGlyph = mySvgFont.findGlyph(uText.substr(0, 5));
+                    var charGlyph = mySvgFont.findGlyph(fontData, text[i - 1]);
                     mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
                     width += charGlyph[charGlyph.length - 1];
+                    uText = "u" + uText.substring(uText.length - 4);
                 }
-                uText = "u" + uText.substring(uText.length - 4);
+                
                 if (i == text.length - 1) // last char
                 {
-                    var charGlyph = mySvgFont.findGlyph(uText);
+                    var charGlyph = mySvgFont.findGlyph(fontData, text[i]);
                     mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
                     width += charGlyph[charGlyph.length - 1];
                 }
-                prefMatch = false;
-            }
+                prevMatch = false;
+*/
         }
         
         svg.appendChild(scaleG);
@@ -86,25 +112,29 @@ var mySvgFont = {
         
         return true;
     },
-    findGlyph:function(uName)
+    findGlyph:function(fontData, uChar)
     {
         for (var i = 0; i < fontData.glyphs.length; i++)
         {
-            if (fontData[i].n == uName)
+            if (fontData.glyphs[i].u == uChar)
             {
-                return [0,0,i,fontData[i].a];
+                return [0,0,i,fontData.glyphs[i].a];
             }
         }
-        return [0,0,0,fontData[0].a];
+        return [0,0,0,fontData.glyphs[0].a];
     },
     appendGlyphPaths: function(scaleG, fontData, gData, dx, dy)
     {
-        for (var i = 0; i < gData.length/3; i+= 3)
+        for (var i = 0; i < gData.length - 1; i+= 3)
         {
-            var path = (document.createElementNS)?document.createElementNS("http://www.w3.org/2000/svg","path"):document.createElement("path");
+            var path = (document.createElementNS)?
+                document.createElementNS("http://www.w3.org/2000/svg","path"):
+                document.createElement("svg:path");
             if (path)
             {
-                path.setAttribute("transform", "translate(" + (dx + gData[i]) + "," + (dy + gData[i+1]) + ")");
+                var gX = dx + ((gData[i] == undefined)? 0 : gData[i]);
+                var gY = dy + ((gData[i+1] == undefined)? 0 : gData[i+1]);
+                path.setAttribute("transform", "translate(" + gX + "," + gY + ")");
                 path.setAttribute("d", fontData.glyphs[gData[i+2]].d);
                 scaleG.appendChild(path);
             }
@@ -123,13 +153,14 @@ var mySvgFont = {
                 var head = document.getElementsByTagName("head").item(0);
                 head.appendChild(asvObject);
                 // this fails, so how can I do this?
-                //var importNS = document.createProcessingInstruction("import", ' namespace="svg" implementation="#AdobeSVG"');
-                //head.appendChild(importNS);
+                // var importNS = document.createProcessingInstruction("import", ' namespace="svg" implementation="#AdobeSVG"');
+                // head.appendChild(importNS);
             }
             catch (e) { alert(e);}
         }
-        var svg = (document.createElementNS)? document.createElementNS("http://www.w3.org/2000/svg", "svg") : 
-			document.createElement(svg);
+        var svg = (document.createElementNS)? 
+            document.createElementNS("http://www.w3.org/2000/svg", "svg") : 
+			document.createElement("svg:svg");
         if (svg)
         {
             if (mySvgFont.renderSvg(svg, fontName, text, size, color))
@@ -138,7 +169,7 @@ var mySvgFont = {
                 var span = document.createElement("span");
                 if (span)
                 {
-                    // add span so text can still be copied, but move it well out of site
+                    // add span so text can still be copied, but move it well out of sight
                     span.appendChild(document.createTextNode(text));
                     span.style.position = "absolute";
                     span.style.zIndex = -1;
@@ -148,6 +179,24 @@ var mySvgFont = {
                 parent.appendChild(svg);
             }
         }
+    },
+    /** find computed style of node */
+    computedStyle: function(node)
+    {
+        return (window.getComputedStyle)? 
+            window.getComputedStyle(node,null) : node.computedStyle;
+    },
+    nodeFontSize: function(node)
+    {
+        var computedStyle = mySvgFont.computedStyle(node);
+        if (computedStyle)
+        {
+            var fontSizeText = String(computedStyle.fontSize);
+            if (fontSizeText.indexOf("px") > -1) 
+                fontSize = fontSizeText.substring(0, fontSizeText.indexOf("px"));
+            if (fontSize > 0) return fontSize;
+        }
+        return mySvgFont.defaultFontSize;
     }
 };
 

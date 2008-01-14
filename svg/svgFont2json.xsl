@@ -30,6 +30,12 @@ glyphs:[
 <xsl:text>{d:"</xsl:text>
 <xsl:value-of select="@d"/>
 <xsl:text>",n:"</xsl:text><xsl:value-of select="@glyph-name"/>
+<xsl:text>",u:"</xsl:text>
+    <xsl:choose>
+    <xsl:when test="@unicode = '&#34;'">\u0022</xsl:when>
+    <xsl:when test="@unicode = '&#92;'">\u005c</xsl:when>
+    <xsl:otherwise><xsl:value-of select="@unicode"/></xsl:otherwise>
+    </xsl:choose>
 <xsl:text>",a:</xsl:text><xsl:value-of select="@horiz-adv-x"/>
 <xsl:text>},
 </xsl:text>

@@ -42,6 +42,7 @@ keyboardIcon : "Keyboard.png",
 keyboardOffIcon : "KeyboardOff.png",
 keyboardVisible : true,
 keyboardSrc : "Keyboard.xml",
+selectionColor : "#c0c0ff",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
 currentSyllable : new Array("", "", "", "", "", "", "", "",
@@ -202,12 +203,12 @@ typeChar: function(charValue, pos)
   var newSyllable = myK.syllableToString();
   inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
   // Move cursor to end of syllable
-  myK.setCursorPosition(oldText.prefix.length + newSyllable.length, 
-                        oldText.prefix.length + newSyllable.length);
+  var cursor = oldText.prefix.length + newSyllable.length;
+  myK.setCursorPosition(cursor, cursor);
   window.status = inputElement.value + " Syllable = " + newSyllable + 
     " " + myK.currentSyllable.length;
   // update overlay if there is one
-  myK.updateOverlay(inputElement);
+  myK.updateOverlay(inputElement, cursor, cursor);
   if (myK.afterKey)
     myK.afterKey(myK.inputNode);
 },
@@ -248,24 +249,51 @@ deleteChar: function()
   }
   var newSyllable = myK.syllableToString();
   inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
-  myK.setCursorPosition(oldText.prefix.length, oldText.prefix.length + 
-                        newSyllable.length);
+  var cursorA = oldText.prefix.length;
+  var cursorB = cursorA + newSyllable.length;
+  myK.setCursorPosition(cursorA, cursorB);
   // update overlay if there is one
-  myK.updateOverlay(inputElement);
+  myK.updateOverlay(inputElement, cursorA, cursorB);
   if (myK.afterKey)
     myK.afterKey(myK.inputNode);
 },
 
-updateOverlay : function(inputElement)
+updateOverlay : function(inputElement, cursorA, cursorB)
 {
   if (myUnicode != undefined && myUnicode.isSupported == false)
   {
     // see if there is an overlay that should have some text added
-    if (inputElement.previousSibling && inputElement.previousSibling.getAttribute('id') && 
-        new String(inputElement.previousSibling.getAttribute('id')).indexOf("myOverlay") > -1)
+    var overlay = inputElement.previousSibling;
+    if (overlay && overlay.getAttribute('id') && 
+        new String(overlay.getAttribute('id')).indexOf("myOverlay") > -1)
     {
-        inputElement.previousSibling.innerHTML = inputElement.value;
-        myUnicode.parseText(inputElement.previousSibling.firstChild, inputElement.value);
+        if (cursorA == undefined) 
+        {
+            var cursor = myK.getCursorPosition();
+            cursorA = cursor.selectionStart; 
+            cursorB = cursor.selectionEnd;
+        //    cursorA = cursorB = inputElement.value.length;
+        }
+        inputElement.previousSibling.innerHTML = inputElement.value.substring(0, cursorA);
+        if (cursorA == cursorB)
+        {
+            var img = document.createElement("img");
+            img.setAttribute("src", myK.pathStem + "cursor.gif");
+            img.setAttribute("alt","|");
+            overlay.appendChild(img);
+        }
+        else
+        {
+            var selectionSpan = document.createElement("span");
+            var selectionText = document.createTextNode(inputElement.value.substring(cursorA, cursorB));
+            selectionSpan.appendChild(selectionText);
+            selectionSpan.style.backgroundColor = myK.selectionColor;
+            overlay.appendChild(selectionSpan);
+        }
+        var afterCursor = document.createTextNode(inputElement.value.substring(cursorB));
+        overlay.appendChild(afterCursor);
+        //myUnicode.parseText(overlay.firstChild, inputElement.value);
+        myUnicode.parseNode(overlay);
     }
   }
 },
@@ -612,19 +640,46 @@ toggleStack: function(prefix)
             {
                 if (children.item(j).nodeType != 1 /*Node.ELEMENT_NODE*/) continue;
                 var oldSrc = children.item(j).getAttribute("src");
-                var newSrc;
-                if (myK.consMode == 0)
+                if (oldSrc)
                 {
-                    var lastSlash = oldSrc.lastIndexOf("/");
-                    newSrc = oldSrc.substring(0,lastSlash + 1) + "25cc1039" +
-                        oldSrc.substring(lastSlash + 1, oldSrc.length);
-                    //newSrc = oldSrc.replace("/10","/25cc103910");
+                    var newSrc;
+                    if (myK.consMode == 0)
+                    {
+                        var lastSlash = oldSrc.lastIndexOf("/");
+                        newSrc = oldSrc.substring(0,lastSlash + 1) + "25cc1039" +
+                            oldSrc.substring(lastSlash + 1, oldSrc.length);
+                        //newSrc = oldSrc.replace("/10","/25cc103910");
+                    }
+                    else
+                    {
+                      newSrc = oldSrc.replace("/25cc1039","/");
+                    }
+                    children.item(j).setAttribute("src",newSrc);
                 }
-                else
+                else if (children.item(j).nodeName == "svg")
                 {
-                  newSrc = oldSrc.replace("/25cc1039","/");
+                    var svgChild = children.item(j);
+                    // get the original text from the title svg/g/title/text
+                    try
+                    {
+                        var text = svgChild.firstChild.firstChild.firstChild.textContent;
+                        if (myK.consMode == 0)
+                        {
+                            text = "\u25cc\u1039" + text;
+                        }
+                        else
+                        {
+                            if (text[0] == '\u25cc' && text[1] == '\u1039') text = text.substring(2);
+                        }
+                        var fontSize = mySvgFont.nodeFontSize(element);
+                        var textColor = mySvgFont.computedStyle(element).color;
+                        var frag = document.createDocumentFragment();
+                        mySvgFont.appendSvgText(frag, myUnicode.svgFont, fontSize, text, textColor);
+                        element.insertBefore(frag, svgChild);
+                        element.removeChild(svgChild);
+                    }
+                    catch (e) { if (mySvgFont.warning) alert(e); mySvgFont.warning = false; }
                 }
-                children.item(j).setAttribute("src",newSrc);
             }
         }
     }

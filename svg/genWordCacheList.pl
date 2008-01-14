@@ -20,11 +20,11 @@ use encoding "utf8";
 "\x{103C}\x{103D}\x{103E}",#ra,wa,ha
 );
 
-@stackMedials = (
-"",
-"\x{103B}",#ya
-"\x{103C}"#ra
-);
+#@stackMedials = (
+#"",
+#"\x{103B}",#ya
+#"\x{103C}"#ra
+#);
 
 @vowels = (
 "",
@@ -111,6 +111,7 @@ use encoding "utf8";
 @consonants = $allConsonants;
 
 @consonants = (
+("\x{25cc}"),
 ("\x{1000}"),#KA,shan
 ("\x{1001}"),#KHA,shan
 ("\x{1002}"),#GA,shan ga
@@ -156,6 +157,7 @@ use encoding "utf8";
 );
 
 @killed = (
+"\x{25cc}",
 "\x{1000}",#0
 "\x{1001}",#1
 "\x{1002}",#2
@@ -214,6 +216,7 @@ use encoding "utf8";
 #"\x{1064}"#sgaw karen
 );
 
+if ($#ARGV < 0) { die "No word list to find stackable consonants"; }
 open(KNOWN,"<:utf8",$ARGV[0]) || die "Failed to open $ARGV[0]\n";
 $words = "";
 while ($line = <KNOWN>)
@@ -269,9 +272,10 @@ for ($k = 0; $k<=$#killed; $k++)
     for ($c = 0; $c<=$#consonants; $c++)
     {
         $match = $killed[$k] . $stacker . $consonants[$c];
-        if ($words =~ /.*$match.*/)
+        # $k ==0 is dotted circle
+        if ($k == 0 || $words =~ /.*$match.*/)
         {
-            printf( "$match");
+            #printf( "$match");
             for ($v = 0; $v<=$#vowels; $v++)
             {
             for ($t = 0; $t<=$#tones; $t++)
@@ -290,6 +294,7 @@ print <<'EOT';
 န္တျ
 န္တျ
 သ္တြ
+င်္◌
 ဥုံ
 တ္တွ
 EOT

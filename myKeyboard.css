@@ -142,6 +142,7 @@ a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
 .my, a.keyboard:link, a.keyboard:visited, a.keyboard:active, div.keyboard p.keyboardTab {
   text-decoration: none;
   font-family: Padauk, Myanmar3, Myanmar2;font-weight: bold;
+  
 }
 
 input, textarea {
@@ -185,4 +186,7 @@ table.keyboard span.my { font-family: padauk, myanmar3; font-weight: bold; float
 div.keyboard p.keyboardTab { margin: 2px; border-width: 1px; border-style: solid; border-color: white; line-height: 1.4em; background-color: #0000ff;}
 div.keyboard span.tabOn { color: white; background-color: #6060ff; }
 div.keyboard a.tabOff {  color: white; padding: 0.1em; text-decoration: none;  }
+svg {
+    vertical-align: top;
+}
 

@@ -69,7 +69,6 @@ var myUnicode = {
     // config variables
     fontData  : "PadaukOT",// can be overridden
     svgFont : "Padauk",
-    svgFontSize : 14,
     codeStart : 4096,// u1000 - inclusive
     codeEnd   : 4256,//u10A0 - exclusive
     imgPrefix : "",// prefix path to images
@@ -321,14 +320,21 @@ var myUnicode = {
             var overlay;
             if (document.createElementNS) overlay = document.createElementNS("http://www.w3.org/1999/xhtml","div");
             else overlay = document.createElement("div");
-            overlay.setAttribute("class","myOverlay");
-            overlay.setAttribute("style","left: " + inputDim.x + 
-                "px; top:" + inputDim.y + "px; width: " + inputDim.width + 
-                "px; height: " + inputDim.height + "px;");
+            //overlay.setAttribute("class","myOverlay");
+            //overlay.setAttribute("style","left: " + inputDim.x + 
+            //    "px; top:" + inputDim.y + "px; width: " + inputDim.width + 
+            //    "px; height: " + inputDim.height + "px;");
             myUnicode.overlayCount++;
             overlay.setAttribute("id", "myOverlay" + myUnicode.overlayCount);
-			overlay.setAttribute("onmouseover","myK.updateOverlay(document.getElementById('myOverlay" + 
-					myUnicode.overlayCount + "').nextSibling)");
+			//overlay.setAttribute("onclick","myK.updateOverlay(document.getElementById('myOverlay" + 
+			//		myUnicode.overlayCount + "').nextSibling)");
+            var index = 0;
+            var inputNodes = document.getElementsByTagName(node.nodeName.toLowerCase());
+            while (inputNodes.item(index) != node && index < inputNodes.length) index++;
+            overlay.onclick = function() {
+                myK.updateOverlay(this.nextSibling);
+                myK.switchInputByIndex(node.nodeName.toLowerCase(), index); node.focus();
+            };
 			if (overlay.style)// ie ignores style attributes set above
 			{
 				overlay.style.left = inputDim.x + "px";
@@ -346,11 +352,13 @@ var myUnicode = {
 				
 				overlay.style.overflow = "auto";
                 overlay.id = "myOverlay" + myUnicode.overlayCount;
-                
-				overlay.onmouseover = "myK.updateOverlay(document.getElementById('myOverlay" + 
-					myUnicode.overlayCount + "').nextSibling)";
+                /*
+				overlay.onclick = "myK.switchInputByIndex('" + 
+                    node.nodeName.toLowerCase() + "'," + index + "); node.focus();" + 
+                    "myK.updateOverlay(document.getElementById('myOverlay" + 
+					myUnicode.overlayCount + "').nextSibling);";*/
 			}
-			overlay.style.display = "none";
+			//overlay.style.display = "none";
             if (node.value)
             {
                 var value = document.createTextNode(node.value);
@@ -367,9 +375,9 @@ var myUnicode = {
 	/** parse an element node and all its children - may be called by directly or recursively */
     parseNode : function (node)
     {
-        if (node == undefined || node.nodeType != 1) return;
+        if (node == undefined || node.tagName == undefined || node.nodeType != 1) return;
         myUnicode.nodeCount++;
-        if (node.tagName != undefined && (node.tagName.toLowerCase() == "input"))
+        if (node.tagName.toLowerCase() == "input")
         {
                 if (node.getAttribute("type").toLowerCase() == "text")
                 {
@@ -377,10 +385,14 @@ var myUnicode = {
                 }
                 return; // don't mess with fields
         }
-        else if (node.tagName != undefined && node.tagName.toLowerCase() == "textarea")
+        else if (node.tagName.toLowerCase() == "textarea")
         {
              myUnicode.addOverlay(node);
              return; // don't mess with fields
+        }
+        else if (node.tagName.toLowerCase() == "svg")
+        {
+             return; // already processed
         }        
         else if (node.hasChildNodes())
         {
@@ -479,73 +491,88 @@ var myUnicode = {
 						sizeIndex = fontHeights.length - 1;
                     height = fontHeights[sizeIndex];
                     fontSize = eval("fontImages_" + myUnicode.fontData + ".fontSize[" + sizeIndex + "];");
-                    //var realFontSize = node.getREalFontsize();
+                    //var realFontSize = node.getRealFontsize();
 					//alert("Fontsize: " + nodeSize + "/" + height + " " + node.parentNode.offsetHeight);
                 }
-                codeString = "u";           
-                
-                lastMatchEnd = -1;
-                for (var j = i; j < i + maxCharLen; j++)
+                if (myUnicode.isIe) // convert to images
                 {
-                    code = text.charCodeAt(j);
-                    if (myUnicode.inRange(code) == false) break;
-                    if (code < 256) codeString += "00";
-                    codeString += code.toString(16);
-                    try
-					{
-	                    var imageProp = eval("fontImages_" + myUnicode.fontData + "." + codeString);
-	                    if (imageProp == undefined)
-	                    {
-	                    }
-	                    else
-	                    {
-	                        lastMatchEnd = j;
-	                        width = imageProp[sizeIndex];
-	                    }
-					}
-					catch (e){}
-                }
-                // was there a match?
-                if (lastMatchEnd > -1) // yes
-                {
-                    if (myUnicode.isIe)
+                    codeString = "u";                
+                    lastMatchEnd = -1;
+                    for (var j = i; j < i + maxCharLen; j++)
                     {
-                    codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
-                    var img;
-                    if (document.createElementNS) img =
-                        document.createElementNS("http://www.w3.org/1999/xhtml","img");
-                    else img = document.createElement("img");
-                    img.setAttribute("src", myUnicode.imgPrefix + myUnicode.fontData + 
-									"_" + fontSize +
-									"/" +
-                                     codeString.substring(1,codeString.length) +
-                                     myUnicode.imgSuffix);
-                    img.setAttribute("alt", text.substring(i,lastMatchEnd + 1));
-                    img.setAttribute("title","");// stop IE using alt as title
-                    img.setAttribute("class","myText2Image");
-                    img.setAttribute("style","vertical-align: middle; width: " +
-						width + "px; height: " + height + "px;");
-					if (img.style) // ie ignores the above style attributes
-					{
-						img.style.height = height + "px";
-						img.style.width = width + "px";
-						img.style.verticalAlign = "middle";
-                        img.style.borderLeftStyle = "none";
-                        img.style.borderRightStyle = "none";
-                        img.style.borderTopStyle = "none";
-					}
-                    docFrag.appendChild(img);
-                    // advance i
-                    i = lastMatchEnd;
-                    //alert(codeString);
+                        code = text.charCodeAt(j);
+                        if (myUnicode.inRange(code) == false) break;
+                        if (code < 256) codeString += "00";
+                        codeString += code.toString(16);
+                        try
+					    {
+	                        var imageProp = eval("fontImages_" + myUnicode.fontData + "." + codeString);
+	                        if (imageProp == undefined)
+	                        {
+	                        }
+	                        else
+	                        {
+	                            lastMatchEnd = j;
+	                            width = imageProp[sizeIndex];
+	                        }
+					    }
+					    catch (e){}
                     }
-                    else mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, myUnicode.svgFontSize, text.substring(i,lastMatchEnd + 1));
+                    // was there a match?
+                    if (lastMatchEnd > -1) // yes
+                    {
+                        
+                        codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
+                        var img;
+                        if (document.createElementNS) img =
+                            document.createElementNS("http://www.w3.org/1999/xhtml","img");
+                        else img = document.createElement("img");
+                        img.setAttribute("src", myUnicode.imgPrefix + myUnicode.fontData + 
+									    "_" + fontSize +
+									    "/" +
+                                         codeString.substring(1,codeString.length) +
+                                         myUnicode.imgSuffix);
+                        img.setAttribute("alt", text.substring(i,lastMatchEnd + 1));
+                        img.setAttribute("title","");// stop IE using alt as title
+                        img.setAttribute("class","myText2Image");
+                        img.setAttribute("style","vertical-align: middle; width: " +
+						    width + "px; height: " + height + "px;");
+					    if (img.style) // ie ignores the above style attributes
+					    {
+						    img.style.height = height + "px";
+						    img.style.width = width + "px";
+						    img.style.verticalAlign = "middle";
+                            img.style.borderLeftStyle = "none";
+                            img.style.borderRightStyle = "none";
+                            img.style.borderTopStyle = "none";
+					    }
+                        docFrag.appendChild(img);
+                        // advance i
+                        i = lastMatchEnd;
+                        //alert(codeString);
+                    }
+                    else
+                    {
+                        // no, just output raw unicode, we can't do anything else
+                        var unexpectedText = document.createTextNode(text.substring(i,i+1));
+                        docFrag.appendChild(unexpectedText);
+                    }
                 }
-                else
+                else // svg
                 {
-                    // no, just output raw unicode, we can't do anything else
-                    var unexpectedText = document.createTextNode(text.substring(i,i+1));
-                    docFrag.appendChild(unexpectedText);
+                    var j;
+                    for (j = i + 1; j < i + text.length; j++)
+                    {
+                        code = text.charCodeAt(j);
+                        if (myUnicode.inRange(code) == false) break;
+                    }
+                    var fontSize = mySvgFont.nodeFontSize(node.parentNode);
+                    var textColor = document.fgColor;
+                    var backColor = document.bgColor;
+                    var computedStyle = mySvgFont.computedStyle(node.parentNode);
+                    if (computedStyle) textColor = computedStyle.color;
+                    mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, backColor);
+                    i = j - 1;
                 }
             }
             else if (docFrag != undefined)
@@ -561,6 +588,7 @@ var myUnicode = {
             parent.replaceChild(docFrag, node);
         }
     },
+    
     /** Choose which image size to use for the given node type 
     * This could be modified to look at the specified style, or class on the
     * node, but currently, this is ignored.
