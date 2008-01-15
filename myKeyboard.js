@@ -974,6 +974,21 @@ toUnicodes: function(text)
         {
             node.onkeypress = function(event) { return myKeyMapper.keyPress(event); };
         }
+        var iconContainer = document.getElementById("myK." + type + index);
+        if (!iconContainer) 
+        {
+            iconContainer = document.createElement("span");
+            iconContainer.style.position = "absolute";
+            iconContainer.setAttribute("id","myK." + type + index);
+            if (node.nextSibling)
+            {
+                node.parentNode.insertBefore(iconContainer, node.nextSibling);
+            }
+            else
+            {
+                node.parentNode.appendChild(iconContainer);
+            }
+        }
         var alphabetWindowId = "myK." + type + index + "alphabetWindowIcon";
         var alphabetWindow = document.getElementById(alphabetWindowId);
         if (!alphabetWindow)
@@ -986,14 +1001,7 @@ toUnicodes: function(text)
             img.setAttribute('title', "Show Keyboard");
             link.appendChild(img);
             link.setAttribute('href',"javascript:{myK.toggleAlphabetWindow();}");
-            if (node.nextSibling)
-            {
-                node.parentNode.insertBefore(link, node.nextSibling);
-            }
-            else
-            {
-                node.parentNode.appendChild(link);
-            }
+            iconContainer.appendChild(link);
         }
         var link = document.createElement('a');
         link.setAttribute('href',"javascript:{myK.toggleLangKeyboard('" + lang + 
@@ -1009,15 +1017,7 @@ toUnicodes: function(text)
         img.setAttribute('alt', "[" + lang + "] ");
         img.setAttribute('id', myK.langIcon(type, index, lang));
         img.setAttribute('title', "" + name + " keyboard");
-        if (node.nextSibling)
-        {
-            var sibling = node.nextSibling;
-            node.parentNode.insertBefore(link, sibling);
-        }
-        else
-        {
-            node.parentNode.appendChild(link);
-        }
+        iconContainer.insertBefore(link, iconContainer.firstChild);
         link.appendChild(img);
         
     },
@@ -1243,7 +1243,8 @@ var myKeyboardMover = {
     keyboardId: "",
     inputId: "textInput",
     inputNode: 0,
-    
+    buffer: 20,// > scroll bar width
+    keepInWindow : false,
     initItemPos:function(keyboardDiv)
     {
         var rectangle = new myRectangle(0,0,0,0);
@@ -1338,6 +1339,7 @@ var myKeyboardMover = {
         }
         document.body.onmousemove = myKeyboardMover.activeMove;
         document.body.onmouseup = myKeyboardMover.endMove;
+        document.body.onclick = myKeyboardMover.endMove;
         myK.inputNode.focus();
         //alert("Moved from " + this.moveStartX + "," + this.moveStartY + " " + this.dialog.x + "," + this.dialog.y);
     },
@@ -1346,6 +1348,7 @@ var myKeyboardMover = {
     {
         document.body.onmousemove = null;
         document.body.onmouseup = null;
+        document.body.onclick = null;
         myK.inputNode.focus();// restore focus & remove any unwanted selection
         //alert(myKeyboardMover.moveSrc + "Moved by " + myKeyboardMover.dialog.x + "," + myKeyboardMover.dialog.y + " " );
     },
@@ -1400,18 +1403,23 @@ var myKeyboardMover = {
         
         var xPos = myKeyboardMover.dialog.x + deltaX;
         var yPos = myKeyboardMover.dialog.y + deltaY;
-        if (xPos + myKeyboardMover.dialog.width > windowDim.x + windowDim.width)
-        {
-            xPos = windowDim.x + windowDim.width - myKeyboardMover.dialog.width;
-        }
-        if (xPos < 0) xPos = 0;
-        if (yPos + myKeyboardMover.dialog.height > windowDim.y + windowDim.height &&
-                    myKeyboardMover.dialog.height  > 0) 
-        {
-            yPos = windowDim.y + windowDim.height- myKeyboardMover.dialog.height;
-        }
-        if (yPos < windowDim.y) yPos = windowDim.y;
         if (yPos < 0) yPos = 0;
+        if (xPos + myKeyboardMover.dialog.width > windowDim.x + windowDim.width 
+            - myKeyboardMover.buffer)
+        {
+            xPos = windowDim.x + windowDim.width - myKeyboardMover.dialog.width 
+                - myKeyboardMover.buffer;
+        }
+        if (myKeyboardMover.keepInWindow)
+        {
+            if (xPos < 0) xPos = 0;
+            if (yPos + myKeyboardMover.dialog.height > windowDim.y + windowDim.height &&
+                        myKeyboardMover.dialog.height  > 0) 
+            {
+                yPos = windowDim.y + windowDim.height- myKeyboardMover.dialog.height;
+            }
+            if (yPos < windowDim.y) yPos = windowDim.y;
+        }
         if (xPos == undefined) xPos = 0;
         if (yPos == undefined) yPos = 0;
         keyboardDiv.style.left = xPos + "px";
@@ -1427,6 +1435,7 @@ var myKeyboardMover = {
         if (window.event) evt = window.event;
         else evt = e;
         myKeyboardMover.moveTo(evt.clientX, evt.clientY);
+        myK.inputNode.focus();
     },
     
     moveBelowInput:function()
@@ -1439,26 +1448,32 @@ var myKeyboardMover = {
         {
             var xPos = myKeyboardMover.input.x + myKeyboardMover.input.width;
             var yPos = myKeyboardMover.input.y + myKeyboardMover.input.height;
-            if (xPos + myKeyboardMover.dialog.width > windowDim.x + windowDim.width)
+            if (xPos + myKeyboardMover.dialog.width + 
+                myKeyboardMover.buffer > windowDim.x + windowDim.width)
             {
-                xPos = windowDim.x + windowDim.width - myKeyboardMover.dialog.width;
+                xPos = windowDim.x + windowDim.width
+                    - myKeyboardMover.dialog.width - myKeyboardMover.buffer;
                 if (myKeyboardMover.input.x - myKeyboardMover.dialog.width > 0)
                 {
                   xPos = myKeyboardMover.input.x - myKeyboardMover.dialog.width;
                 }
             }
-            if (xPos < 0) xPos = 0;
             
-            if (yPos + myKeyboardMover.dialog.height > 
-                windowDim.y + windowDim.height &&
-                myKeyboardMover.dialog.height > 0)
+            if (myKeyboardMover.keepInWindow)
             {
-              yPos = windowDim.y + windowDim.height - myKeyboardMover.dialog.height;
-              if (yPos < myKeyboardMover.input.y)
-              {
-                yPos = myKeyboardMover.input.y - myKeyboardMover.dialog.height;
-                //yPos = windowDim.y;
-              }
+                if (xPos < 0) xPos = 0;
+                
+                if (yPos + myKeyboardMover.dialog.height > 
+                    windowDim.y + windowDim.height &&
+                    myKeyboardMover.dialog.height > 0)
+                {
+                  yPos = windowDim.y + windowDim.height - myKeyboardMover.dialog.height;
+                  if (yPos < myKeyboardMover.input.y)
+                  {
+                    yPos = myKeyboardMover.input.y - myKeyboardMover.dialog.height;
+                    //yPos = windowDim.y;
+                  }
+                }
             }
             if (yPos < 0) yPos = 0;
             if (xPos == undefined) xPos = 0;

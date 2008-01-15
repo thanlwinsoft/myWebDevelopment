@@ -59,13 +59,13 @@ Note: the <span>s must be before the script, so they are available as the page l
     }
 </style>
 
-<script type="text/javascript" src="../PadaukOT.js"></script>
-<script type="text/javascript" src="../myDetection.js"></script>
-<script type="text/javascript" src="../xmlRequest.js"></script>
-<script type="text/javascript" src="../mySource.js"></script>
-<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+<script type="text/javascript" src="PadaukOT.js"></script>
+<script type="text/javascript" src="myDetection.js"></script>
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="mySource.js"></script>
+<link type="text/css" rel="stylesheet" href="mySource.css"/>
 </head>
-<body onload="myUnicode.initParse('../');">
+<body onload="myUnicode.initParse('');">
 
 <h1>Myanmar Unicode Test<span class="myUniTest" id="myWidth2">ကက</span>
 <span class="myUniTest" id="myWidth1">က္က</span></h1>
@@ -91,8 +91,8 @@ if (myUnicode.isSupported == false)
 &lt;script type="text/javascript" src="/styles/xmlRequest.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body  onload="myUnicode.initParse('/styles/');" &gt;
-&lt;span style="font-family: 'PadaukOT','Myanmar2','Padauk'" id="myWidth2"&gt;ကက&lt;/span&gt;
-&lt;span style="font-family: 'PadaukOT','Myanmar2','Padauk'" id="myWidth1"&gt;က္က&lt;/span&gt;
+&lt;span style="font-family: 'Padauk','Myanmar3','Myanmar2'" id="myWidth2"&gt;ကက&lt;/span&gt;
+&lt;span style="font-family: 'Padauk','Myanmar3','Myanmar2'" id="myWidth1"&gt;က္က&lt;/span&gt;
 ...
 </pre>
 <p>Change the styles directory as appropriate for your website. 
@@ -102,7 +102,7 @@ For more details <a href="javascript:getSourceFile('source','myDetection.html')"
 <p>If the conversion fails, Myanmar <span class="my">[မြန်မာ]</span> text should automatically be converted to images. If your browser supports Myanmar Unicode you can still <a href="javascript:{ myUnicode.isSupported=false; myUnicode.parseDoc(); }">force the conversion</a>.</p>
 <p>If you want support for Myanmar Unicode in text input fields you can use the <a href="myKeyboard.html">Myanmar Keyboard</a>.</p>
 
-<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
 <!-- Creative Commons License -->
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.

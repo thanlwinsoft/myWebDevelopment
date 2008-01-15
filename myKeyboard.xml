@@ -35,7 +35,7 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
 <div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
-<p style="float:left; display='';" id="myKeyboardLayoutOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
+<p style="float:left; display:'';" id="myKeyboardLayoutOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
 <span class="tabOn">ခလုပ်ကွက်</span>
 <a class="tabOff" href="javascript:myK.toggle('my_keyboardLayoutUnshifted');myK.toggle('my_keyboardLayoutShifted');myK.toggle('my_alphabet');myK.toggle('myKeyboardLayoutOn');myK.toggle('myKeyboardAlphabetOn');" title="Show alphabet">အက္ခရာ</a>
 </p>

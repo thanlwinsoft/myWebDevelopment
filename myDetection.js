@@ -320,10 +320,6 @@ var myUnicode = {
             var overlay;
             if (document.createElementNS) overlay = document.createElementNS("http://www.w3.org/1999/xhtml","div");
             else overlay = document.createElement("div");
-            //overlay.setAttribute("class","myOverlay");
-            //overlay.setAttribute("style","left: " + inputDim.x + 
-            //    "px; top:" + inputDim.y + "px; width: " + inputDim.width + 
-            //    "px; height: " + inputDim.height + "px;");
             myUnicode.overlayCount++;
             overlay.setAttribute("id", "myOverlay" + myUnicode.overlayCount);
 			//overlay.setAttribute("onclick","myK.updateOverlay(document.getElementById('myOverlay" + 
@@ -352,11 +348,6 @@ var myUnicode = {
 				
 				overlay.style.overflow = "auto";
                 overlay.id = "myOverlay" + myUnicode.overlayCount;
-                /*
-				overlay.onclick = "myK.switchInputByIndex('" + 
-                    node.nodeName.toLowerCase() + "'," + index + "); node.focus();" + 
-                    "myK.updateOverlay(document.getElementById('myOverlay" + 
-					myUnicode.overlayCount + "').nextSibling);";*/
 			}
 			//overlay.style.display = "none";
             if (node.value)
@@ -429,6 +420,7 @@ var myUnicode = {
                     else myUnicode.parseNode(child);
                 }
                 else if (child.nodeType == 8) {} // ignore comments
+                else if (child.nodeType == 7) {} // ignore processing instructions
                 else
                 {
                     alert("node " + child + " type" + child.nodeType);
