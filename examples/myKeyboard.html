@@ -18,17 +18,18 @@ To get around these problems you can use a visual keyboard like this.
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
 <title>Myanmar Unicode Virtual Keyboard</title>
-<script type="text/javascript" src="xmlRequest.js"></script>
-<script type="text/javascript" src="myKeyboard.js"></script>
-<script type="text/javascript" src="mySource.js"></script>
-<script type="text/javascript" src="PadaukOT.js"></script>
-<script type="text/javascript" src="myDetection.js"></script>
+<script type="text/javascript" src="../xmlRequest.js"></script>
+<script type="text/javascript" src="../myKeyboard.js"></script>
+<script type="text/javascript" src="../mySource.js"></script>
+<script type="text/javascript" src="../PadaukOT.js"></script>
+<script type="text/javascript" src="../myDetection.js"></script>
 
-<link type="text/css" rel="stylesheet" href="myKeyboard.css"/>
-<link type="text/css" rel="stylesheet" href="mySource.css"/>
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
 </head>
 <!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
-<body id='body' onload="myUnicode.initParse('');myK.registerKeyboard('ksw');myK.registerKeyboard('my');">
+<body id='body' onload="myUnicode.initParse('../');myK.registerKeyboard('ksw');myK.registerKeyboard('my');">
+<div>
 <h1>Myanmar Unicode Virtual Keyboard</h1>
 <script type="text/javascript">
 function showUnicodes(input)
@@ -58,6 +59,7 @@ function showUnicodes(input)
 myK.afterKey = showUnicodes;
 </script>
 <form>
+<p>Click on the <img src="../myKeyboardOff.png"/> icon to type in Myanmar. Click on the <img src="../myKeyboard.png"/> icon again for English. Note: to type <span class="my">က္က</span> type "uu`". <span class="my">ြ </span> &nbsp;is typed after the consonant e.g. "uj" gives <span class="my">ကြ</span>. A visual keyboard will popup, but you can close this if you already know the keyboard layout.</p>
 <input type="text" onmouseover="showUnicodes(this)" id="textInput" class="my" name="a"></input><br />
 <textarea cols="50" rows="4" class="my" onmouseover="showUnicodes(this)" name="b" id="areaInput"></textarea>
 <br />
@@ -84,9 +86,9 @@ myUnicode.check();
 ...
 </pre>
 <p><a href="javascript:getSourceFile('source','myKeyboard.html')">View the Source HTML</a>, 
-<a href="javascript:getSourceFile('keySrc','myKeyboard.php')"> the Keyboard HTML</a>, 
-<a href="javascript:getSourceFile('js','myKeyboard.js')">Javascript</a> and  
-<a href="javascript:getSourceFile('cssPre','myKeyboard.css')">CSS</a> 
+<a href="javascript:getSourceFile('keySrc','../myKeyboard.xml')"> the Keyboard HTML</a>, 
+<a href="javascript:getSourceFile('js','../myKeyboard.js')">Javascript</a> and  
+<a href="javascript:getSourceFile('cssPre','../myKeyboard.css')">CSS</a> 
 for more instructions on how to use in your own pages.</p>
 <p>This script can be combined with <tt>myUnicode.initParse('/styles/');</tt> to allow the Myanmar text to be converted to images automatically when Unicode support is not available. If your browser supports Myanmar Unicode you can <a href="javascript:{ myUnicode.isSupported=false; myUnicode.parseDoc(); }">force the conversion</a> of Myanmar <span class="my">[မြန်မာ]</span> text to images. 
 </p>
@@ -94,7 +96,7 @@ for more instructions on how to use in your own pages.</p>
 <p>See also the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>. </p>
 <div class="testSpace"></div>
 
-<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="my" href='http://www.thanlwinsoft.org'>သံလွင်Soft.org <img src='ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="my" href='http://www.thanlwinsoft.org'>သံလွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
 <!-- Creative Commons License -->
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
@@ -142,6 +144,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <h2>CSS Source</h2>
 <pre id="cssPre" style="display:none;">
 </pre>
+</div>
 </div>
 </body>
 </html>

@@ -73,6 +73,7 @@ td.keyButton {
 
 div.keyboard {
   position: absolute; /* uncomment to place at fixed position at top of page*/
+  overflow: hidden;
   text-align: center;
   border-width: 2px;
   border-style: solid; 
@@ -141,8 +142,8 @@ a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
 
 .my, a.keyboard:link, a.keyboard:visited, a.keyboard:active, div.keyboard p.keyboardTab {
   text-decoration: none;
-  font-family: Padauk, Myanmar3, Myanmar2;font-weight: bold;
-  
+  font-family: Padauk, Myanmar3, Myanmar2;
+  font-weight: bold;
 }
 
 input, textarea {

@@ -34,6 +34,7 @@ by the myK.registerKeyboard('ksw'); call usin an AJAX based technique.
 <div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
 <p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('ksw')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
 </div>
+<div id="ksw_alphabet" style="display: ''; clear: left;">
 <table><tr><td>
 <table class="consonants">
 <colgroup>
@@ -140,5 +141,5 @@ by the myK.registerKeyboard('ksw'); call usin an AJAX based technique.
 </tr>
 </table>
 </td></tr></table>
-
+</div>
 </div>

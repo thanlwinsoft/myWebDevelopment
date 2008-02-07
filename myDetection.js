@@ -44,21 +44,29 @@ Note: the myUniTest <span>s must be inside the body and before the myUnicode.che
 */
 
 // tweak these strings to meet your requirements
-var myIconPath = "";
-var mySupported = "<p class='myGood'>Congratulations your browser is Myanmar Unicode enabled! <br />" +
-"<span class='myText'>မိတ်ဆွေရဲ့ </span> web browser <span class='myText'>က မြန်မာ</span>" +
-" Unicode <span class='myText'>ကို သုံးလို့ ရတဲ့အတွက် ဝမ်းမြောက်ပါတယ်။</span></p>";
-var myUnsupported = "<div class='myUnicodeTestFailed'>" +
+
+function myUnsupportedMsg(myIconPath)
+{
+    return "<div class='myUnicodeTestFailed'>" +
 "<p class='myWarning'>Warning: This site uses the <a href='http://www.unicode.org' class='myFirefoxLink'>International Unicode Standard</a> to store and display Myanmar/Burmese text. " +
 "Please upgrade to a browser with Myanmar Unicode support: " +
 "<ol><li>Download a Graphite enabled Myanmar Unicode font such as " +
 "<a href='http://www.thanlwinsoft.org/ThanLwinSoft/Downloads/#fonts' class='myFirefoxLink'>Padauk</a> and run the installer.</li>" +
-"<li>Install <a href='http://sila.mozdev.org/grFirefox.html' class='myFirefoxLink'>Graphite enabled Firefox</a> (Normal Mozilla Firefox may not work correctly).</li></ol></p>" +
+"</ol></p>" +
 // images for the Burmese translation, since we know the browser can't render it.
 "<p class='myTextMsg'><img src='" + myIconPath + "myNoUnicode0.png' /><br />" +
-"<a href='http://www.thanlwinsoft.org/ThanLwinSoft/Downloads/#fonts'><img src='" + myIconPath + "myNoUnicode1.png' /></a><br />" +
-"<a href='http://sila.mozdev.org/grFirefox.html'><img src='" + myIconPath +"myNoUnicode2.png' /></a></p>" +
+"<a href='http://www.thanlwinsoft.org/ThanLwinSoft/Downloads/#fonts'><img src='" + myIconPath + "myNoUnicode1.png' /></a></p>" +
 "<p><span class='myThanLwin'>This site uses <a href='http://www.thanlwinsoft.org' class='myFirefoxLink'>Myanmar Unicode technology from ThanLwinSoft.org</a></span></p></div>" ;
+}
+
+function mySupportedMsg(myIconPath)
+{
+    return "<p class='myGood'>Congratulations your browser is Myanmar Unicode enabled! <br />" +
+"<span class='myText'>မိတ်ဆွေရဲ့ </span> web browser <span class='myText'>က မြန်မာ</span>" +
+" Unicode <span class='myText'>ကို သုံးလို့ ရတဲ့အတွက် ဝမ်းမြောက်ပါတယ်။</span></p>";
+}
+
+
 
 /**
 * Test the browser for Myanmar Unicode Support.
@@ -92,6 +100,7 @@ var myUnicode = {
     threadEnd : 0,
     isIe: false,
     isGecko: false,
+	retryCount: 0,
 	/** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
 	* message to the user.
@@ -100,6 +109,7 @@ var myUnicode = {
 	{
 	    if (myUnicode.check())
 	    {
+            var mySupported = mySupportedMsg(myUnicode.imgPrefix);
 	        if (mySupported.length > 0)
 	        {
 	            document.writeln(mySupported);
@@ -107,6 +117,7 @@ var myUnicode = {
 	    }
 	    else
 	    {
+            var myUnsupported = myUnsupportedMsg(myUnicode.imgPrefix);
 	        if (myUnsupported.length > 0)
 	            document.writeln(myUnsupported);
 	    }
@@ -195,6 +206,7 @@ var myUnicode = {
         myUnicode.imgPrefix = theImgPrefix;
         if (myUnicode.checkFinished == false) myUnicode.check();
         myUnicode.parseDoc();
+		myUnicode.retryCount = 0;
     },
     addScript: function(src)
     {
@@ -209,6 +221,25 @@ var myUnicode = {
     {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
+			if (!myUnicode.isIe)
+			{
+				try
+				{
+					// wait for the script additions to take affect
+					if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
+					{
+						setTimeout("myUnicode.parseDoc()", 500);
+						myUnicode.retryCount++;
+						return;
+					}
+				}
+				catch (notDefException)
+				{ 
+					setTimeout("myUnicode.parseDoc()", 500);
+					myUnicode.retryCount++;
+					return;
+				}
+			}
             myUnicode.createNotice();
             myUnicode.nodeCount = 0;
             myUnicode.threadStart++;
@@ -232,7 +263,7 @@ var myUnicode = {
     /** call back from parseDoc */
     parseDocWorker : function ()
     {
-            myUnicode.parseNode(document.getElementsByTagName("body")[0]);
+            myUnicode.parseNode(document.getElementsByTagName("body").item(0));
             myUnicode.checkThreads();
     },
     /** checks the number of threads waiting to run via setTimeout */
@@ -558,13 +589,20 @@ var myUnicode = {
                         code = text.charCodeAt(j);
                         if (myUnicode.inRange(code) == false) break;
                     }
-                    var fontSize = mySvgFont.nodeFontSize(node.parentNode);
-                    var textColor = document.fgColor;
-                    var backColor = document.bgColor;
-                    var computedStyle = mySvgFont.computedStyle(node.parentNode);
-                    if (computedStyle) textColor = computedStyle.color;
-                    mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, backColor);
-                    i = j - 1;
+					try
+					{
+						if (mySvgFont != undefined)
+						{
+		                    var fontSize = mySvgFont.nodeFontSize(node.parentNode);
+		                    var textColor = document.fgColor;
+		                    var backColor = document.bgColor;
+		                    var computedStyle = mySvgFont.computedStyle(node.parentNode);
+		                    if (computedStyle) textColor = computedStyle.color;
+		                    mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, backColor);
+		                    i = j - 1;
+						}
+					}
+					catch (e) {}
                 }
             }
             else if (docFrag != undefined)
@@ -577,7 +615,7 @@ var myUnicode = {
         if (docFrag != undefined)
         {
             var parent = node.parentNode;
-            parent.replaceChild(docFrag, node);
+            if (parent) parent.replaceChild(docFrag, node);
         }
     },
     

@@ -2,9 +2,27 @@
 // License: GNU Lesser General Public License, version 2.1 or later.
 // http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 var mySvgFont = {
-    fontWarning:true,
+    fontWarning:false,
     defaultFontSize:12,
     maxContext:10,
+	loaded:false,
+	hasFontData : function(fontName)
+	{
+		if (mySvgFont.loaded) return true;
+		try
+        {
+            fontData = eval('svgFont_' + fontName);
+            renderingData = eval(fontName + "Rendered");
+			mySvgFont.loaded = true;
+			return true;
+        }
+        catch (e)
+        {
+            if (mySvgFont.fontWarning) alert(fontName + " SVG not yet found");
+            mySvgFont.fontWarning = false;
+            return false;
+        }
+	},
     renderSvg: function(svg, fontName, text, size, color)
     {
         var fontData;
@@ -24,15 +42,20 @@ var mySvgFont = {
         var scaledLineHeight = (fontData.ascent - fontData.descent) * scaling;
         
         var scaleG = (document.createElementNS)?
-            document.createElementNS("http://www.w3.org/2000/svg", "g"):document.createElement("svg:g");
+            document.createElementNS("http://www.w3.org/2000/svg", "g"):
+			document.createElement("g");
         if (!scaleG) return false;
         var title = (document.createElementNS)?
           document.createElementNS("http://www.w3.org/2000/svg","title"):
-			document.createElement("svg:title");
-        if (title)
+			document.createElement("title");
+        if (title && title.appendChild)
         {
-            title.appendChild(document.createTextNode(text));
-            scaleG.appendChild(title);
+			scaleG.appendChild(title);
+			var titleText = document.createTextNode(text);
+            if (titleText)
+			{
+				title.appendChild(titleText);
+			}
         }
         scaleG.setAttribute("transform", "translate(0," + (fontData.ascent * scaling) + 
             ") scale(" + scaling + ",-" + scaling + ")");
@@ -76,7 +99,7 @@ var mySvgFont = {
             else
             {
                 // no contextual ligatures/reordering, just use the simple cmap lookup
-                var charGlyph = mySvgFont.findGlyph(fontData, text[i]);
+                var charGlyph = mySvgFont.findGlyph(fontData, text.substring(i,i+1));
                 mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
                 width += charGlyph[charGlyph.length - 1];
             }
@@ -116,7 +139,7 @@ var mySvgFont = {
     {
         for (var i = 0; i < fontData.glyphs.length; i++)
         {
-            if (fontData.glyphs[i].u == uChar)
+            if (fontData.glyphs[i] && fontData.glyphs[i].u == uChar)
             {
                 return [0,0,i,fontData.glyphs[i].a];
             }
@@ -129,7 +152,7 @@ var mySvgFont = {
         {
             var path = (document.createElementNS)?
                 document.createElementNS("http://www.w3.org/2000/svg","path"):
-                document.createElement("svg:path");
+                document.createElement("path");
             if (path)
             {
                 var gX = dx + ((gData[i] == undefined)? 0 : gData[i]);
@@ -143,6 +166,7 @@ var mySvgFont = {
     appendSvgText: function(parent, fontName, size, text, color)
     {
         if (text.length == 0) return;
+		if (!mySvgFont.hasFontData(fontName)) return;
         if (!document.getElementById("AdobeSVG"))
         {
             try
@@ -160,7 +184,7 @@ var mySvgFont = {
         }
         var svg = (document.createElementNS)? 
             document.createElementNS("http://www.w3.org/2000/svg", "svg") : 
-			document.createElement("svg:svg");
+			document.createElement("svg");
         if (svg)
         {
             if (mySvgFont.renderSvg(svg, fontName, text, size, color))

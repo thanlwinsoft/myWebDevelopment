@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+Most computers do not have a  Myanmar Unicode Input Method installed. 
+Even if people have one, they may not be familiar with typing in Myanmar. 
+To get around these problems you can use a visual keyboard like this.
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Dynamic SVG font</title>
+<script type="text/javascript" src="../mySource.js"></script>
+<script type="text/javascript" src="../xmlRequest.js"></script>
+<script type="text/javascript" src="../svg/Padauk.js"></script>
+<script type="text/javascript" src="../svg/PadaukRendered.js"></script>
+<script type="text/javascript" src="../svg/mySvgFont.js"></script>
+
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+</head>
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<body id='body' >
+<h1>Dynamic SVG font</h1>
+
+<!--  onclick="this.innerHTML='';" title="click to clear" -->
+<p id="svgContainer"></p>
+<script type="text/javascript">
+<!--
+var svgContainer = document.getElementById("svgContainer");
+mySvgFont.appendSvgText(svgContainer, "Padauk", 18, "မြန်မာစကား။ ", "blue");
+mySvgFont.appendSvgText(svgContainer, "Padauk", 14, "အက္ခရာ။ ");
+mySvgFont.appendSvgText(svgContainer, "Padauk", 12, "ကော်ဖီ။ ","red");
+-->
+</script>
+</p>
+<p>You browser must support SVG for this example to work. It is known to work in Firefox and Opera.
+For more details <a href="javascript:getSourceFile('source','mySvgFontTest.html')">View the Source HTML, CSS</a> and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Javascript</a> for instructions on how to use in your own pages. In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, which will automatically convert Myanmar Unicode text to SVG when appropriate. </p></p>
+<hr />
+<p>You are free to use this on your own website without charge or waranty, though it would be appreciated you could add a link of acknowledgement to 
+<a href="http://www.thanlwinsoft.org/"><img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/>www.thanlwinsoft.org</a>.
+</p>
+<div class="source" style="display:none;">
+<h2>Page HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source" style="display:none;">
+<h2>Keyboard HTML Source</h2>
+<pre id="keySrc" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>CSS Source</h2>
+<pre id="cssPre" style="display:none;">
+</pre>
+</div>
+</body>
+</html>
