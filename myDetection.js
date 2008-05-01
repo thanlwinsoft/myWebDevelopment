@@ -66,7 +66,15 @@ function mySupportedMsg(myIconPath)
 " Unicode <span class='myText'>ကို သုံးလို့ ရတဲ့အတွက် ဝမ်းမြောက်ပါတယ်။</span></p>";
 }
 
-
+var myCommon = {
+    createElement : function(eName)
+    {
+        if (document.createElementNS)
+            return document.createElementNS(
+                "http://www.w3.org/1999/xhtml", eName);
+        return document.createElement(eName);
+    }
+};
 
 /**
 * Test the browser for Myanmar Unicode Support.
@@ -334,62 +342,14 @@ var myUnicode = {
             notice.removeChild(notice.childNodes[i]);
         }
     },
-    /** creates a div overlay ontop of a text input/textarea for displaying images of the input contents */
+    /** creates a div overlay ontop of a text input/textarea for displaying
+    * images of the input contents 
+    */
     addOverlay : function (node)
     {
         if (myKeyboardMover != undefined)
         {
-            if (node.previousSibling && node.previousSibling.nodeType == 1 &&
-                node.previousSibling.getAttribute('id') && 
-                new String(node.previousSibling.getAttribute('id')).indexOf("myOverlay") > -1)
-            {
-                //alert("overlay exists");
-                return; // already exists
-            }
-            var inputDim = myKeyboardMover.initItemPos(node);
-            var docFrag = document.createDocumentFragment();
-            var overlay;
-            if (document.createElementNS) overlay = document.createElementNS("http://www.w3.org/1999/xhtml","div");
-            else overlay = document.createElement("div");
-            myUnicode.overlayCount++;
-            overlay.setAttribute("id", "myOverlay" + myUnicode.overlayCount);
-			//overlay.setAttribute("onclick","myK.updateOverlay(document.getElementById('myOverlay" + 
-			//		myUnicode.overlayCount + "').nextSibling)");
-            var index = 0;
-            var inputNodes = document.getElementsByTagName(node.nodeName.toLowerCase());
-            while (inputNodes.item(index) != node && index < inputNodes.length) index++;
-            overlay.onclick = function() {
-                myK.updateOverlay(this.nextSibling);
-                myK.switchInputByIndex(node.nodeName.toLowerCase(), index); node.focus();
-            };
-			if (overlay.style)// ie ignores style attributes set above
-			{
-				overlay.style.left = inputDim.x + "px";
-				overlay.style.top = inputDim.y + "px";
-				overlay.style.width = inputDim.width + "px";
-				overlay.style.height = inputDim.height + "px";
-				overlay.style.position = "absolute";
-				
-				if (node.backgroundColor)
-					overlay.style.backgroundColor = node.backgroundColor;
-				else
-					overlay.style.backgroundColor = "white";
-				overlay.style.borderStyle = "solid";
-				overlay.style.borderWidth = "1px";
-				
-				overlay.style.overflow = "auto";
-                overlay.id = "myOverlay" + myUnicode.overlayCount;
-			}
-			//overlay.style.display = "none";
-            if (node.value)
-            {
-                var value = document.createTextNode(node.value);
-                overlay.appendChild(value);
-            }
-            docFrag.appendChild(overlay);
-            var parent = node.parentNode;
-            parent.insertBefore(docFrag, node);
-            myUnicode.parseText(node.previousSibling.firstChild, new String(node.value));
+            myK.addOverlay(node);
         }
         //else alert("no myOverlay");
     },
@@ -546,10 +506,7 @@ var myUnicode = {
                     {
                         
                         codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
-                        var img;
-                        if (document.createElementNS) img =
-                            document.createElementNS("http://www.w3.org/1999/xhtml","img");
-                        else img = document.createElement("img");
+                        var img = myCommon.createElement("img");
                         img.setAttribute("src", myUnicode.imgPrefix + myUnicode.fontData + 
 									    "_" + fontSize +
 									    "/" +
