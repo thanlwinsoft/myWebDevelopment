@@ -76,6 +76,75 @@ var myCommon = {
     }
 };
 
+function MyNodeParser(node) {
+    this.node = node;
+}
+
+MyNodeParser.prototype.parse = function()
+{
+    var node = this.node;
+    if (node == undefined || node.tagName == undefined || node.nodeType != 1) return;
+        myUnicode.nodeCount++;
+        var tag = node.tagName.toLowerCase();
+        if (node.tagName.toLowerCase() == "input")
+        {
+                if (node.getAttribute("type").toLowerCase() == "text")
+                {
+                    myUnicode.addOverlay(node);
+                }
+                return; // don't mess with fields
+        }
+        else if (node.tagName.toLowerCase() == "textarea")
+        {
+             myUnicode.addOverlay(node);
+             return; // don't mess with fields
+        }
+        else if (node.tagName.toLowerCase() == "svg")
+        {
+             return; // already processed
+        }        
+        else if (node.hasChildNodes())
+        {
+            
+            var children = node.childNodes;
+            var nodeCount = children.length;
+            for (var i = 0; i < children.length; i++)
+            {
+                var child = children.item(i);
+                if (child.nodeType == 3)//Node.TEXT_NODE
+                {
+                    myUnicode.parseText(child, new String(child.data));
+                }
+                else if (child.nodeType == 1)//Node.ELEMENT_NODE
+                {
+                    // nodes with ids can be parsed in separate thread to avoid timeouts on long documents
+                    myUnicode.queueNode(new MyNodeParser(child));
+                }
+                else if (child.nodeType == 8) {} // ignore comments
+                else if (child.nodeType == 7) {} // ignore processing instructions
+                else
+                {
+                    alert("node " + child + " type" + child.nodeType);
+                }
+                if (node.childNodes.length > nodeCount)
+                {
+                    children = node.childNodes;
+                    // nodes were inserted
+                    i += children.length - nodeCount;
+                    nodeCount = children.length;
+                }
+                else if (node.childNodes.length < nodeCount)
+                {
+                    alert(nodeCount + " lost nodes " + node.childNodes.length);
+                }
+                else
+                {
+                    children = node.childNodes;
+                }
+            }
+        }
+}
+
 /**
 * Test the browser for Myanmar Unicode Support.
 * Call this function from inside a script element inside the body of your web page.
@@ -83,6 +152,7 @@ var myCommon = {
 */
 var myUnicode = {
     // config variables
+    fontNames : "PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode'",
     fontData  : "PadaukOT",// can be overridden
     svgFont : "Padauk",
     codeStart : 4096,// u1000 - inclusive
@@ -104,11 +174,13 @@ var myUnicode = {
     overlayCount : 0,
     currentNode : null,
     nodeCount : 0,
-    threadStart : 0,
-    threadEnd : 0,
+//    threadStart : 0,
+//    threadEnd : 0,
     isIe: false,
     isGecko: false,
     retryCount: 0,
+    queue : new Array(),
+    debug : function() { return document.getElementById("myDebug");},
     /** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
     * message to the user.
@@ -146,16 +218,16 @@ var myUnicode = {
 	    document.body.appendChild(widthTest);
 
             myW2 = document.createElement("span");
-            myW2.style.fontFamily = 'Myanmar3, PadaukOT, Padauk, Parabaik';
+            myW2.style.fontFamily = myUnicode.fontNames;
             myW2.setAttribute("id","myWidth2");
             widthTest.appendChild(myW2);
             myW2.innerHTML = "ကက";
 
             myW1 = document.createElement("span");
-            myW1.style.fontFamily = 'Myanmar3, PadaukOT, Padauk, Parabaik';
+            myW1.style.fontFamily = myUnicode.fontNames;
             myW1.setAttribute("id","myWidth1");
             widthTest.appendChild(myW1);
-            myW1.innerHTML = "က္က";
+            myW1.innerHTML = "က္ကြ";
         }
         var myW1Width = 0;
         var myW2Width = 0;
@@ -253,8 +325,7 @@ var myUnicode = {
             }
             myUnicode.createNotice();
             myUnicode.nodeCount = 0;
-            myUnicode.threadStart++;
-            setTimeout("myUnicode.parseDocWorker()", 5);
+            myUnicode.parseDocWorker();
         }
     },
     /** normal entry port to convert just part of a document from unicode to 
@@ -266,34 +337,13 @@ var myUnicode = {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
             myUnicode.createNotice();
-            myUnicode.threadStart++;
             myUnicode.parseNode(node);
-            myUnicode.checkThreads();
         }
     },
     /** call back from parseDoc */
     parseDocWorker : function ()
     {
             myUnicode.parseNode(document.getElementsByTagName("body").item(0));
-            myUnicode.checkThreads();
-    },
-    /** checks the number of threads waiting to run via setTimeout */
-    checkThreads : function()
-    {
-        myUnicode.threadEnd++;
-        if (myUnicode.threadEnd >= myUnicode.threadStart)
-        {
-            //alert("Threads finished" + myUnicode.threadEnd + "/" +myUnicode.threadStart);
-            myUnicode.threadStart = 0;
-            myUnicode.threadEnd = 0;
-            myUnicode.hideNotice();
-        }
-        else
-        {
-            /** show that something is still hapenning */
-            var notice = document.getElementById("myParseNotice");
-            notice.appendChild(document.createTextNode("."));
-        }
     },
     /** createNotice at top (bottom if fixed is supported) while conversion is 
     * running */
@@ -338,11 +388,13 @@ var myUnicode = {
     hideNotice : function ()
     {
         var notice = document.getElementById('myParseNotice');
-        if (notice) notice.style.display = "none";
-        
-        for (var i = 2; i < notice.childNodes.length; i++)
+        if (notice) 
         {
-            notice.removeChild(notice.childNodes[i]);
+            notice.style.display = "none";
+            for (var i = 2; i < notice.childNodes.length; i++)
+            {
+                notice.removeChild(notice.childNodes[i]);
+            }
         }
     },
     /** creates a div overlay ontop of a text input/textarea for displaying
@@ -356,79 +408,36 @@ var myUnicode = {
         }
         //else alert("no myOverlay");
     },
-    
-    /** parse an element node and all its children - may be called by directly or recursively */
-    parseNode : function (node)
+    parseNextNode :function()
     {
-        if (node == undefined || node.tagName == undefined || node.nodeType != 1) return;
-        myUnicode.nodeCount++;
-        if (node.tagName.toLowerCase() == "input")
+        if (myUnicode.queue.length > 0)
         {
-                if (node.getAttribute("type").toLowerCase() == "text")
-                {
-                    myUnicode.addOverlay(node);
-                }
-                return; // don't mess with fields
+            var nParser = myUnicode.queue[0];
+            nParser.parse();
+            myUnicode.queue.shift();
+            if (myUnicode.queue.length %10 == 0)
+                setTimeout("myUnicode.parseNextNode()",1);
+            else 
+                myUnicode.parseNextNode();
         }
-        else if (node.tagName.toLowerCase() == "textarea")
+        else
         {
-             myUnicode.addOverlay(node);
-             return; // don't mess with fields
-        }
-        else if (node.tagName.toLowerCase() == "svg")
-        {
-             return; // already processed
-        }        
-        else if (node.hasChildNodes())
-        {
-            
-            var children = node.childNodes;
-            var nodeCount = children.length;
-            for (var i = 0; i < children.length; i++)
-            {
-                var child = children.item(i);
-                if (child.nodeType == 3)//Node.TEXT_NODE
-                {
-                    myUnicode.parseText(child, new String(child.data));
-                }
-                else if (child.nodeType == 1)//Node.ELEMENT_NODE
-                {
-                    // nodes with ids can be parsed in separate thread to avoid timeouts on long documents
-                    // ie6 doesn't support hasAttribute
-                    var childId;
-                    if (child.hasAttribute)
-                    {
-                         if (child.hasAttribute("id")) childId = child.getAttribute("id");
-                        else childId = "";
-                    }
-                    else
-                    {
-                        childId = child.id;
-                    }
-                    if (childId != undefined && childId.length > 0 && child.hasChildNodes() && child.childNodes.length > 2) 
-                    {
-                        myUnicode.threadStart++;
-                        setTimeout("myUnicode.parseNode(document.getElementById('" + childId + "'));myUnicode.checkThreads();", 
-                                        10 + myUnicode.threadStart * 10);
-                    }
-                    else myUnicode.parseNode(child);
-                }
-                else if (child.nodeType == 8) {} // ignore comments
-                else if (child.nodeType == 7) {} // ignore processing instructions
-                else
-                {
-                    alert("node " + child + " type" + child.nodeType);
-                }
-                children = node.childNodes;
-                if (children.length > nodeCount)
-                {
-                    // nodes were inserted
-                    i += children.length - nodeCount;
-                    nodeCount = children.length;
-                }
-            }
+            myUnicode.hideNotice();
         }
     },
+    /** parse an element node and all its children */
+    parseNode : function (node)
+    {
+        myUnicode.queueNode(new MyNodeParser(node));
+    },
+    /** callback from MyNodeParser */
+    queueNode : function (nodeParser)
+    {
+        myUnicode.queue.push(nodeParser);
+        if (myUnicode.queue.length == 1)
+            myUnicode.parseNextNode();
+    },
+
     /** tests whether the code point is in the range where images may be needed */
     inRange : function(code)
     {

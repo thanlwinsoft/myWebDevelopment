@@ -111,7 +111,7 @@ use encoding "utf8";
 @consonants = $allConsonants;
 
 @consonants = (
-("\x{25cc}"),
+(""),
 ("\x{1000}"),#KA,shan
 ("\x{1001}"),#KHA,shan
 ("\x{1002}"),#GA,shan ga

@@ -23,7 +23,7 @@ var mySvgFont = {
             return false;
         }
     },
-    renderSvg: function(svg, fontName, text, size, color)
+    renderSvg: function(svg, fontName, text, size, color, background)
     {
         var fontData;
         var renderingData;
@@ -50,7 +50,7 @@ var mySvgFont = {
             document.createElement("metadata");
         if (metadata && metadata.appendChild)
         {
-            scaleG.appendChild(metadata);
+            svg.appendChild(metadata);
             var titleText = document.createTextNode(text);
             if (titleText)
             {
@@ -132,16 +132,18 @@ var mySvgFont = {
         var widthPx = width * scaling;
         var heightPx = scaledLineHeight * lineCount;
         // background
-        var rect = (document.createElementNS)?
-          document.createElementNS("http://www.w3.org/2000/svg","rect"):
-            document.createElement("rect");
-        rect.setAttribute("x", 0);
-        rect.setAttribute("y", 0);
-        rect.setAttribute("width", widthPx);
-        rect.setAttribute("height", heightPx);
-        rect.setAttribute("fill", "white");
-        svg.appendChild(rect);
-        
+        if (background != undefined)
+        {
+            var rect = (document.createElementNS)?
+              document.createElementNS("http://www.w3.org/2000/svg","rect"):
+                document.createElement("rect");
+            rect.setAttribute("x", 0);
+            rect.setAttribute("y", 0);
+            rect.setAttribute("width", widthPx);
+            rect.setAttribute("height", heightPx);
+            rect.setAttribute("fill", background);
+            svg.appendChild(rect);
+        }
         svg.appendChild(scaleG);
         svg.setAttribute("width", widthPx);
         svg.setAttribute("height", heightPx);

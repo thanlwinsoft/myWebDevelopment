@@ -45,6 +45,7 @@ keyboardSrc : "Keyboard.xml",
 selectionColor : "#c0c0ff",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
+debug : function() { return document.getElementById("myDebug");},
 currentSyllable : new Array("", "", "", "", "", "", "", "",
                             "", "", "", "", "", "", ""),
 stackableCons : new Array('u1000', 'u1001', 'u1002', 'u1003', 
@@ -71,7 +72,11 @@ positionNodes : new Array(['kinzi'], "", "", ['medYa', 'medRa'],
 initKeyboard: function(path, lang)
 {
     myK.pathStem = path;
-    myK.registerKeyboard(lang);
+    var langArray = lang;
+    alert(typeof lang);
+    if (typeof lang == "string")
+        langArray = new Array(lang);
+    myK.registerKeyboard(langArray);
 },
 
 /**
@@ -303,14 +308,6 @@ hideOverlay : function(inputElement)
 {
   if (myUnicode != undefined && myUnicode.isSupported == false)
   {
-/*
-    // see if there is an overlay that should have some text added
-    var overlay = inputElement.previousSibling;
-    if (overlay && overlay.getAttribute('id') && 
-        new String(overlay.getAttribute('id')).indexOf("myOverlay") > -1)
-    {
-        overlay.style.display = "none";
-    }*/
   }
 },
 
@@ -1186,7 +1183,7 @@ toUnicodes: function(text)
     {
         if (myK.requestC.readyState == 4)
         {
-            appendKeyboard(myK.requestC.responseText);
+            myK.appendKeyboard(myK.requestC.responseText);
         }
     },
     
@@ -1245,6 +1242,7 @@ toUnicodes: function(text)
     },
     getCursorPosition : function()
     { 
+/*
         var cursorDisplay = document.getElementById('cursor');
         var inputObject = myK.inputNode;//document.getElementById(myK.inputId);
         if (!inputObject) 
@@ -1253,60 +1251,80 @@ toUnicodes: function(text)
             cursorDisplay.innerHTML = '-';
           return;
         }
+*/
         this.selectionStart = -1;
         this.selectionEnd = -1;
-        if (document.selection && inputObject.selectionStart == undefined)
+        var selObj = window.getSelection();
+        if (myUnicode && myUnicode.isSupported == false)
         {
-            inputObject.focus();
-			var orig = inputObject.value;
-            var range = document.selection.createRange();
-			var oldRange = range.text;
-            if (range.parentElement() != inputObject)
+            var innerDiv = document.getElementById(myK.inputId + "_innerDiv");
+            if (selObj.rangeCount)
             {
-                if (cursorDisplay)
-                    cursorDisplay.innerHTML = '-';
-                return;
+                var r = selObj.getRangeAt(0);
+                if (r.startContainer == myK.inputNode)
+                {
+                    this.selectionStart = r.startOffset;
+                    if (r.endContainer == myK.inputNode)
+                    {
+                        this.selectionStart = r.endOffset;
+                    }
+                    else
+                    {
+                        this.selectionEnd = myK.inputNode.value.length;
+                    }
+                }
             }
-            var prefixRange = inputObject.createTextRange();
-			try
-			{
-				range.text= "\u200C";// Assume this won't occur naturally
-				var pos = inputObject.value.indexOf('\u200C');
-				inputObject.value = orig;//restore original value
-				//prefixRange = prefixRange.setEndPoint("EndToStart", range);
-				//var suffixRange = inputObject.createTextRange();
-				//suffixRange = suffixRange.setEndPoint("StartToEnd", range);
-				this.selectionStart = pos;
-				this.selectionEnd = pos + oldRange.length;
-			}
-			catch (e)
-			{
-				this.selectionEnd = this.selectionStart = inputObject.value.length;
-			}
+            else
+            {
+                if (myK.inputNode)
+                    this.selectionStart = this.selectionEnd = myK.inputNode.myK_cursor;
+            }
         }
         else
         {
-            try
+
+            if (document.selection && inputObject.selectionStart == undefined)
             {
-                this.selectionStart = inputObject.selectionStart;
-                this.selectionEnd = inputObject.selectionEnd;        
+                myK.inputNode.focus();
+			    var orig = myK.inputNode.value;
+                var range = document.selection.createRange();
+			    var oldRange = range.text;
+                if (range.parentElement() != myK.inputNode)
+                {
+                    return;
+                }
+                var prefixRange = myK.inputNode.createTextRange();
+			    try
+			    {
+				    range.text= "\u200C";// Assume this won't occur naturally
+				    var pos = inputObject.value.indexOf('\u200C');
+				    inputObject.value = orig;//restore original value
+				    //prefixRange = prefixRange.setEndPoint("EndToStart", range);
+				    //var suffixRange = inputObject.createTextRange();
+				    //suffixRange = suffixRange.setEndPoint("StartToEnd", range);
+				    this.selectionStart = pos;
+				    this.selectionEnd = pos + oldRange.length;
+			    }
+			    catch (e)
+			    {
+				    this.selectionEnd = this.selectionStart = myK.inputNode.value.length;
+			    }
             }
-            catch (e)
+            else
             {
-                this.selectionStart = this.selectionEnd = inputObject.myK_cursor;
+                try
+                {
+                    this.selectionStart = myK.inputNode.selectionStart;
+                    this.selectionEnd = myK.inputNode.selectionEnd;
+                }
+                catch (e)
+                {
+                    this.selectionStart = this.selectionEnd = myK.inputNode.myK_cursor;
+                }
             }
         }
 
-        if (this.selectionStart > -1)
-        {
-          if (cursorDisplay)
-            cursorDisplay.innerHTML = ' ' + this.selectionStart + ':' + this.selectionEnd;
-        }
-        else
-        {
-          if (cursorDisplay)
-            cursorDisplay.innerHTML = '';
-        }
+        if (myK.debug()) myK.debug().innerHTML = "range:" + this.selectionStart + ':' + this.selectionEnd;
         return this;
     },
     setCursorPosition : function(start, end)
@@ -1319,10 +1337,10 @@ toUnicodes: function(text)
         {
             if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();
             var range = myK.inputNode.createTextRange();
-	        range.move('character', start); 
+            range.move('character', start); 
             if (end > start)
                 range.moveEnd('character', end - start);
-	        range.select();
+            range.select();
         }
         else
         {
@@ -1335,6 +1353,10 @@ toUnicodes: function(text)
                 } catch (e) {}
             }
         }
+        // TODO implement using 
+        // var range = document.createRange();
+        //range.setStart(startNode, startOffset);
+        //range.setEnd(endNode, endOffset);
         myK.inputNode.myK_cursor = start;
     },
     /** add overlay to an input box
@@ -1482,7 +1504,7 @@ var myKeyboardMover = {
     
     initInputPos:function()
     {
-        var inputElement = document.getElementById(myKeyboardMover.inputId + "_innerDiv");
+        var inputElement = document.getElementById(myKeyboardMover.inputId + "_outerDiv");
         myKeyboardMover.input = myKeyboardMover.initItemPos(inputElement);
     },
     
@@ -1575,7 +1597,7 @@ var myKeyboardMover = {
         var deltaX = x - myKeyboardMover.moveStartX;
         var deltaY = y - myKeyboardMover.moveStartY;
         var keyboardDiv = document.getElementById(myKeyboardMover.keyboardId);
-        
+        if (!keyboardDiv) return;
         var xPos = myKeyboardMover.dialog.x + deltaX;
         var yPos = myKeyboardMover.dialog.y + deltaY;
         if (yPos < 0) yPos = 0;
@@ -1599,6 +1621,8 @@ var myKeyboardMover = {
         if (yPos == undefined) yPos = 0;
         keyboardDiv.style.left = xPos + "px";
         keyboardDiv.style.top = yPos + "px";
+//        try { 
+            window.getSelection().removeAllRanges(); //} catch (e) {}
 /*        window.status = " [" + myKeyboardMover.dialog.x + "," + myKeyboardMover.dialog.y + " " + 
             myKeyboardMover.dialog.width + "," + myKeyboardMover.dialog.height + "] " + 
             xPos + "," + yPos + " w" + windowDim.width + "h" + windowDim.height;*/
@@ -1610,7 +1634,6 @@ var myKeyboardMover = {
         if (window.event) evt = window.event;
         else evt = e;
         myKeyboardMover.moveTo(evt.clientX, evt.clientY);
-        if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();
     },
     
     moveBelowInput:function()
@@ -1759,9 +1782,13 @@ var myKeyMapper = {
                 //alert(lookup);
             }
         }
-        
+
         if (myK.inputNode) 
         {
+            // don't interpret events if the input is still visible
+            if (myK.inputNode.style.display != "none")
+                return true;
+
             var oldValue = String(myK.inputNode.value);
             var cursor = myK.getCursorPosition();
             var newText = "";

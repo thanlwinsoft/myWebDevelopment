@@ -34,10 +34,9 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 <div class="keyboard" id="my_keyboard" style="display:none;"
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
-<div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
+<div  id='myKeyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
 <p style="float:left; display:inherit;" id="myKeyboardLayoutOn" class="keyboardTab">
-<span style="background-color: white;" onclick="myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');this.style.backgroundColor='white';this.nextSibling.style.backgroundColor='inherit';" title="Show keyboard">ခလုပ်ကွက်
-</span><span onclick="myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');this.style.backgroundColor='white';this.previousSibling.style.backgroundColor='inherit';" title="Show alphabet">အက္ခရာ</span>
+<span style="background-color: white;" onclick="myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');this.style.backgroundColor='white';this.nextSibling.style.backgroundColor='inherit';" title="Show keyboard">ခလုပ်ကွက်</span><span onclick="myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');this.style.backgroundColor='white';this.previousSibling.style.backgroundColor='inherit';" title="Show alphabet">အက္ခရာ</span>
 </p>
 <p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('my')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
 </div>
@@ -50,12 +49,12 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 </colgroup>
 <!-- 2nd arg is order in syllable -->
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_u1000" href="javascript:myK.typeChar('\u1000', 1)">က</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1000" href="javascript:myK.typeChar('\u1000', 1)">_က_</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1001" href="javascript:myK.typeChar('\u1001', 1)">ခ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1002"  href="javascript:myK.typeChar('\u1002', 1)">ဂ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1003"  href="javascript:myK.typeChar('\u1003', 1)">ဃ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1004"  href="javascript:myK.typeChar('\u1004', 1)">င</a></td>
-<td class="keyboard"><a class="keyboard" id="my_kinzi" href="javascript:myK.typeChar('\u1004\u103a\u1039', 0)">င်္◌</a></td>
+<td class="keyboard"><a class="keyboard" id="my_kinzi" href="javascript:myK.typeChar('\u1004\u103a\u1039', 0)">င်္</a></td>
 </tr>
 <tr>
 <td class="keyboard"><a class="keyboard" id="my_u1005"  href="javascript:myK.typeChar('\u1005', 1)">စ</a></td>
@@ -111,11 +110,11 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <colgroup><col span="5" class="vowels"/>
 <col span="1" class="wideCol" /></colgroup>
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_medYa" href="javascript:myK.typeChar('\u103b', 3)">◌ျ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_medRa" href="javascript:myK.typeChar('\u103c', 3)">◌ြ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_medWa" href="javascript:myK.typeChar('\u103d', 4)">◌ွ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_medHa" href="javascript:myK.typeChar('\u103e', 5)">◌ှ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_killer" href="javascript:myK.typeChar('\u103A', 11)">◌်</a></td>
+<td class="keyboard"><a class="keyboard" id="my_medYa" href="javascript:myK.typeChar('\u103b', 3)">ျ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_medRa" href="javascript:myK.typeChar('\u103c', 3)">ြ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_medWa" href="javascript:myK.typeChar('\u103d', 4)">ွ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_medHa" href="javascript:myK.typeChar('\u103e', 5)">ှ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_killer" href="javascript:myK.typeChar('\u103A', 11)">်</a></td>
 <td class="keyButton"><a class="keyboard" id="my_hideKeyboard" href="javascript:myK.hideKeyboard('my')">ဝှက်ပါ</a></td>
 </tr>
 <tr>
@@ -127,20 +126,20 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <td class="keyboard"><a class="keyboard" id="my_u102a" href="javascript:myK.typeChar('\u102a', 1)">ဪ</a></td>
 </tr>
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_u102d" href="javascript:myK.typeChar('\u102d', 7)">◌ိ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u102e" href="javascript:myK.typeChar('\u102e', 7)">◌ီ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u102f" href="javascript:myK.typeChar('\u102f', 8)">ု,◌ု</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u1030" href="javascript:myK.typeChar('\u1030', 8)">ူ,◌ူ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u102d" href="javascript:myK.typeChar('\u102d', 7)">ိ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u102e" href="javascript:myK.typeChar('\u102e', 7)">ီ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u102f" href="javascript:myK.typeChar('\u102f', 8)">◌ု</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1030" href="javascript:myK.typeChar('\u1030', 8)">ူ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1031" href="javascript:myK.typeChar('\u1031', 6)">​ေ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1029" href="javascript:myK.typeChar('\u1029', 1)">ဩ</a></td>
 </tr>
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_u1032" href="javascript:myK.typeChar('\u1032', 7)">◌ဲ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u1036" href="javascript:myK.typeChar('\u1036', 10)">◌ံ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u1037" href="javascript:myK.typeChar('\u1037', 12)">◌့</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u1038" href="javascript:myK.typeChar('\u1038', 13)">◌း</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u102c" href="javascript:myK.typeChar('\u102c', 9)">◌ာ</a></td>
-<td class="keyboard"><a class="keyboard" id="my_u102b" href="javascript:myK.typeChar('\u102b', 9)">◌ါ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1032" href="javascript:myK.typeChar('\u1032', 7)">ဲ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1036" href="javascript:myK.typeChar('\u1036', 10)">ံ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1037" href="javascript:myK.typeChar('\u1037', 12)">့</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1038" href="javascript:myK.typeChar('\u1038', 13)">း</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u102c" href="javascript:myK.typeChar('\u102c', 9)">ာ</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u102b" href="javascript:myK.typeChar('\u102b', 9)">ါ</a></td>
 
 </tr>
 <tr>
@@ -173,7 +172,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <div id="my_keyboardLayoutUnshifted" style="clear: both;" onmouseover="myKeyMapper.setupLayoutKeys(this,false);">
 <table class="keyboard">
 <tr>
-<td style="width:2em;"><span class="my">◌</span><span class="en">`</span></td>
+<td style="width:2em;"><span class="my">◌္</span><span class="en">`</span></td>
 <td style="width:2em;"><span class="my">၁</span><span class="en">1</span></td>
 <td style="width:2em;"><span class="my">၂</span><span class="en">2</span></td>
 <td style="width:2em;"><span class="my">၃</span><span class="en">3</span></td>
@@ -210,16 +209,16 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <table class="keyboard">
 <tr>
 <td style="width:3.5em;" class="special"><span class="en">Caps</span></td>
-<td style="width:2em;"><span class="my">​◌ေ</span><span class="en">a</span></td>
-<td style="width:2em;"><span class="my">◌ျ</span><span class="en">s</span></td>
-<td style="width:2em;"><span class="my">◌ိ</span><span class="en">d</span></td>
-<td style="width:2em;"><span class="my">◌်</span><span class="en">f</span></td>
-<td style="width:2em;"><span class="my">◌ါ</span><span class="en">g</span></td>
+<td style="width:2em;"><span class="my">​‌ေ</span><span class="en">a</span></td>
+<td style="width:2em;"><span class="my">ျ</span><span class="en">s</span></td>
+<td style="width:2em;"><span class="my">ိ</span><span class="en">d</span></td>
+<td style="width:2em;"><span class="my">်</span><span class="en">f</span></td>
+<td style="width:2em;"><span class="my">ါ</span><span class="en">g</span></td>
 <td style="width:2em;"><span class="my">့</span><span class="en">h</span></td>
-<td style="width:2em;"><span class="my">◌ြ</span><span class="en">j</span></td>
-<td style="width:2em;"><span class="my">◌ု</span><span class="en">k</span></td>
-<td style="width:2em;"><span class="my">◌ူ</span><span class="en">l</span></td>
-<td style="width:2em;"><span class="my">◌း</span><span class="en">;</span></td>
+<td style="width:2em;"><span class="my">ြ</span><span class="en">j</span></td>
+<td style="width:2em;"><span class="my">ု</span><span class="en">k</span></td>
+<td style="width:2em;"><span class="my">ူ</span><span class="en">l</span></td>
+<td style="width:2em;"><span class="my">း</span><span class="en">;</span></td>
 <td style="width:2em;"><span class="my">ဒ</span><span class="en">'</span></td>
 <td style="width:3.8em;" class="special"><span class="en">Enter</span></td>
 </tr>
@@ -235,7 +234,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <td style="width:2em;"><span class="my">ည</span><span class="en">n</span></td>
 <td style="width:2em;"><span class="my">ာ</span><span class="en">m</span></td>
 <td style="width:2em;"><span class="my">ယ</span><span class="en">,</span></td>
-<td style="width:2em;"><span class="my">◌.</span><span class="en">.</span></td>
+<td style="width:2em;"><span class="my">.</span><span class="en">.</span></td>
 <td style="width:2em;"><span class="my">။</span><span class="en">/</span></td>
 <td style="width:5.1em;" class="special"><span class="en">Shift</span></td>
 </tr>
@@ -294,9 +293,9 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <tr>
 <td style="width:3.5em;" class="special"><span class="en">Caps</span></td>
 <td style="width:2em;"><span class="my">​ဗ</span><span class="en">A</span></td>
-<td style="width:2em;"><span class="my">◌ှ</span><span class="en">S</span></td>
+<td style="width:2em;"><span class="my">ှ</span><span class="en">S</span></td>
 <td style="width:2em;"><span class="my">ီ</span><span class="en">D</span></td>
-<td style="width:2em;"><span class="my">င်္◌</span><span class="en">F</span></td>
+<td style="width:2em;"><span class="my">င်္</span><span class="en">F</span></td>
 <td style="width:2em;"><span class="my">ွ</span><span class="en">G</span></td>
 <td style="width:2em;"><span class="my">ံ</span><span class="en">H</span></td>
 <td style="width:2em;"><span class="my">ဲ</span><span class="en">J</span></td>

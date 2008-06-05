@@ -143,17 +143,17 @@ a.closeWindow , a.closeWindow:link, a.closeWindow:visited, a.closeWindow:active{
 
 .my, a.keyboard:link, a.keyboard:visited, a.keyboard:active, div.keyboard p.keyboardTab {
   text-decoration: none;
-  font-family: Padauk, Myanmar3, Myanmar2;
+  font-family: PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';
   font-weight: bold;
 }
 
 input, textarea {
-  font-family: Padauk, Myanmar3, Myanmar2;
+  font-family: PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';
 }
 
 /** for Unicode support detection*/
 .myUniTest {
-        font-family: Padauk, Myanmar3, Myanmar2;
+        font-family: PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';
         font-size: 1em; /* don't make it so small that rounding errors give problems */
         color: white; /* should be same as background to make it invisible */
 }
@@ -163,7 +163,7 @@ input, textarea {
 }
 
 .myOverlay {/*ignored by IE on DHTML */
-    font-family: Padauk, Myanmar3, Myanmar2;
+    font-family: PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';
     z-index: 9; /* just below keyboard*/
     position: absolute;
 	
@@ -183,7 +183,10 @@ table.keyboard td { background-color: #707070; width: 2em; height: 2em; padding:
 table.keyboard td.special { background-color: #505050; text-align: center; 
     font-weight: bold; cursor: default; }
 table.keyboard span.en { font-family: sans-serif; }
-table.keyboard span.my { font-family: padauk, myanmar3; font-weight: bold; float: right; color: #f0f0ff; }
+table.keyboard span.my { 
+    font-family: PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';
+    font-weight: bold; float: right; color: #f0f0ff; 
+}
 
 div.keyboard p.keyboardTab { 
     margin: 2px; 
@@ -198,7 +201,7 @@ div.myKeyInput {
     border-radius: 5px;
     padding: 5px;
     -moz-border-radius: 5px;
-    display: inline-block;
+    display: block;
     background-color: #aaf;
 }
 
