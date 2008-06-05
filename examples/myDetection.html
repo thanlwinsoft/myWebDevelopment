@@ -27,7 +27,7 @@ Note: the <span>s must be before the script, so they are available as the page l
 <title>Test Myanmar Unicode Support</title>
 <style>
     .myUniTest {
-        font-family: Padauk, Myanmar3, Myanmar2;
+        font-family: Myanmar3, Padauk, Parabaik;
         font-size: 1em; /* don't make it so small that rounding errors give problems */
         color: white; /* should be same as background to make it invisible */
     }
@@ -35,7 +35,7 @@ Note: the <span>s must be before the script, so they are available as the page l
         color: red;
     }
     .myText {
-        font-family: Padauk, Myanmar3, Myanmar2;
+        font-family: Padauk, Myanmar3, Parabaik;
         font-size: 1em;
     }
     .myTextMsg {
@@ -63,20 +63,18 @@ Note: the <span>s must be before the script, so they are available as the page l
 <script type="text/javascript" src="../myDetection.js"></script>
 <script type="text/javascript" src="../xmlRequest.js"></script>
 <script type="text/javascript" src="../mySource.js"></script>
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
 <link type="text/css" rel="stylesheet" href="../mySource.css"/>
 </head>
 <body onload="myUnicode.initParse('../');">
 
-<h1>Myanmar Unicode Test<span class="myUniTest" id="myWidth2">ကက</span>
-<span class="myUniTest" id="myWidth1">က္က</span></h1>
-
+<h1>Myanmar Unicode Test</h1>
+<!--
+<span class="myUniTest" id="myWidth2">ကက</span>
+<span class="myUniTest" id="myWidth1">က္က</span>
+-->
 <script type="text/javascript">
-myUnicode.imgPrefix = "../";
-myUnicode.checkWithMsg();
-if (myUnicode.isSupported == false)
-{
-// do something
-}
+
 </script>
 <!-- End of Myanmar Unicode Support Testing -->
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>.</p>

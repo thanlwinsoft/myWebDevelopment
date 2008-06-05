@@ -66,7 +66,7 @@ positionNodes : new Array(['kinzi'], "", "", ['medYa', 'medRa'],
 /** 
 * Initialise path to keyboard files and register keyboard
 * @param path to files
-* @param language prefix for keyboard e.g. 'my' or 'ksw'
+* @param array of language prefixes for keyboards e.g. ['my','ksw']
 */
 initKeyboard: function(path, lang)
 {
@@ -208,7 +208,7 @@ typeChar: function(charValue, pos)
   window.status = inputElement.value + " Syllable = " + newSyllable + 
     " " + myK.currentSyllable.length;
   // update overlay if there is one
-  myK.updateOverlay(inputElement, cursor, cursor);
+  myK.updateOverlay(myK.inputId, cursor, cursor);
   if (myK.afterKey)
     myK.afterKey(myK.inputNode);
 },
@@ -253,19 +253,19 @@ deleteChar: function()
   var cursorB = cursorA + newSyllable.length;
   myK.setCursorPosition(cursorA, cursorB);
   // update overlay if there is one
-  myK.updateOverlay(inputElement, cursorA, cursorB);
+  myK.updateOverlay(myK.inputId, cursorA, cursorB);
   if (myK.afterKey)
     myK.afterKey(myK.inputNode);
 },
 
-updateOverlay : function(inputElement, cursorA, cursorB)
+updateOverlay : function(inputId, cursorA, cursorB)
 {
   if (myUnicode != undefined && myUnicode.isSupported == false)
   {
+    var inputElement = document.getElementById(inputId);
     // see if there is an overlay that should have some text added
-    var overlay = inputElement.previousSibling;
-    if (overlay && overlay.getAttribute('id') && 
-        new String(overlay.getAttribute('id')).indexOf("myOverlay") > -1)
+    var overlay = document.getElementById(inputId + "_innerDiv")
+    if (overlay)
     {
         if (cursorA == undefined) 
         {
@@ -274,12 +274,13 @@ updateOverlay : function(inputElement, cursorA, cursorB)
             cursorB = cursor.selectionEnd;
         //    cursorA = cursorB = inputElement.value.length;
         }
-        inputElement.previousSibling.innerHTML = inputElement.value.substring(0, cursorA);
+        overlay.innerHTML = inputElement.value.substring(0, cursorA);
         if (cursorA == cursorB)
         {
             var img = document.createElement("img");
             img.setAttribute("src", myK.pathStem + "cursor.gif");
             img.setAttribute("alt","|");
+            img.setAttribute("id",myK.inputId + "_cursor");
             overlay.appendChild(img);
         }
         else
@@ -302,13 +303,14 @@ hideOverlay : function(inputElement)
 {
   if (myUnicode != undefined && myUnicode.isSupported == false)
   {
+/*
     // see if there is an overlay that should have some text added
     var overlay = inputElement.previousSibling;
     if (overlay && overlay.getAttribute('id') && 
         new String(overlay.getAttribute('id')).indexOf("myOverlay") > -1)
     {
         overlay.style.display = "none";
-    }
+    }*/
   }
 },
 
@@ -749,21 +751,21 @@ hideKeyboard: function(lang)
 /**
 * toggles display of the keyboard on or off
 */
-toggleLangKeyboard: function(lang, type, index)
+toggleLangKeyboard: function(lang, nodeId)
 {
   var keyboard = document.getElementById(myK.lang + '_keyboard');
   if (lang != myK.lang)
   {
-    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, myK.lang));
+    var img = document.getElementById(nodeId + "_" + myK.lang);
     if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
-    img = document.getElementById(myK.langIcon(type, index, lang));
+    img = document.getElementById(nodeId + "_" + lang);
     if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
     myK.lang = lang;
     if (keyboard) keyboard.style.display = "none";
   }
   else
   {
-    var img = document.getElementById(myK.langIcon(myK.inputType, myK.inputIndex, lang));
+    var img = document.getElementById(nodeId + "_" + lang);
     if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardOffIcon);
     myK.lang = '';
   }
@@ -773,16 +775,15 @@ toggleLangKeyboard: function(lang, type, index)
   if (myK.keyboardVisible && keyboard.style.display == "none")
   {
     keyboard.style.display = "";
-    myKeyboardMover.inputId = "";
+    myKeyboardMover.inputId = nodeId;
     myKeyboardMover.inputNode = myK.inputNode;
     myKeyboardMover.moveBelowInput();
   }
   else
   {
     keyboard.style.display = "none";
-    //myK.hideOverlay(myK.inputNode);
   }
-  myK.switchInputByIndex(type, index);
+  myK.switchInput(nodeId);
   if (myK.inputNode)
     myK.inputNode.focus();
 },
@@ -794,6 +795,19 @@ toggleLangKeyboard: function(lang, type, index)
 */
 switchInput: function(newId)
 {
+  var oldInput = document.getElementById(myK.inputId);
+  if (oldInput)
+  {
+    var oldCursor = document.getElementById(myK.inputId + "_cursor");
+    if (oldCursor) oldCursor.style.display = "none";
+    
+    var icon = document.getElementById(myK.inputId + "_keyboardDialog");
+    if (icon)
+        icon.setAttribute("src",myK.pathStem + "alphabetWindowOff.png");
+    icon = document.getElementById(myK.inputId + "_" + myK.lang);
+    if (icon)
+        icon.setAttribute("src",myK.pathStem + myK.lang + myK.keyboardOffIcon);
+  }
   myK.inputId = newId;
   myK.resetSyllable();
   var newInput = document.getElementById(newId);
@@ -801,20 +815,26 @@ switchInput: function(newId)
   { 
     myK.inputNode = newInput;
     myK.findOldText(newInput, myK.getCursorPosition());
+    //alert(myK.getCursorPosition().selectionStart);
     myKeyboardMover.inputId = newId;
     myKeyboardMover.inputNode = newInput;
     myKeyboardMover.moveBelowInput();
     if (myUnicode != undefined && myUnicode.isSupported == false)
     {
         // see if there is an overlay that should have some text added
-        if (myK.inputNode.previousSibling && myK.inputNode.previousSibling.style)
+        var inputInnerDiv = document.getElementById(newId + "_innerDiv");
+        if (inputInnerDiv)
         {
-            //var keyboard = document.getElementById(myK.lang + '_keyboard');
-            // myK.inputNode.previousSibling.style.display = keyboard.style.display;
-            myK.inputNode.previousSibling.style.display = '';
-            myK.updateOverlay(myK.inputNode);
+            myK.updateOverlay(myK.inputId);
         }
     }
+    var icon = document.getElementById(myK.inputId + "_keyboardDialog");
+    if (icon)
+        icon.setAttribute("src",myK.pathStem + "alphabetWindow" + 
+            ((myK.keyboardVisible)? ".png":"Off.png") );
+    icon = document.getElementById(myK.inputId + "_" + myK.lang);
+    if (icon)
+        icon.setAttribute("src",myK.pathStem + myK.lang + myK.keyboardIcon);
   }
 },
 
@@ -822,6 +842,7 @@ switchInput: function(newId)
 * Call this method in the onclick event of each input box
 * that you want the keyboard to work with
 */
+/*
 switchInputByIndex: function(tagName, index)
 {
     if (myK.inputType == tagName && myK.inputIndex == index)
@@ -860,9 +881,11 @@ switchInputByIndex: function(tagName, index)
     }
   }
 },
+*/
 
 /** method to register keyboard listeners on every input and textarea in a page
 * Call this in the onload method of a page
+* @param array of languages
 */
 registerKeyboard: function(lang)
 {
@@ -885,9 +908,12 @@ registerKeyboard: function(lang)
     }
     if (inputCount > 0)
     {
-        if (!(document.getElementById(lang + "_keyboard")))
+        for (var k = 0; k < lang.length; k++)
         {
-            myK.getSourceFile(myK.pathStem + lang + myK.keyboardSrc);
+            if (!(document.getElementById(lang[k] + "_keyboard")))
+            {
+                myK.getSourceFile(myK.pathStem + lang[k] + myK.keyboardSrc);
+            }
         }
     }
 },
@@ -955,6 +981,92 @@ toUnicodes: function(text)
 
     addOnEventLink: function(node, type, index, lang)
     {
+        var nodeId = node.getAttribute("id");
+        var inputFrag = 0;
+        var inputOuterDiv = 0;
+        var inputInnerDiv = 0;
+        if (nodeId == undefined)
+        {
+            nodeId = "myKey_" + type + index;
+            node.setAttribute("id", nodeId);
+        }
+        else
+        {
+            inputOuterDiv = document.getElementById(nodeId + "_outerDiv");
+            inputInnerDiv = document.getElementById(nodeId + "_innerDiv");
+        }
+        if (inputOuterDiv == 0 || inputOuterDiv == undefined)
+        {
+            var parentNode = node.parentNode;
+            var inputDim = myKeyboardMover.initItemPos(node);
+            var iconsWidth = 16 * (lang.length + 1) + 2;
+            inputDim.width += iconsWidth;
+            
+            inputFrag = document.createDocumentFragment();
+            inputOuterDiv = document.createElement("div");
+            inputInnerDiv = document.createElement("div");
+            if (!inputFrag || !inputOuterDiv || !inputInnerDiv) return;
+            inputOuterDiv.setAttribute("id",nodeId + "_outerDiv");
+            inputInnerDiv.setAttribute("id",nodeId + "_innerDiv");
+            
+            // add lang icons
+            for (var i = 0; i < lang.length; i++)
+            {
+                var langIcon = document.createElement('img');
+                langIcon.setAttribute('src', myK.pathStem + lang[i] + myK.keyboardOffIcon);
+                langIcon.setAttribute('id', nodeId + "_" + lang[i]);
+                langIcon.setAttribute('alt', "Show Keyboard");
+                langIcon.setAttribute('title', "Show Keyboard");
+                langIcon.myK_lang = lang[i];
+                langIcon.myK_nodeId = nodeId;
+                langIcon.onclick = function() {myK.toggleLangKeyboard(this.myK_lang,this.myK_nodeId);}
+                langIcon.style.cssFloat = "right";
+                langIcon.style.cursor = "pointer";
+                inputOuterDiv.appendChild(langIcon);
+            }
+            var keyboardIcon = document.createElement('img');
+            keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindow" + ((myK.keyboardVisible)?"":"Off") + ".png");
+            keyboardIcon.setAttribute('id', nodeId + "_keyboardDialog");
+            keyboardIcon.setAttribute('alt', "Show Keyboard");
+            keyboardIcon.setAttribute('title', "Show Keyboard");
+            keyboardIcon.onclick = function() {myK.toggleAlphabetWindow();};
+            keyboardIcon.style.cssFloat = "right";
+            keyboardIcon.style.cursor = "pointer";
+            inputOuterDiv.appendChild(keyboardIcon);
+
+
+            inputFrag.appendChild(inputOuterDiv);
+            //inputOuterDiv.appendChild(node);
+            inputOuterDiv.myK_nodeId = nodeId;
+            inputOuterDiv.appendChild(inputInnerDiv);
+            inputOuterDiv.setAttribute("class", "myKeyInput");
+            inputOuterDiv.style.width = inputDim.width + "px";
+            inputOuterDiv.style.height = inputDim.height + "px";
+            inputOuterDiv.onclick = function(){myK.switchInput(this.myK_nodeId);};
+            inputInnerDiv.style.borderWidth = "1px";
+            inputInnerDiv.style.borderColor = "black";
+            inputInnerDiv.style.borderStyle = "solid";
+            inputInnerDiv.style.backgroundColor = "white";
+            inputInnerDiv.style.dispay = "inline-block";
+            inputInnerDiv.style.overflow = "auto";
+            inputInnerDiv.style.width = (inputDim.width - iconsWidth) + "px";
+            inputInnerDiv.style.height = inputDim.height + "px";
+            //alert("width " + inputDim.width + " " + inputDim.height);
+            
+            if (myUnicode && myUnicode.isSupported)
+                inputInnerDiv.style.display = "none";
+            else
+                node.style.display = "none";
+            
+            parentNode.insertBefore(inputFrag, node);
+            parentNode.removeChild(node);
+            node.myK_cursor = String(node.value).length;
+            inputOuterDiv.insertBefore(node, inputInnerDiv);
+            myK.updateOverlay(nodeId);
+//            myK.addOnKeyPressEvent(inputOuterDiv);
+            myK.addOnKeyPressEvent(document);
+        }
+/*
         if (node.onclick != undefined && String(node.onclick).indexOf('myK.switchInputByIndex') == -1)
         {
             var oldOnClick = node.onclick;
@@ -963,17 +1075,7 @@ toUnicodes: function(text)
             };
         }
         else node.onclick = function() { myK.switchInputByIndex(type , index);};
-        if (node.onkeypress != undefined && String(node.onkeypress).indexOf('myKeyMapper') == -1)
-        {
-            var oldOnKeyPress = node.onkeypress;
-            node.onkeypress = function(e) { return (myKeyMapper.keyPress(e))? oldOnKeyPress(e) : false; };
-            //     alert("onclick/onkeypress handler already exists on " + type + " " + 
-            //        index + node.onkeypress);
-        }
-        else
-        {
-            node.onkeypress = function(event) { return myKeyMapper.keyPress(event); };
-        }
+        
         var iconContainer = document.getElementById("myK." + type + index);
         if (!iconContainer) 
         {
@@ -1019,13 +1121,25 @@ toUnicodes: function(text)
         img.setAttribute('title', "" + name + " keyboard");
         iconContainer.insertBefore(link, iconContainer.firstChild);
         link.appendChild(img);
-        
+        */
+    },
+    addOnKeyPressEvent : function(node)
+    {
+        if (node.onkeypress != undefined && String(node.onkeypress).indexOf('myKeyMapper') == -1)
+        {
+            var oldOnKeyPress = node.onkeypress;
+            node.onkeypress = function(e) { return (myKeyMapper.keyPress(e))? oldOnKeyPress(e) : false; };
+            //     alert("onclick/onkeypress handler already exists on " + type + " " + 
+            //        index + node.onkeypress);
+        }
+        else
+        {
+            node.onkeypress = function(event) { return myKeyMapper.keyPress(event); };
+        }
     },
     toggleAlphabetWindow : function()
     {
         var keyboard = document.getElementById(myK.lang + '_keyboard');
-        var alphabetWindow = "myK." + myK.inputType + myK.inputIndex + "alphabetWindowIcon";
-        img = document.getElementById(alphabetWindow);
         if (keyboard)
         {
             myKeyboardMover.keyboardId = myK.lang + '_keyboard';
@@ -1035,28 +1149,21 @@ toUnicodes: function(text)
                 myK.keyboardVisible = false;
                 keyboard.style.display = "none";
                 imgSrc = myK.pathStem + "alphabetWindowOff.png";
-                myKeyboardMover.inputId = "";
-                myKeyboardMover.inputNode = myK.inputNode;
-                myKeyboardMover.moveBelowInput();
             }
             else
             {
                 myK.keyboardVisible = true; 
                 keyboard.style.display = "";
                 imgSrc = myK.pathStem + "alphabetWindow.png";
+                myKeyboardMover.inputId = myK.inputId;
+                myKeyboardMover.inputNode = myK.inputNode;
+                myKeyboardMover.moveBelowInput();
             }
-            for (var type = "input"; type != ""; (type == "input")? type = "textarea" : type = "")
+            var alphabetWindow = myK.inputId + "_keyboardDialog";
+            var img = document.getElementById(alphabetWindow);
+            if (img)
             {
-                var inputIndex = 0;
-                var alphabetWindow = "myK." + type + inputIndex + "alphabetWindowIcon";
-                var img = document.getElementById(alphabetWindow);
-                while (img)
-                {
-                    img.setAttribute("src", imgSrc);
-                    ++inputIndex;
-                    alphabetWindow = "myK." + type + inputIndex + "alphabetWindowIcon";
-                    img = document.getElementById(alphabetWindow);
-                }
+                img.setAttribute("src", imgSrc);
             }
         }
     },
@@ -1179,8 +1286,15 @@ toUnicodes: function(text)
         }
         else
         {
-            this.selectionStart = inputObject.selectionStart;
-            this.selectionEnd = inputObject.selectionEnd;        
+            try
+            {
+                this.selectionStart = inputObject.selectionStart;
+                this.selectionEnd = inputObject.selectionEnd;        
+            }
+            catch (e)
+            {
+                this.selectionStart = this.selectionEnd = inputObject.myK_cursor;
+            }
         }
 
         if (this.selectionStart > -1)
@@ -1203,7 +1317,7 @@ toUnicodes: function(text)
         }
         if (document.selection)
         {
-            myK.inputNode.focus();
+            if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();
             var range = myK.inputNode.createTextRange();
 	        range.move('character', start); 
             if (end > start)
@@ -1212,15 +1326,23 @@ toUnicodes: function(text)
         }
         else
         {
-            myK.inputNode.focus();
-            myK.inputNode.setSelectionRange(start, end);
+            if (myK.inputNode && myK.inputNode.focus) 
+            {
+                try
+                {
+                    myK.inputNode.focus();
+                    myK.inputNode.setSelectionRange(start, end);
+                } catch (e) {}
+            }
         }
+        myK.inputNode.myK_cursor = start;
     },
     /** add overlay to an input box
     * see also addOnEventLink - TODO make a more logical combined overlay 
     */
     addOverlay : function(node)
     {
+/*
         if (node.previousSibling && node.previousSibling.nodeType == 1 &&
                 node.previousSibling.getAttribute('id') && 
                 new String(node.previousSibling.getAttribute('id')).indexOf("myOverlay") > -1)
@@ -1270,6 +1392,7 @@ toUnicodes: function(text)
         var parent = node.parentNode;
         parent.insertBefore(docFrag, node);
         myUnicode.parseText(node.previousSibling.firstChild, new String(node.value));
+*/
     }
 };// end MyKeyboard
 
@@ -1359,11 +1482,8 @@ var myKeyboardMover = {
     
     initInputPos:function()
     {
-        if (myK.inputNode == -1)
-        {
-            myKeyboardMover.inputNode = document.getElementById(myKeyboardMover.inputId);
-        }
-        myKeyboardMover.input = myKeyboardMover.initItemPos(myKeyboardMover.inputNode);
+        var inputElement = document.getElementById(myKeyboardMover.inputId + "_innerDiv");
+        myKeyboardMover.input = myKeyboardMover.initItemPos(inputElement);
     },
     
     startMove:function(event)
@@ -1395,7 +1515,7 @@ var myKeyboardMover = {
         document.body.onmousemove = myKeyboardMover.activeMove;
         document.body.onmouseup = myKeyboardMover.endMove;
         document.body.onclick = myKeyboardMover.endMove;
-        myK.inputNode.focus();
+        if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();
         //alert("Moved from " + this.moveStartX + "," + this.moveStartY + " " + this.dialog.x + "," + this.dialog.y);
     },
 
@@ -1404,7 +1524,7 @@ var myKeyboardMover = {
         document.body.onmousemove = null;
         document.body.onmouseup = null;
         document.body.onclick = null;
-        myK.inputNode.focus();// restore focus & remove any unwanted selection
+        if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();// restore focus & remove any unwanted selection
         //alert(myKeyboardMover.moveSrc + "Moved by " + myKeyboardMover.dialog.x + "," + myKeyboardMover.dialog.y + " " );
     },
     
@@ -1490,7 +1610,7 @@ var myKeyboardMover = {
         if (window.event) evt = window.event;
         else evt = e;
         myKeyboardMover.moveTo(evt.clientX, evt.clientY);
-        myK.inputNode.focus();
+        if (myK.inputNode && myK.inputNode.focus) myK.inputNode.focus();
     },
     
     moveBelowInput:function()
@@ -1601,11 +1721,6 @@ var myKeyMapper = {
     keyPress : function(e)
     {
         var evt = e || window.event;
-        if (myK.lang == '') 
-        {
-            setTimeout("myK.updateOverlay(myK.inputNode);", 100);
-            return true;
-        }
         var key = evt.keyCode;
         // charCode should be defined for a keypress in Firefox, unless its a special key
         if (evt.charCode != undefined)
@@ -1613,46 +1728,98 @@ var myKeyMapper = {
             key = evt.charCode;
         }
         // ignore ctrl/alt combinations and control characters
-        if (key <= 20 || evt.ctrlKey || evt.altKey) 
+        if (evt.ctrlKey || evt.altKey) 
         {
-            setTimeout("myK.updateOverlay(myK.inputNode);", 100);
+            setTimeout("myK.updateOverlay(myK.inputId);", 100);
             return true;
         }
         var theChar = String.fromCharCode(key);
-        var lookup = myK.lang + "_map" + 
-            (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
-        if (key < 'A'.charCodeAt(0) || key > 'z'.charCodeAt(0) || 
-            (key > 'Z'.charCodeAt(0) && key < 'a'.charCodeAt(0)))
+        if (myK.lang != '' && key > 20)
         {
-            lookup = myK.lang + "_map" + 
-                (evt.shiftKey ? "Shift._" : "._") + key;
-        }
-/*
-        var debugText = (evt.ctrlKey ? " Ctrl" : "") + (evt.altKey ? " Alt" : "") +
-            (evt.shiftKey ? " Shift" : "") + evt.keyCode + "(" + 
-            String.fromCharCode(evt.keyCode) +")";
-        alert(debugText);
-*/
-        try
-        {
-            var keyCodeMap = eval("myKeyMapper." + lookup);
-            if (keyCodeMap != undefined)
+            var lookup = myK.lang + "_map" + 
+                (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
+            if (key < 'A'.charCodeAt(0) || key > 'z'.charCodeAt(0) || 
+                (key > 'Z'.charCodeAt(0) && key < 'a'.charCodeAt(0)))
             {
-                myK.typeChar(keyCodeMap, myK.getCharOrder(keyCodeMap, 0));
-                return false;
+                lookup = myK.lang + "_map" + 
+                    (evt.shiftKey ? "Shift._" : "._") + key;
+            }
+            try
+            {
+                var keyCodeMap = eval("myKeyMapper." + lookup);
+                if (keyCodeMap != undefined)
+                {
+                    myK.typeChar(keyCodeMap, myK.getCharOrder(keyCodeMap, 0));
+                    return false;
+                }
+            }
+            catch (theException) 
+            {
+                // for debugging
+                //alert(lookup);
             }
         }
-        catch (theException) 
-        {
-            // for debugging
-            alert(lookup);
-        }
         
-        // remove the selection to prevent overwriting
-        setTimeout("myK.updateOverlay(myK.inputNode);", 100);
-        // for debugging
+        if (myK.inputNode) 
+        {
+            var oldValue = String(myK.inputNode.value);
+            var cursor = myK.getCursorPosition();
+            var newText = "";
+            if (key == 0)
+            {
+                switch (evt.keyCode)
+                {
+                case 13:// enter
+                    newText = "\n";
+                    break;
+                case 36:// end
+                    cursor.selectionEnd = cursor.selectionStart = 0;
+                    break;
+                case 35:// home
+                    cursor.selectionStart = oldValue.length;
+                    cursor.selectionEnd = oldValue.length;
+                    break;
+                case 37:// left arrow
+                    cursor.selectionStart = cursor.selectionStart - 1;
+                    cursor.selectionEnd = cursor.selectionStart;
+                    break;
+                case 39:// right arrow
+                    cursor.selectionStart = cursor.selectionStart + 1;
+                    cursor.selectionEnd = cursor.selectionStart;
+                    break;
+                case 46:// del
+                    cursor.selectionEnd = cursor.selectionEnd + 1;
+                    break;
+                case 8:// backspace
+                    cursor.selectionStart = cursor.selectionStart - 1;
+                    break;
+                default:
+                    return true;
+                }
+                if (cursor.selectionStart < 0)
+                    cursor.selectionStart = cursor.selectionEnd = 0;
+                if (cursor.selectionStart > oldValue.length)
+                    cursor.selectionStart = cursor.selectionEnd = oldValue.length;
+                myK.inputNode.myK_cursor = cursor.selectionStart;
+            }
+            else
+            {
+                newText = String.fromCharCode(key);
+                myK.inputNode.myK_cursor += newText.length;
+            }
+            myK.inputNode.value = oldValue.substring(0, cursor.selectionStart)
+                    + newText + oldValue.substring(cursor.selectionEnd);
+            //setTimeout("myK.updateOverlay(myK.inputId);", 100);
+            myK.updateOverlay(myK.inputId);
+        }
+        return false;
+        
+        
+
+        //var debugText = (evt.ctrlKey ? " Ctrl" : "") + (evt.altKey ? " Alt" : "") +
+        //    (evt.shiftKey ? " Shift" : "") + evt.keyCode + "(" + 
+        //    String.fromCharCode(evt.keyCode) +")";
         //alert(debugText);
-        return true;
     }
 };
 

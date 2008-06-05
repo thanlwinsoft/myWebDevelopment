@@ -98,104 +98,107 @@ var myUnicode = {
     thFont : 2,
     supFont : 1,// smallest index
     subFont : 1,
-	// end user config variables
-	isSupported : false,// flag determining support level - only valid after myUnicode.check();
+    // end user config variables
+    isSupported : false,// flag determining support level - only valid after myUnicode.check();
     checkFinished : false,
-	overlayCount : 0,
-	currentNode : null,
+    overlayCount : 0,
+    currentNode : null,
     nodeCount : 0,
     threadStart : 0,
     threadEnd : 0,
     isIe: false,
     isGecko: false,
-	retryCount: 0,
-	/** tests the width of the myWidth1/2 spans to see if Myanmar
+    retryCount: 0,
+    /** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
-	* message to the user.
-	*/
-	checkWithMsg : function()
-	{
-	    if (myUnicode.check())
-	    {
+    * message to the user.
+    */
+    checkWithMsg : function()
+    {
+        if (myUnicode.check())
+        {
             var mySupported = mySupportedMsg(myUnicode.imgPrefix);
-	        if (mySupported.length > 0)
-	        {
-	            document.writeln(mySupported);
-	        }
-	    }
-	    else
-	    {
+            if (mySupported.length > 0)
+            {
+                document.writeln(mySupported);
+            }
+        }
+        else
+        {
             var myUnsupported = myUnsupportedMsg(myUnicode.imgPrefix);
-	        if (myUnsupported.length > 0)
-	            document.writeln(myUnsupported);
-	    }
-	},
+            if (myUnsupported.length > 0)
+                document.writeln(myUnsupported);
+        }
+    },
 
-	/** tests the width of the myWidth1/2 spans to see if Myanmar 
+    /** tests the width of the myWidth1/2 spans to see if Myanmar 
     * Unicode support is available 
     */
-	check : function ()
-	{
-	    
-	    var myW2 = document.getElementById('myWidth2');
-        if (!myW2)
+    check : function ()
+    {
+        if (myUnicode.checkFinished == true) return myUnicode.isSupported;
+	var widthTest = 0;
+        var myW2 = document.getElementById('myWidth2');
+        var myW1 = document.getElementById('myWidth1');
+        if (!myW2 || !myW1)
         {
-            myW2 = document.createElement("p");
-            myW2.setAttribute('class','myUniTest');
+	    var widthTest = document.createElement("p");
+	    document.body.appendChild(widthTest);
+
+            myW2 = document.createElement("span");
+            myW2.style.fontFamily = 'Myanmar3, PadaukOT, Padauk, Parabaik';
             myW2.setAttribute("id","myWidth2");
-            document.body.appendChild(myW2);
+            widthTest.appendChild(myW2);
             myW2.innerHTML = "ကက";
-        }
-	    var myW1 = document.getElementById('myWidth1');
-        if (!myW1)
-        {
-            myW1 = document.createElement("p");
-            myW1.setAttribute('class','myUniTest');
+
+            myW1 = document.createElement("span");
+            myW1.style.fontFamily = 'Myanmar3, PadaukOT, Padauk, Parabaik';
             myW1.setAttribute("id","myWidth1");
-            document.body.appendChild(myW1);
+            widthTest.appendChild(myW1);
             myW1.innerHTML = "က္က";
         }
-	    var myW1Width = 0;
-	    var myW2Width = 0;
-        if (myUnicode.checkFinished == true) return myUnicode.isSupported;
+        var myW1Width = 0;
+        var myW2Width = 0;
         myUnicode.checkFinished = true;
-	    if (myW1 && myW2)
-	    {
-	        myW1Width = myW1.offsetWidth;
-	        myW2Width = myW2.offsetWidth;
-	        // what does IE use for width?
-	        if (myW1Width == undefined) myW1Width = myW1.width;
-	        if (myW2Width == undefined) myW2Width = myW2.width;
-			if (myW1Width == undefined && myW2Width == undefined || (myW2Width == 0 && myW1Width == 0))
-			{
-				myUnicode.isSupported = true;
-				return true; // probably not visible, so we don't know
-			}
-	    }
-	    else
-	    {
-			myUnicode.isSupported = true;
-			return true; // no test spans, so best not to convert to images
-	    }
-	// debug line - you will probably not need this unless you have trouble
-	//document.writeln('width1=' + myW1Width + ' width2=' + myW2Width + '<br/>');
-	// the width of w2 may not always be exactly twice w1 depending on the font
-	// and rounding errors. However it should be safe to say that w1's width should be 
-	// much less than 3/4 of w2's width.
-	    if (myW1Width >= 0.75 * myW2Width || myW1Width == undefined)
-	    {
-
-	    }
-	    else 
-	    {
-			// comment out the next line to test non-Unicode support on supported browsers
-	        myUnicode.isSupported = true;
-	    } 
-	    myW1.removeChild(myW1.firstChild);
-	    myW2.removeChild(myW2.firstChild);
-	    return myUnicode.isSupported;
-	},
-	/** initialise the img location, check for unicode support and convert to 
+        if (myW1 && myW2)
+        {
+            myW1Width = myW1.offsetWidth;
+            myW2Width = myW2.offsetWidth;
+            // what does IE use for width?
+            if (myW1Width == undefined) myW1Width = myW1.width;
+            if (myW2Width == undefined) myW2Width = myW2.width;
+            if (myW1Width == undefined && myW2Width == undefined || (myW2Width == 0 && myW1Width == 0))
+            {
+                myUnicode.isSupported = true;
+                return true; // probably not visible, so we don't know
+            }
+        }
+        else
+        {
+            myUnicode.isSupported = true;
+            return true; // no test spans, so best not to convert to images
+        }
+    // debug line - you will probably not need this unless you have trouble
+    //document.writeln('width1=' + myW1Width + ' width2=' + myW2Width + '<br/>');
+    // the width of w2 may not always be exactly twice w1 depending on the font
+    // and rounding errors. However it should be safe to say that w1's width should be 
+    // much less than 3/4 of w2's width.
+        if (myW1Width >= 0.75 * myW2Width || myW1Width == undefined)
+        {
+           //alert("w1 " + myW1Width + " w2 "+ myW2Width + " " );
+        }
+        else 
+        {
+            // comment out the next line to test non-Unicode support on supported browsers
+            myUnicode.isSupported = true;
+        } 
+        myW1.removeChild(myW1.firstChild);
+        myW2.removeChild(myW2.firstChild);
+	if (widthTest != 0)
+            document.body.removeChild(widthTest);
+        return myUnicode.isSupported;
+    },
+    /** initialise the img location, check for unicode support and convert to 
     * images if needed 
     * This is designed to be called in the onload function of body.
     * @param imgPrefix path (relative or absolute) to the PadaukOT.js file.
@@ -214,7 +217,7 @@ var myUnicode = {
         myUnicode.imgPrefix = theImgPrefix;
         if (myUnicode.checkFinished == false) myUnicode.check();
         myUnicode.parseDoc();
-		myUnicode.retryCount = 0;
+        myUnicode.retryCount = 0;
     },
     addScript: function(src)
     {
@@ -224,30 +227,30 @@ var myUnicode = {
         script.setAttribute("src", src);
         head.appendChild(script);
     },
-	/** normal entry port to start conversion from unicode to images */
+    /** normal entry port to start conversion from unicode to images */
     parseDoc : function()
     {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
-			if (!myUnicode.isIe)
-			{
-				try
-				{
-					// wait for the script additions to take affect
-					if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
-					{
-						setTimeout("myUnicode.parseDoc()", 500);
-						myUnicode.retryCount++;
-						return;
-					}
-				}
-				catch (notDefException)
-				{ 
-					setTimeout("myUnicode.parseDoc()", 500);
-					myUnicode.retryCount++;
-					return;
-				}
-			}
+            if (!myUnicode.isIe)
+            {
+                try
+                {
+                    // wait for the script additions to take affect
+                    if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
+                    {
+                        setTimeout("myUnicode.parseDoc()", 500);
+                        myUnicode.retryCount++;
+                        return;
+                    }
+                }
+                catch (notDefException)
+                { 
+                    setTimeout("myUnicode.parseDoc()", 500);
+                    myUnicode.retryCount++;
+                    return;
+                }
+            }
             myUnicode.createNotice();
             myUnicode.nodeCount = 0;
             myUnicode.threadStart++;
@@ -349,12 +352,12 @@ var myUnicode = {
     {
         if (myKeyboardMover != undefined)
         {
-            myK.addOverlay(node);
+            //myK.addOverlay(node);
         }
         //else alert("no myOverlay");
     },
     
-	/** parse an element node and all its children - may be called by directly or recursively */
+    /** parse an element node and all its children - may be called by directly or recursively */
     parseNode : function (node)
     {
         if (node == undefined || node.tagName == undefined || node.nodeType != 1) return;
@@ -406,7 +409,7 @@ var myUnicode = {
                     {
                         myUnicode.threadStart++;
                         setTimeout("myUnicode.parseNode(document.getElementById('" + childId + "'));myUnicode.checkThreads();", 
-                                        10 + myUnicode.threadStart * 100);
+                                        10 + myUnicode.threadStart * 10);
                     }
                     else myUnicode.parseNode(child);
                 }
@@ -426,7 +429,7 @@ var myUnicode = {
             }
         }
     },
-	/** tests whether the code point is in the range where images may be needed */
+    /** tests whether the code point is in the range where images may be needed */
     inRange : function(code)
     {
         if (code == 0x25cc) return true; // hack for dotted circle
@@ -435,7 +438,7 @@ var myUnicode = {
             return true;
         return false;
     },
-	/** parses a text node and converts it to images if required */
+    /** parses a text node and converts it to images if required */
     parseText : function(node, text)
     {
         if (text == undefined) return;
@@ -444,10 +447,10 @@ var myUnicode = {
         var codeString = "u";
         var lastOutput = 0;
         var width = 0;
-		var height = 0;
+        var height = 0;
         var fontSize = 0;
         var maxCharLen = 0;
-		var sizeIndex = 0;
+        var sizeIndex = 0;
         for (var i = 0; i < text.length; i++)
         {
             var code = text.charCodeAt(i);
@@ -459,23 +462,23 @@ var myUnicode = {
                     docFrag = document.createDocumentFragment();
                     var prefix = document.createTextNode(text.substring(0,i));
                     docFrag.appendChild(prefix);
-					// these don't change between strings, so set them once
+                    // these don't change between strings, so set them once
                     maxCharLen = eval("fontImages_" + myUnicode.fontData + ".maxCharLen");
-					//var fontSizes = eval("fontImages_" + myUnicode.fontData + ".fontSize");
+                    //var fontSizes = eval("fontImages_" + myUnicode.fontData + ".fontSize");
                     var fontHeights = eval("fontImages_" + myUnicode.fontData + ".fontHeight");
 //                    var nodeSize = new Number(node.parentNode.offsetHeight);        
 //                    for (sizeIndex = 0; sizeIndex < fontHeights.length; sizeIndex++)
-//					{
-//						if (fontHeights[sizeIndex] >= nodeSize)
-//							break;
-//					}
-					sizeIndex = myUnicode.chooseFontIndex(node.parentNode);
+//                    {
+//                        if (fontHeights[sizeIndex] >= nodeSize)
+//                            break;
+//                    }
+                    sizeIndex = myUnicode.chooseFontIndex(node.parentNode);
                     if (sizeIndex >= fontHeights.length) 
-						sizeIndex = fontHeights.length - 1;
+                        sizeIndex = fontHeights.length - 1;
                     height = fontHeights[sizeIndex];
                     fontSize = eval("fontImages_" + myUnicode.fontData + ".fontSize[" + sizeIndex + "];");
                     //var realFontSize = node.getRealFontsize();
-					//alert("Fontsize: " + nodeSize + "/" + height + " " + node.parentNode.offsetHeight);
+                    //alert("Fontsize: " + nodeSize + "/" + height + " " + node.parentNode.offsetHeight);
                 }
                 if (myUnicode.isIe) // convert to images
                 {
@@ -488,18 +491,18 @@ var myUnicode = {
                         if (code < 256) codeString += "00";
                         codeString += code.toString(16);
                         try
-					    {
-	                        var imageProp = eval("fontImages_" + myUnicode.fontData + "." + codeString);
-	                        if (imageProp == undefined)
-	                        {
-	                        }
-	                        else
-	                        {
-	                            lastMatchEnd = j;
-	                            width = imageProp[sizeIndex];
-	                        }
-					    }
-					    catch (e){}
+                        {
+                            var imageProp = eval("fontImages_" + myUnicode.fontData + "." + codeString);
+                            if (imageProp == undefined)
+                            {
+                            }
+                            else
+                            {
+                                lastMatchEnd = j;
+                                width = imageProp[sizeIndex];
+                            }
+                        }
+                        catch (e){}
                     }
                     // was there a match?
                     if (lastMatchEnd > -1) // yes
@@ -508,24 +511,24 @@ var myUnicode = {
                         codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
                         var img = myCommon.createElement("img");
                         img.setAttribute("src", myUnicode.imgPrefix + myUnicode.fontData + 
-									    "_" + fontSize +
-									    "/" +
+                                        "_" + fontSize +
+                                        "/" +
                                          codeString.substring(1,codeString.length) +
                                          myUnicode.imgSuffix);
                         img.setAttribute("alt", text.substring(i,lastMatchEnd + 1));
                         img.setAttribute("title","");// stop IE using alt as title
                         img.setAttribute("class","myText2Image");
                         img.setAttribute("style","vertical-align: middle; width: " +
-						    width + "px; height: " + height + "px;");
-					    if (img.style) // ie ignores the above style attributes
-					    {
-						    img.style.height = height + "px";
-						    img.style.width = width + "px";
-						    img.style.verticalAlign = "middle";
+                            width + "px; height: " + height + "px;");
+                        if (img.style) // ie ignores the above style attributes
+                        {
+                            img.style.height = height + "px";
+                            img.style.width = width + "px";
+                            img.style.verticalAlign = "middle";
                             img.style.borderLeftStyle = "none";
                             img.style.borderRightStyle = "none";
                             img.style.borderTopStyle = "none";
-					    }
+                        }
                         docFrag.appendChild(img);
                         // advance i
                         i = lastMatchEnd;
@@ -546,20 +549,20 @@ var myUnicode = {
                         code = text.charCodeAt(j);
                         if (myUnicode.inRange(code) == false) break;
                     }
-					try
-					{
-						if (mySvgFont != undefined)
-						{
-		                    var fontSize = mySvgFont.nodeFontSize(node.parentNode);
-		                    var textColor = document.fgColor;
-		                    var backColor = document.bgColor;
-		                    var computedStyle = mySvgFont.computedStyle(node.parentNode);
-		                    if (computedStyle) textColor = computedStyle.color;
-		                    mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, backColor);
-		                    i = j - 1;
-						}
-					}
-					catch (e) {}
+                    try
+                    {
+                        if (mySvgFont != undefined)
+                        {
+                            var fontSize = mySvgFont.nodeFontSize(node.parentNode);
+                            var textColor = document.fgColor;
+                            var backColor = document.bgColor;
+                            var computedStyle = mySvgFont.computedStyle(node.parentNode);
+                            if (computedStyle) textColor = computedStyle.color;
+                            mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, backColor);
+                            i = j - 1;
+                        }
+                    }
+                    catch (e) {}
                 }
             }
             else if (docFrag != undefined)
@@ -583,6 +586,7 @@ var myUnicode = {
     chooseFontIndex : function(node)
     {
         var index = myUnicode.defaultFont;
+    if (! node.tagName) return index;
         var elementName = node.tagName.toLowerCase();
         while (elementName == "a" || elementName == "span" || 
                elementName == "b" || elementName == "i" || elementName == "emph")

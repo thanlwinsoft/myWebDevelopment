@@ -80,8 +80,9 @@ div.keyboard {
   border-color: black;
   background-color: #ffffff; /* background */
   margin: 0px;
-  padding: 0px;
   z-index: 10;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
   opacity: 0.5;
 }
 
@@ -184,10 +185,25 @@ table.keyboard td.special { background-color: #505050; text-align: center;
 table.keyboard span.en { font-family: sans-serif; }
 table.keyboard span.my { font-family: padauk, myanmar3; font-weight: bold; float: right; color: #f0f0ff; }
 
-div.keyboard p.keyboardTab { margin: 2px; border-width: 1px; border-style: solid; border-color: white; line-height: 1.4em; background-color: #0000ff;}
-div.keyboard span.tabOn { color: white; background-color: #6060ff; }
-div.keyboard a.tabOff {  color: white; padding: 0.1em; text-decoration: none;  }
+div.keyboard p.keyboardTab { 
+    margin: 2px; 
+    border-width: 1px; border-style: solid; border-color: white; 
+    line-height: 1.4em; 
+    cursor: pointer;
+}
+p.keyboardTab span { padding-left: 2px; padding-right: 2px; }
+
+div.myKeyInput { 
+    border-color: blue; border-width: 1px; border-style: solid; 
+    border-radius: 5px;
+    padding: 5px;
+    -moz-border-radius: 5px;
+    display: inline-block;
+    background-color: #aaf;
+}
+
 svg {
+    display: inline;
     vertical-align: top;
 }
 

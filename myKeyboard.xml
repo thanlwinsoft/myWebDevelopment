@@ -35,17 +35,13 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
 <div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
-<p style="float:left; display:'';" id="myKeyboardLayoutOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
-<span class="tabOn">ခလုပ်ကွက်</span>
-<a class="tabOff" href="javascript:myK.toggle('my_keyboardLayoutUnshifted');myK.toggle('my_keyboardLayoutShifted');myK.toggle('my_alphabet');myK.toggle('myKeyboardLayoutOn');myK.toggle('myKeyboardAlphabetOn');" title="Show alphabet">အက္ခရာ</a>
-</p>
-<p style="float:left; display:none;" id="myKeyboardAlphabetOn" class="keyboardTab" onmouseover="myUnicode.parseNodeIfNeeded(this);">
-<a class="tabOff" href="javascript:myK.toggle('my_alphabet');myK.toggle('my_keyboardLayoutUnshifted');myK.toggle('my_keyboardLayoutShifted');myK.toggle('myKeyboardLayoutOn');myK.toggle('myKeyboardAlphabetOn');" title="Show keyboard layout">ခလုပ်ကွက်</a>
-<span class="tabOn">အက္ခရာ</span>
+<p style="float:left; display:inherit;" id="myKeyboardLayoutOn" class="keyboardTab">
+<span style="background-color: white;" onclick="myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');this.style.backgroundColor='white';this.nextSibling.style.backgroundColor='inherit';" title="Show keyboard">ခလုပ်ကွက်
+</span><span onclick="myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');this.style.backgroundColor='white';this.previousSibling.style.backgroundColor='inherit';" title="Show alphabet">အက္ခရာ</span>
 </p>
 <p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('my')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
 </div>
-<div id="my_alphabet" style="display: none; clear: left;">
+<div id="my_alphabet" style="display:none; clear: left;">
 <table><tr><td>
 <table class="consonants">
 <colgroup>
@@ -178,7 +174,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <table class="keyboard">
 <tr>
 <td style="width:2em;"><span class="my">◌</span><span class="en">`</span></td>
-<td style="width:2em;" onclick="myK.typeChar('၁',1);"><span class="my">၁</span><span class="en">1</span></td>
+<td style="width:2em;"><span class="my">၁</span><span class="en">1</span></td>
 <td style="width:2em;"><span class="my">၂</span><span class="en">2</span></td>
 <td style="width:2em;"><span class="my">၃</span><span class="en">3</span></td>
 <td style="width:2em;"><span class="my">၄</span><span class="en">4</span></td>

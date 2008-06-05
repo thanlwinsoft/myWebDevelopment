@@ -28,7 +28,7 @@ To get around these problems you can use a visual keyboard like this.
 <link type="text/css" rel="stylesheet" href="../mySource.css"/>
 </head>
 <!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
-<body id='body' onload="myUnicode.initParse('../');myK.registerKeyboard('ksw');myK.registerKeyboard('my');">
+<body id='body' onload="myUnicode.initParse('../');myK.registerKeyboard(['my','ksw']);">
 <div>
 <h1>Myanmar Unicode Virtual Keyboard</h1>
 <script type="text/javascript">
@@ -67,13 +67,7 @@ myK.afterKey = showUnicodes;
 </form>
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 
 <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>
-<span class="myUniTest" id="myWidth2">ကက</span>
-<span class="myUniTest" id="myWidth1">က္က</span>
 </p>
-<script type="text/javascript">
-myUnicode.check();
-
-</script>
 <p>If you want to include this in your own web pages add a few extra lines to the header as below and append a call to <tt>myK.initKeyboard()</tt> or <tt>myK.registerKeyboard()</tt> to the onload function. The first argument to <tt>myK.initKeyboard()</tt> is the path to the keyboard, javascript files and images. Muliple onload functions can be separated by ";". For example, you may want to combine it with the myDetection code <tt>myUnicode.initParse('/styles/')</tt>.</p>
 
 <pre>...
@@ -125,24 +119,24 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 </rdf:RDF>
 
 -->
-<div class="source" style="display:none;">
+<div class="source" style="display:'none';">
 <h2>Page HTML Source</h2>
 <pre id="source" >
 </pre>
 </div>
-<div class="source" style="display:none;">
+<div class="source" style="display:'none';">
 <h2>Keyboard HTML Source</h2>
 <pre id="keySrc" >
 </pre>
 </div>
-<div class="source"  style="display:none;">
+<div class="source"  style="display:'none';">
 <h2>Javascript Source</h2>
 <pre id="js" >
 </pre>
 </div>
-<div class="source"  style="display:none;">
+<div class="source"  style="display:'none';">
 <h2>CSS Source</h2>
-<pre id="cssPre" style="display:none;">
+<pre id="cssPre" style="display:'none';">
 </pre>
 </div>
 </div>

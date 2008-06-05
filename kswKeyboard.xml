@@ -29,7 +29,7 @@ If you use the onload function, then it will automatically add some links.
 In PHP you can use an include to load this keyboard, otherwise, the keyboard is loaded
 by the myK.registerKeyboard('ksw'); call usin an AJAX based technique.
 -->
-<div  xmlns="http://www.w3.org/1999/xhtml" class="keyboard" id="ksw_keyboard" style="display:none"  onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
+<div  xmlns="http://www.w3.org/1999/xhtml" class="keyboard" id="ksw_keyboard" style="display:'none'"  onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
 <div  id='keyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
 <p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('ksw')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>

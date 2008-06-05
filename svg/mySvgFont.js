@@ -5,16 +5,16 @@ var mySvgFont = {
     fontWarning:false,
     defaultFontSize:12,
     maxContext:10,
-	loaded:false,
-	hasFontData : function(fontName)
-	{
-		if (mySvgFont.loaded) return true;
-		try
+    loaded:false,
+    hasFontData : function(fontName)
+    {
+        if (mySvgFont.loaded) return true;
+        try
         {
             fontData = eval('svgFont_' + fontName);
             renderingData = eval(fontName + "Rendered");
-			mySvgFont.loaded = true;
-			return true;
+            mySvgFont.loaded = true;
+            return true;
         }
         catch (e)
         {
@@ -22,7 +22,7 @@ var mySvgFont = {
             mySvgFont.fontWarning = false;
             return false;
         }
-	},
+    },
     renderSvg: function(svg, fontName, text, size, color)
     {
         var fontData;
@@ -43,19 +43,19 @@ var mySvgFont = {
         
         var scaleG = (document.createElementNS)?
             document.createElementNS("http://www.w3.org/2000/svg", "g"):
-			document.createElement("g");
+            document.createElement("g");
         if (!scaleG) return false;
-        var title = (document.createElementNS)?
-          document.createElementNS("http://www.w3.org/2000/svg","title"):
-			document.createElement("title");
-        if (title && title.appendChild)
+        var metadata = (document.createElementNS)?
+          document.createElementNS("http://www.w3.org/2000/svg","metadata"):
+            document.createElement("metadata");
+        if (metadata && metadata.appendChild)
         {
-			scaleG.appendChild(title);
-			var titleText = document.createTextNode(text);
+            scaleG.appendChild(metadata);
+            var titleText = document.createTextNode(text);
             if (titleText)
-			{
-				title.appendChild(titleText);
-			}
+            {
+                metadata.appendChild(titleText);
+            }
         }
         scaleG.setAttribute("transform", "translate(0," + (fontData.ascent * scaling) + 
             ") scale(" + scaling + ",-" + scaling + ")");
@@ -128,11 +128,25 @@ var mySvgFont = {
                 prevMatch = false;
 */
         }
+
+        var widthPx = width * scaling;
+        var heightPx = scaledLineHeight * lineCount;
+        // background
+        var rect = (document.createElementNS)?
+          document.createElementNS("http://www.w3.org/2000/svg","rect"):
+            document.createElement("rect");
+        rect.setAttribute("x", 0);
+        rect.setAttribute("y", 0);
+        rect.setAttribute("width", widthPx);
+        rect.setAttribute("height", heightPx);
+        rect.setAttribute("fill", "white");
+        svg.appendChild(rect);
         
         svg.appendChild(scaleG);
-        svg.setAttribute("width", width * scaling);
-        svg.setAttribute("height", scaledLineHeight * lineCount);
+        svg.setAttribute("width", widthPx);
+        svg.setAttribute("height", heightPx);
         
+
         return true;
     },
     findGlyph:function(fontData, uChar)
@@ -166,7 +180,7 @@ var mySvgFont = {
     appendSvgText: function(parent, fontName, size, text, color)
     {
         if (text.length == 0) return;
-		if (!mySvgFont.hasFontData(fontName)) return;
+        if (!mySvgFont.hasFontData(fontName)) return;
         if (!document.getElementById("AdobeSVG"))
         {
             try
@@ -184,22 +198,21 @@ var mySvgFont = {
         }
         var svg = (document.createElementNS)? 
             document.createElementNS("http://www.w3.org/2000/svg", "svg") : 
-			document.createElement("svg");
+            document.createElement("svg");
         if (svg)
         {
             if (mySvgFont.renderSvg(svg, fontName, text, size, color))
             {
-                /*
+/*
                 var span = document.createElement("span");
                 if (span)
                 {
                     // add span so text can still be copied, but move it well out of sight
-                    span.appendChild(document.createTextNode(text));
-                    span.style.position = "absolute";
-                    span.style.zIndex = -1;
-                    span.style.left = "-100%";
+                    //span.appendChild(document.createTextNode(text));
                     parent.appendChild(span);
-                }*/
+                    span.appendChild(svg);
+                }
+                else */
                 parent.appendChild(svg);
             }
         }

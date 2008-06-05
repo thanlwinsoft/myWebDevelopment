@@ -24,6 +24,7 @@ To get around these problems you can use a visual keyboard like this.
 <script type="text/javascript" src="../svg/PadaukRendered.js"></script>
 <script type="text/javascript" src="../svg/mySvgFont.js"></script>
 
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
 <link type="text/css" rel="stylesheet" href="../mySource.css"/>
 </head>
 <!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
@@ -31,7 +32,7 @@ To get around these problems you can use a visual keyboard like this.
 <h1>Dynamic SVG font</h1>
 
 <!--  onclick="this.innerHTML='';" title="click to clear" -->
-<p id="svgContainer"></p>
+<p id="svgContainer">SVG text: </p>
 <script type="text/javascript">
 <!--
 var svgContainer = document.getElementById("svgContainer");
