@@ -111,7 +111,6 @@ use encoding "utf8";
 @consonants = $allConsonants;
 
 @consonants = (
-(""),
 ("\x{1000}"),#KA,shan
 ("\x{1001}"),#KHA,shan
 ("\x{1002}"),#GA,shan ga
@@ -195,7 +194,7 @@ use encoding "utf8";
 @tones = (
 "",
 #"\x{1069}",#w-pwo-1
-"\x{1037}",#dot-below
+"\x{1037}"#dot-below
 #"\x{1087}",#shan-2
 #"\x{108B}",#shan-council-2
 #"\x{106A}",#w-pwo-2
@@ -236,7 +235,7 @@ for ($v = 0; $v<=$#vowels; $v++)
 for ($t = 0; $t<=$#tones; $t++)
 {
     printf("%s%s%s%s\n", $consonants[$c], $medials[$m], $vowels[$v], $tones[$t]);
-    if ($consonants[$c] =~ /[\x{1001}\x{1002}\x{1004}\x{1012}\x{101d}]/)
+    if ($consonants[$c] =~ /[\x{1001}\x{1002}\x{1004}\x{1012}\x{101d}]/ && $vowels[$v] eq "ာ")
     {
         printf("%s%s%s%s\n", $consonants[$c], $medials[$m], "ါ", $tones[$t]);
         printf("%s%s%s%s\n", $consonants[$c], $medials[$m], "ါ်", $tones[$t]);
@@ -287,6 +286,28 @@ for ($k = 0; $k<=$#killed; $k++)
     }
 }
 
+for ($i = 0; $i < $#medials; $i++)
+{
+    if (length($medials[$i]) == 1)
+    {
+        printf("%s\n", $medials[$i]);
+    }
+}
+for ($i = 0; $i < $#vowels; $i++)
+{
+    if (length($vowels[$i]) == 1)
+    {
+        printf("%s\n", $vowels[$i]);
+    }
+}
+for ($i = 0; $i < $#tones; $i++)
+{
+    if (length($tones[$i]) == 1)
+    {
+        printf("%s\n", $tones[$i]);
+    }
+}
+
 print <<'EOT';
 က်ျ
 န်ု
@@ -294,7 +315,11 @@ print <<'EOT';
 န္တျ
 န္တျ
 သ္တြ
-င်္◌
+င်္
+ါ်
+ါ
+့
+်
 ဥုံ
 တ္တွ
 EOT

@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+Most computers do not have a  Myanmar Unicode Input Method installed. 
+Even if people have one, they may not be familiar with typing in Myanmar. 
+To get around these problems you can use a visual keyboard like this.
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Show rendered strings</title>
+<script type="text/javascript" src="../xmlRequest.js"></script>
+<script type="text/javascript" src="../myKeyboard.js"></script>
+<script type="text/javascript" src="../mySource.js"></script>
+<script type="text/javascript" src="../PadaukOT.js"></script>
+<script type="text/javascript" src="../myDetection.js"></script>
+<script type="text/javascript" src="../svg/mySvgFont.js"></script>
+<script type="text/javascript" src="../svg/Padauk.js"></script>
+<script type="text/javascript" src="../svg/PadaukRendered.js"></script>
+
+
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+
+<script>
+<!--
+function showRendered(start)
+{
+    if (typeof myUnicode != "undefined" && typeof mySvgFont != "undefined" && 
+        mySvgFont.hasFontData(myUnicode.svgFont))
+    {
+        var renderedSvg = document.getElementById("renderedSvg");
+        var r = mySvgFont.fonts.getRendered(myUnicode.svgFont);
+        var i = 0;
+        for (text in r)
+        {
+            if (i++ < start) continue;
+            var codeString = String(text).substring(1);
+            var uText = "";
+            for (var j = 0; j < codeString.length; j+=4)
+            {
+                uText += String.fromCharCode(parseInt(codeString.substring(j, j+4), 16));
+            }
+            //if (i == 1) alert(uText);
+            mySvgFont.appendSvgText(renderedSvg, myUnicode.svgFont, 14, uText, "#000", "#afa");
+            renderedSvg.appendChild(document.createTextNode(uText + " "));
+            if (i > start + 100)
+            {
+                setTimeout("showRendered(" + i + ")", 100);
+                return;
+            }
+        }
+    }
+    else setTimeout("showRendered(0)", 500);
+}
+-->
+</script>
+
+</head>
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<body id='body' onload="showRendered(0);myUnicode.imgPrefix='../';">
+<div id="renderedSvg">
+</div>
+
+</body>
+</html>
+

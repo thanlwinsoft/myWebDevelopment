@@ -15,7 +15,10 @@ glyphs:[
 </xsl:text>
 <xsl:apply-templates/>
 <xsl:text>]};
-
+mySvgFont.fonts.setFont("</xsl:text>
+<xsl:value-of select="svg:font-face/@font-family"/>
+<xsl:text>", svgFont_</xsl:text>
+<xsl:value-of select="svg:font-face/@font-family"/><xsl:text>);
 </xsl:text>
 <!--<xsl:text>glyphCount:</xsl:text><xsl:value-of select="count(svg:missing-glyph|svg:glyph)"/>-->
 </xsl:template>

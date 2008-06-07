@@ -208,5 +208,6 @@ div.myKeyInput {
 svg {
     display: inline;
     vertical-align: top;
+    overflow: visible;
 }
 

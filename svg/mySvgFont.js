@@ -1,27 +1,62 @@
 // Copyright: Keith Stribley 2008 http://www.ThanLwinSoft.org/
 // License: GNU Lesser General Public License, version 2.1 or later.
 // http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+function MySvgFonts() {
+    this.fonts = new Array();
+    this.rendered = new Array();
+    return this;
+}
+
+MySvgFonts.prototype.setFont = function(name, data)
+{
+    this.fonts[name] = data;
+}
+MySvgFonts.prototype.setRendered = function(name, data)
+{
+    this.rendered[name] = data;
+}
+MySvgFonts.prototype.hasFont = function(name)
+{
+    if (typeof this.fonts[name] != "undefined" && 
+        typeof this.rendered[name] != "undefined")
+        return true;
+    return false;
+}
+MySvgFonts.prototype.getFont = function(name)
+{
+    return this.fonts[name];
+}
+MySvgFonts.prototype.getRendered = function(name)
+{
+    return this.rendered[name];
+}
+
 var mySvgFont = {
-    fontWarning:false,
+    fontWarning:true,
     defaultFontSize:12,
     maxContext:10,
     loaded:false,
+    fonts: new MySvgFonts(),
     hasFontData : function(fontName)
     {
-        if (mySvgFont.loaded) return true;
         try
         {
-            fontData = eval('svgFont_' + fontName);
-            renderingData = eval(fontName + "Rendered");
-            mySvgFont.loaded = true;
-            return true;
+            if (mySvgFont.loaded) return true;
+            //fontData = eval('svgFont_' + fontName);
+            //renderingData = eval(fontName + "Rendered");
+            if (mySvgFont.fonts.hasFont(fontName))
+            {
+                mySvgFont.loaded = true;
+                return true;
+            }
         }
         catch (e)
         {
             if (mySvgFont.fontWarning) alert(fontName + " SVG not yet found");
             mySvgFont.fontWarning = false;
-            return false;
         }
+        return false;
     },
     renderSvg: function(svg, fontName, text, size, color, background)
     {
@@ -29,8 +64,8 @@ var mySvgFont = {
         var renderingData;
         try
         {
-            fontData = eval('svgFont_' + fontName);
-            renderingData = eval(fontName + "Rendered");
+            fontData = mySvgFont.fonts.getFont(fontName);//eval('svgFont_' + fontName);
+            renderingData = mySvgFont.fonts.getRendered(fontName);//eval(fontName + "Rendered");
         }
         catch (e)
         {
@@ -77,11 +112,19 @@ var mySvgFont = {
                 uText += hex;
                 try
                 {
-                    gData = eval("renderingData." + uText);                
-                    if (gData != undefined)
+                    // avoid entries for single code points unless they are
+                    // isolated, since these may have dotted circles for diacritics
+                    // which should only be displayed stand alone
+                    if (uText.length > 5 || text.length == 1)
                     {
-                        prevMatch = gData;
-                        lastMatchIndex = j;
+                        gData = renderingData[uText];
+                        if (gData != undefined)
+                        {
+//                            if (myUnicode.debug())
+//                                myUnicode.debug().appendChild(document.createTextNode(uText));
+                            prevMatch = gData;
+                            lastMatchIndex = j;
+                        }
                     }
                 }
                 catch (e)
@@ -103,30 +146,6 @@ var mySvgFont = {
                 mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
                 width += charGlyph[charGlyph.length - 1];
             }
-/*
-                 if (prevMatch)
-                {
-                    mySvgFont.appendGlyphPaths(scaleG, fontData, prevMatch, width, 0);
-                    width += prevMatch[prevMatch.length - 1];
-                    uText = "u" + uText.substring(uText.length - 4);
-                }
-                else if (uText.length > 5)
-                {
-                    // previous didn't match, just output the character's normal glyph
-                    var charGlyph = mySvgFont.findGlyph(fontData, text[i - 1]);
-                    mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
-                    width += charGlyph[charGlyph.length - 1];
-                    uText = "u" + uText.substring(uText.length - 4);
-                }
-                
-                if (i == text.length - 1) // last char
-                {
-                    var charGlyph = mySvgFont.findGlyph(fontData, text[i]);
-                    mySvgFont.appendGlyphPaths(scaleG, fontData, charGlyph, width, 0);
-                    width += charGlyph[charGlyph.length - 1];
-                }
-                prevMatch = false;
-*/
         }
 
         var widthPx = width * scaling;
@@ -147,7 +166,6 @@ var mySvgFont = {
         svg.appendChild(scaleG);
         svg.setAttribute("width", widthPx);
         svg.setAttribute("height", heightPx);
-        
 
         return true;
     },
@@ -179,7 +197,7 @@ var mySvgFont = {
             }
         }
     },
-    appendSvgText: function(parent, fontName, size, text, color)
+    appendSvgText: function(parent, fontName, size, text, color, background)
     {
         if (text.length == 0) return;
         if (!mySvgFont.hasFontData(fontName)) return;
@@ -203,7 +221,7 @@ var mySvgFont = {
             document.createElement("svg");
         if (svg)
         {
-            if (mySvgFont.renderSvg(svg, fontName, text, size, color))
+            if (mySvgFont.renderSvg(svg, fontName, text, size, color, background))
             {
 /*
                 var span = document.createElement("span");

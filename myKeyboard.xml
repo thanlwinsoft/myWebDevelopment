@@ -29,16 +29,19 @@ link which calls java script code similar to:
 If you use the onload function, then it will automatically add some links.
 In PHP you can use an include to load this keyboard, otherwise, the keyboard is loaded
 by the myK.registerKeyboard('my'); call usin an AJAX based technique.
+
+
 -->
 <div xmlns="http://www.w3.org/1999/xhtml">
 <div class="keyboard" id="my_keyboard" style="display:none;"
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
-<!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
-<div  id='myKeyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
-<p style="float:left; display:inherit;" id="myKeyboardLayoutOn" class="keyboardTab">
-<span style="background-color: white;" onclick="myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');this.style.backgroundColor='white';this.nextSibling.style.backgroundColor='inherit';" title="Show keyboard">ခလုပ်ကွက်</span><span onclick="myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');this.style.backgroundColor='white';this.previousSibling.style.backgroundColor='inherit';" title="Show alphabet">အက္ခရာ</span>
+<div  id='myKeyboardTopBar' class='keyboardTopBar' >
+<p style="float:left; display:inherit;" class="keyboardTab">
+<span style="background-color: white;" onclick="document.getElementById('myKeyboardLayoutOn').style.backgroundColor='white';document.getElementById('myAlphabetOn').style.backgroundColor='blue';myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');" title="Show keyboard" id="myKeyboardLayoutOn">ခလုပ်ကွက်</span><span style="background-color: blue;" onclick="document.getElementById('myAlphabetOn').style.backgroundColor='white';document.getElementById('myKeyboardLayoutOn').style.backgroundColor='blue';myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');" title="Show alphabet" id="myAlphabetOn">အက္ခရာ</span>
 </p>
-<p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('my')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
+<!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on each site which uses this script + html code. -->
+<p title="Click &amp; drag to move. Reclick to end move." onmousedown="myKeyboardMover.startMove(event);">
+<span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('my')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
 </div>
 <div id="my_alphabet" style="display:none; clear: left;">
 <table><tr><td>
@@ -49,7 +52,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 </colgroup>
 <!-- 2nd arg is order in syllable -->
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_u1000" href="javascript:myK.typeChar('\u1000', 1)">_က_</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u1000" href="javascript:myK.typeChar('\u1000', 1)">က</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1001" href="javascript:myK.typeChar('\u1001', 1)">ခ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1002"  href="javascript:myK.typeChar('\u1002', 1)">ဂ</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u1003"  href="javascript:myK.typeChar('\u1003', 1)">ဃ</a></td>
