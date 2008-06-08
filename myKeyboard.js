@@ -1028,6 +1028,12 @@ toUnicodes: function(text)
             inputOuterDiv.insertBefore(node, inputInnerDiv);
             myK.updateOverlay(nodeId);
             myK.addOnKeyPressEvent(document);
+           // if (myUnicode.isIe)
+                document.onkeydown = function(e) {if (window.event) {
+                                return myKeyMapper.controlKey(window.event); 
+                            }
+                            return true;
+                    };
         }
     },
     addOnKeyPressEvent : function(node)
@@ -1643,6 +1649,58 @@ var myKeyMapper = {
         }
     },
 
+    controlKey : function(evt)
+    {
+        if (evt.shiftKey == true) 
+        {
+            return true;
+        }
+        var oldValue = String(myK.inputNode.value);
+        var newText = "";
+        var selectionStart = 0;
+        var selectionEnd = 0;
+        switch (evt.keyCode)
+            {
+            case 13:// enter
+                newText = "\n";
+                break;
+            case 36:// end
+                selectionEnd = selectionStart = 0;
+                break;
+            case 35:// home
+                selectionStart = oldValue.length;
+                selectionEnd = oldValue.length;
+                break;
+            case 37:// left arrow
+                selectionStart = selectionStart - 1;
+                selectionEnd = selectionStart;
+                break;
+            case 39:// right arrow
+                selectionStart = selectionStart + 1;
+                selectionEnd = selectionStart;
+                break;
+            case 46:// del
+                selectionEnd = selectionEnd + 1;
+                break;
+            case 8:// backspace
+                selectionStart = selectionStart - 1;
+                break;
+            default:
+                return true;
+            }
+            if (selectionStart < 0)
+                selectionStart = selectionEnd = 0;
+            if (selectionStart > oldValue.length)
+                selectionStart = selectionEnd = oldValue.length;
+            myK.inputNode.myK_cursor = selectionStart;
+            myK.inputNode.value = oldValue.substring(0, selectionStart)
+                    + newText + oldValue.substring(selectionEnd);
+            var newPos = selectionStart + newText.length;
+            myK.inputNode.myK_cursor = newPos;
+            myK.updateOverlay(myK.inputId, newPos, newPos);
+            return false;
+    },
+
     keyPress : function(e)
     {
         var evt = e || window.event;
@@ -1699,40 +1757,7 @@ var myKeyMapper = {
             var newText = "";
             if (key == 0)
             {
-                switch (evt.keyCode)
-                {
-                case 13:// enter
-                    newText = "\n";
-                    break;
-                case 36:// end
-                    cursor.selectionEnd = cursor.selectionStart = 0;
-                    break;
-                case 35:// home
-                    cursor.selectionStart = oldValue.length;
-                    cursor.selectionEnd = oldValue.length;
-                    break;
-                case 37:// left arrow
-                    cursor.selectionStart = cursor.selectionStart - 1;
-                    cursor.selectionEnd = cursor.selectionStart;
-                    break;
-                case 39:// right arrow
-                    cursor.selectionStart = cursor.selectionStart + 1;
-                    cursor.selectionEnd = cursor.selectionStart;
-                    break;
-                case 46:// del
-                    cursor.selectionEnd = cursor.selectionEnd + 1;
-                    break;
-                case 8:// backspace
-                    cursor.selectionStart = cursor.selectionStart - 1;
-                    break;
-                default:
-                    return true;
-                }
-                if (cursor.selectionStart < 0)
-                    cursor.selectionStart = cursor.selectionEnd = 0;
-                if (cursor.selectionStart > oldValue.length)
-                    cursor.selectionStart = cursor.selectionEnd = oldValue.length;
-                myK.inputNode.myK_cursor = cursor.selectionStart;
+                return myKeyMapper.controlKey(evt);
             }
             else
             {
