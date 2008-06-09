@@ -216,13 +216,13 @@ var myUnicode = {
     check : function ()
     {
         if (myUnicode.checkFinished == true) return myUnicode.isSupported;
-	var widthTest = 0;
+        var widthTest = 0;
         var myW2 = document.getElementById('myWidth2');
         var myW1 = document.getElementById('myWidth1');
         if (!myW2 || !myW1)
         {
-	    var widthTest = document.createElement("p");
-	    document.body.appendChild(widthTest);
+        var widthTest = document.createElement("p");
+        document.body.appendChild(widthTest);
 
             myW2 = document.createElement("span");
             myW2.style.fontFamily = myUnicode.fontNames;
@@ -273,7 +273,7 @@ var myUnicode = {
         } 
         myW1.removeChild(myW1.firstChild);
         myW2.removeChild(myW2.firstChild);
-	if (widthTest != 0)
+    if (widthTest != 0)
             document.body.removeChild(widthTest);
         return myUnicode.isSupported;
     },
@@ -287,6 +287,7 @@ var myUnicode = {
         var userAgent =navigator.userAgent.toLowerCase();
         myUnicode.isGecko = (userAgent.indexOf('gecko') != -1);
         myUnicode.isIe = (userAgent.indexOf("msie")!=-1);
+        myUnicode.addScript(theImgPrefix + "myParser.js");
         if (!myUnicode.isIe)
         {
             myUnicode.addScript(theImgPrefix + "svg/mySvgFont.js");
@@ -414,7 +415,7 @@ var myUnicode = {
         if (notice) 
         {
             notice.style.display = "none";
-            for (var i = 3; i < notice.childNodes.length; i++)
+            for (var i = 8; i < notice.childNodes.length; i++)
             {
                 notice.removeChild(notice.childNodes[i]);
             }
@@ -592,6 +593,10 @@ var myUnicode = {
                     {
                         code = text.charCodeAt(j);
                         if (myUnicode.inRange(code) == false) break;
+                        if (myParser != undefined && myParser.canBreakAfter(text, j - 1))
+                        {
+                            break;
+                        }
                     }
                     try
                     {

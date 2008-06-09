@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Sgaw Karen Keyboard</title>
+</head>
+<body>
+<!-- 
+Copyright 2005,2006 ThanLwinSoft.org
+
+You are free to use this on your website and modify it 
+subject to a Creative Commons license. 
+However, please add a link to www.thanlwinsoft.org 
+on every page that uses this script. For more info
+and contact details see www.thanlwinsoft.org.
+
+This copyright statement must not be removed.
+===========================================================
+
+You will need to add a link to the accompanying script
+in your page header. The page uses the UTF-8 Unicode Encoding.
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="myKeyboard.js"></script>
+<link type="text/css" rel="stylesheet" href="myKeyboard.css"/>
+</head>
+<body id='body' onload="myK.registerKeyboard('ksw');">...</body>
+The keyboard will not be displayed until you click on a 
+link which calls java script code similar to:
+<a href="javascript:toggleLangKeyboard('ksw')">
+ခလုတ်ကွက်ပြ
+</a>
+If you use the onload function, then it will automatically add some links.
+In PHP you can use an include to load this keyboard, otherwise, the keyboard is loaded
+by the myK.registerKeyboard('ksw'); call usin an AJAX based technique.
+-->
+<div  xmlns="http://www.w3.org/1999/xhtml" class="keyboard" id="ksw_keyboard" style="display:none;"  onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
+<!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on every page that uses this script + html code. -->
+<div  id='kswKeyboardTopBar' class='keyboardTopBar' onmousedown="myKeyboardMover.startMove(event)">
+<p title="Click &amp; drag to move. Reclick to end move."><span><a href='http://www.thanlwinsoft.org' class="keyboard"><img src='ThanLwinIcon.png' alt='ThanLwinSoft' title="Myanmar Unicode technology from www.ThanLwinSoft.org"/></a></span><a href="javascript:myK.hideKeyboard('ksw')" class="closeWindow" title='Hide Keyboard'>&#x00D7;</a></p>
+</div>
+<div id="ksw_alphabet" style="clear: left;">
+<table><tr><td>
+<table class="consonants">
+<colgroup>
+<col class="consonants" span="4"/>
+<col class="consWide" />
+</colgroup>
+
+<!-- 2nd arg is order in syllable -->
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1000" href="javascript:myK.typeChar('\u1000', 1)">က</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1001" href="javascript:myK.typeChar('\u1001', 1)">ခ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1002"  href="javascript:myK.typeChar('\u1002', 1)">ဂ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1003"  href="javascript:myK.typeChar('\u1003', 1)">ဃ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1004"  href="javascript:myK.typeChar('\u1004', 1)">င</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1005"  href="javascript:myK.typeChar('\u1005', 1)">စ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1006"  href="javascript:myK.typeChar('\u1006', 1)">ဆ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1061"  href="javascript:myK.typeChar('\u1061', 1)">&#x1061;</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u100a"  href="javascript:myK.typeChar('\u100a', 1)">ည</a></td>
+<td class="keyboard"></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1010"  href="javascript:myK.typeChar('\u1010', 1)">တ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1011"  href="javascript:myK.typeChar('\u1011', 1)">ထ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1012"  href="javascript:myK.typeChar('\u1012', 1)">ဒ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1014"  href="javascript:myK.typeChar('\u1014', 1)">န</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1015"  href="javascript:myK.typeChar('\u1015', 1)">ပ</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1016" href="javascript:myK.typeChar('\u1016', 1)">ဖ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1018"  href="javascript:myK.typeChar('\u1018', 1)">ဘ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1019"  href="javascript:myK.typeChar('\u1019', 1)">မ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u101a"  href="javascript:myK.typeChar('\u101a', 1)">ယ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u101b"  href="javascript:myK.typeChar('\u101b', 1)">ရ</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u101c"  href="javascript:myK.typeChar('\u101c', 1)">လ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u101d"  href="javascript:myK.typeChar('\u101d', 1)">ဝ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u101e"  href="javascript:myK.typeChar('\u101e', 1)">သ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u101f"  href="javascript:myK.typeChar('\u101f', 1)">ဟ</a></td>
+<td class="keyboard"></td>
+</tr>
+<tr>
+<td class="keyboard"></td>
+<td class="keyboard"><a class="keyboard"  id="ksw_u1021" href="javascript:myK.typeChar('\u1021', 1)">အ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1027" href="javascript:myK.typeChar('\u1027', 1)">ဧ</a></td>
+<td class="keyButton" colspan="2"><a class="keyboard"  id="ksw_stack" href="javascript:myK.toggleStack('ksw')">က
+<span class="arrow">↔</span>္က</a></td>
+</tr>
+</table>
+</td><td>
+<table class="vowels">
+<colgroup><col span="6" class="vowels"/>
+<col span="1" class="wideCol" /></colgroup>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_medYa" href="javascript:myK.typeChar('\u103b', 3)">ျ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_medRa" href="javascript:myK.typeChar('\u103c', 3)">ြ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_medWa" href="javascript:myK.typeChar('\u103d', 4)">ွ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_medHa" href="javascript:myK.typeChar('\u103e', 5)">ှ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_killer" href="javascript:myK.typeChar('\u1060', 3)">ၠ</a></td>
+<td class="keyButton" colspan="2"><a class="keyboard" id="ksw_hideKeyboard" href="javascript:myK.hideKeyboard('ksw')">မၤဟါမၢ်ကွံာ်</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1023" href="javascript:myK.typeChar('\u103A', 5)">်</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1024" href="javascript:myK.typeChar('\u102C\u103A', 1)">ာ်</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1026" href="javascript:myK.typeChar('\u1062\u103A', 1)">ၢ်</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1025" href="javascript:myK.typeChar('\u1063\u103A', 1)">ၣ်</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u102a" href="javascript:myK.typeChar('\u1062', 1)">ၢ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u102c" href="javascript:myK.typeChar('\u1064', 13)">ၤ</a></td>
+<td class="keyboard" rowspan="3"></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u102d" href="javascript:myK.typeChar('\u102d', 7)">ိ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u102e" href="javascript:myK.typeChar('\u102e', 7)">ီ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u102f" href="javascript:myK.typeChar('\u102f', 8)">ု</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1030" href="javascript:myK.typeChar('\u1030', 8)">ူ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u104a" href="javascript:myK.typeChar('\u104a', 14)">၊</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u104b" href="javascript:myK.typeChar('\u104b', 14)">။</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1032" href="javascript:myK.typeChar('\u1032', 7)">ဲ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1036" href="javascript:myK.typeChar('\u1036', 10)">ံ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1037" href="javascript:myK.typeChar('\u1037', 12)">့</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1038" href="javascript:myK.typeChar('\u1038', 13)">း</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1031" href="javascript:myK.typeChar('\u1031', 6)">​ေ</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u102b" href="javascript:myK.typeChar('\u102b', 9)">ါ</a></td>
+
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1040" href="javascript:myK.typeChar('\u1040', 1)">၀</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1041" href="javascript:myK.typeChar('\u1041', 1)">၁</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1042" href="javascript:myK.typeChar('\u1042', 1)">၂</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1043" href="javascript:myK.typeChar('\u1043', 1)">၃</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1044" href="javascript:myK.typeChar('\u1044', 1)">၄</a></td>
+<td class="keyButton" rowspan="2" colspan="2"><a class="keyboard" href="javascript:myK.deleteChar()">←<br/>တူးသံကွံာ်</a></td>
+</tr>
+<tr>
+<td class="keyboard"><a class="keyboard" id="ksw_u1045" href="javascript:myK.typeChar('\u1045', 1)">၅</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1046" href="javascript:myK.typeChar('\u1046', 1)">၆</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1047" href="javascript:myK.typeChar('\u1047', 1)">၇</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1048" href="javascript:myK.typeChar('\u1048', 1)">၈</a></td>
+<td class="keyboard"><a class="keyboard" id="ksw_u1049" href="javascript:myK.typeChar('\u1049', 1)">၉</a></td>
+</tr>
+</table>
+</td></tr></table>
+</div>
+</div>
+</body></html>
+

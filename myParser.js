@@ -1,5 +1,5 @@
 /*
-Copyright 2005,2006 ThanLwinSoft.org
+Copyright 2005,2006,2008 ThanLwinSoft.org
 
 You are free to use this on your website and modify it 
 subject to either the GNU Lesser General Public License or the 
@@ -42,13 +42,11 @@ function MyParser()
   this.MMC_MD = 12;
   this.MMC_SE = 13;
   this.MMC_VS = 14;
-  this.MMC_PL = 15;
-  this.MMC_PV = 16;
-  this.MMC_SP = 17;
-  this.MMC_LQ = 18;
-  this.MMC_RQ = 19;
-  this.MMC_WJ = 20;
-  this.MMC_OT = 21;
+  this.MMC_SP = 15;
+  this.MMC_LQ = 16;
+  this.MMC_RQ = 17;
+  this.MMC_WJ = 18;
+  this.MMC_OT = 19;
 // break weights from initial table approach
   this.BK_NO_BREAK = 0;
   this.BK_WEIGHT_1 = 1;
@@ -64,28 +62,26 @@ function MyParser()
     // BK_UNEXPECTED = 4; BK_SYLLABLE = 5; BK_WHITESPACE = 6; BK_EOL = 7;
   this.BKSTATUS = 
       new Array (
-    //              ci me vi ev uv lv av an ki ld vg md se vs pl pv sp lq rq wj ot 
-    /*ci*/new Array( 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*me*/new Array( 3, 0, 4, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*vi*/new Array( 0, 4, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 1, 2, 5, 0, 1 ),
-    /*ev*/new Array( 3, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*uv*/new Array( 3, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*lv*/new Array( 3, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*av*/new Array( 3, 4, 0, 4, 4, 4, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*an*/new Array( 2, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*ki*/new Array( 2, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*ld*/new Array( 2, 4, 4, 4, 4, 4, 0, 4, 4, 4, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*vg*/new Array( 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*md*/new Array( 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 2, 5, 0, 1 ),
-    /*se*/new Array( 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 4, 1, 1, 4, 1, 2, 5, 0, 1 ),
-    /*vs*/new Array( 1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 1, 5, 5, 1, 4, 1, 2, 5, 0, 1 ),
-    /*pl*/new Array( 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 2, 0, 1, 2, 5, 0, 1 ),
-    /*pv*/new Array( 2, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 2, 4, 1, 2, 5, 0, 1 ),
-    /*sp*/new Array( 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 5, 0, 6 ),
-    /*lq*/new Array( 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 0, 5, 5, 5 ),
-    /*rq*/new Array( 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 5, 0, 1 ),
-    /*wj*/new Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 0, 0 ),
-    /*ot*/new Array( 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 0, 0 )
+    //              ci me vi ev uv lv av an ki ld vg md se vs sp lq rq wj ot 
+    /*ci*/new Array( 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*me*/new Array( 3, 0, 4, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*vi*/new Array( 0, 4, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0, 4, 4, 1, 2, 5, 0, 1 ),
+    /*ev*/new Array( 3, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*uv*/new Array( 3, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*lv*/new Array( 3, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*av*/new Array( 3, 4, 0, 4, 4, 4, 0, 0, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*an*/new Array( 2, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*ki*/new Array( 2, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*ld*/new Array( 2, 4, 4, 4, 4, 4, 0, 4, 4, 4, 0, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*vg*/new Array( 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*md*/new Array( 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 5, 0, 1 ),
+    /*se*/new Array( 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 4, 1, 1, 2, 5, 0, 1 ),
+    /*vs*/new Array( 1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 1, 5, 5, 1, 2, 5, 0, 1 ),
+    /*sp*/new Array( 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 5, 0, 6 ),
+    /*lq*/new Array( 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 0, 5, 5, 5 ),
+    /*rq*/new Array( 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 5, 0, 1 ),
+    /*wj*/new Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 0, 0 ),
+    /*ot*/new Array( 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 5, 0, 0 )
       );
 
 
@@ -187,6 +183,12 @@ function MyParser()
       case 0x1029:
       case 0x102a:
       case 0x104e:
+      case 0x1050:
+      case 0x1051:
+      case 0x1052:
+      case 0x1053:
+      case 0x1054:
+      case 0x1055:
       case 0x105a:
       case 0x105b:
       case 0x105c:
@@ -217,6 +219,8 @@ function MyParser()
         break;
       case 0x102f:
       case 0x1030:
+      case 0x1058:
+      case 0x1059:
         mmClass = myParser.MMC_LV;
         break;
       case 0x102d:
@@ -228,6 +232,8 @@ function MyParser()
         break;
       case 0x102b:
       case 0x102c:
+      case 0x1056:
+      case 0x1057:
       case 0x1062:
       case 0x1063:
       case 0x1064:
@@ -274,20 +280,6 @@ function MyParser()
       case 0x2013: //en dash
       case 0x2014: //em dash
         mmClass = myParser.MMC_VS;
-        break;  
-      case 0x1050:
-      case 0x1051:
-      case 0x1052:
-      case 0x1053:
-      case 0x1054:
-      case 0x1055:
-        mmClass = myParser.MMC_PL;
-        break;
-      case 0x1056:
-      case 0x1057:
-      case 0x1058:
-      case 0x1059:
-        mmClass = myParser.MMC_PV;
         break;
       case 0x0020:
       case 0x2000:
@@ -312,9 +304,6 @@ function MyParser()
       case 0x203a:
         mmClass = myParser.MMC_RQ;
         break;
-      //case 0x200c:
-      //  mmClass = myParser.MMC_NJ;
-      //  break;
       case 0x200d:
       case 0x2060:
         mmClass = myParser.MMC_WJ;
@@ -406,3 +395,4 @@ function MyParser()
 }
 
 var myParser = new MyParser();
+

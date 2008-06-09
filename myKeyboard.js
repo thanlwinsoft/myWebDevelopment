@@ -42,7 +42,7 @@ langAvailable : [],
 keyboardIcon : "Keyboard.png",
 keyboardOffIcon : "KeyboardOff.png",
 keyboardVisible : false,
-keyboardSrc : "Keyboard.xml",
+keyboardSrc : "Keyboard.html",
 selectionColor : "#c0c0ff",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
@@ -793,39 +793,48 @@ hideKeyboard: function(lang)
 */
 toggleLangKeyboard: function(lang, nodeId)
 {
-  var keyboard = document.getElementById(myK.lang + '_keyboard');
-  if (lang != myK.lang)
-  {
-    var img = document.getElementById(nodeId + "_" + myK.lang);
-    if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
-    img = document.getElementById(nodeId + "_" + lang);
-    if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
-    myK.lang = lang;
-    if (keyboard) keyboard.style.display = "none";
-  }
-  else
-  {
-    var img = document.getElementById(nodeId + "_" + lang);
-    if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardOffIcon);
-    myK.lang = '';
-  }
-  
-  keyboard = document.getElementById(lang + '_keyboard');
-  myKeyboardMover.keyboardId = lang + '_keyboard';
-  if (myK.keyboardVisible && keyboard.style.display == "none")
-  {
-    keyboard.style.display = "";
-    myKeyboardMover.inputId = nodeId;
-    myKeyboardMover.inputNode = myK.inputNode;
-    myKeyboardMover.moveBelowInput();
-  }
-  else
-  {
-    keyboard.style.display = "none";
-  }
-  myK.switchInput(nodeId);
-  if (myK.inputNode && myK.inputNode.style.display != "none")
-    myK.inputNode.focus();
+    var keyboard = document.getElementById(myK.lang + '_keyboard');
+    if (lang != myK.lang)
+    {
+        var img = document.getElementById(nodeId + "_" + myK.lang);
+        if (img) img.setAttribute('src',myK.pathStem + myK.lang + myK.keyboardOffIcon);
+        img = document.getElementById(nodeId + "_" + lang);
+        if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardIcon);
+        myK.lang = lang;
+        if (keyboard) keyboard.style.display = "none";
+    }
+    else
+    {
+        var img = document.getElementById(nodeId + "_" + lang);
+        if (img) img.setAttribute('src',myK.pathStem + lang + myK.keyboardOffIcon);
+        myK.lang = '';
+    }
+
+    keyboard = document.getElementById(lang + '_keyboard');
+    if (!keyboard)
+    {
+        var keyboardIframe = document.getElementById(lang + '_keyboardFrame');
+        if (keyboardIframe && keyboardIframe.contentDocument)
+        {
+            myK.appendKeyboard(keyboardIframe.contentDocument.body.innerHTML);
+            document.body.removeChild(keyboardIframe);
+        }
+    }
+    myKeyboardMover.keyboardId = lang + '_keyboard';
+    if (myK.keyboardVisible && keyboard.style.display == "none")
+    {
+        keyboard.style.display = "";
+        myKeyboardMover.inputId = nodeId;
+        myKeyboardMover.inputNode = myK.inputNode;
+        myKeyboardMover.moveBelowInput();
+    }
+    else
+    {
+        if (keyboard) keyboard.style.display = "none";
+    }
+    myK.switchInput(nodeId);
+    if (myK.inputNode && myK.inputNode.style.display != "none")
+        myK.inputNode.focus();
 },
 
 /** Change the active input box for the keyboard.
@@ -905,9 +914,16 @@ registerKeyboard: function(langArray)
     {
         for (var k = 0; k < langArray.length; k++)
         {
-            if (!(document.getElementById(langArray[k] + "_keyboard")))
+            if (!(document.getElementById(langArray[k] + "_keyboard")) &&
+                !(document.getElementById(langArray[k] + "_keyboardFrame")))
             {
-                myK.getSourceFile(myK.pathStem + langArray[k] + myK.keyboardSrc);
+                //myK.getSourceFile(myK.pathStem + langArray[k] + myK.keyboardSrc);
+                var iframe = document.createElement("iframe");
+                iframe.style.display = "none";
+                iframe.id = langArray[k] + "_keyboardFrame";
+                iframe.src = myK.pathStem + langArray[k] + myK.keyboardSrc;
+                //iframe.onload = "myK.appendKeyboard(this.contentDocument.body.innerHTML);";
+                document.body.appendChild(iframe);
             }
         }
     }
@@ -925,16 +941,18 @@ toUnicodes: function(text)
   return codes;
 },
 
-    requestA: 0,
-    requestB: 0,
-    requestC: 0,
+//    requestA: 0,
+//    requestB: 0,
+//    requestC: 0,
 /**
-    * A very versatile method of getting a file and getting around the browsers attempt to open the file 
-    * associated with the file type.
+    * A very versatile method of getting a file and getting around the browsers
+    * attempt to open the file associated with the file type.
+    * Unfortunately, latest browers don't allow this to work for file: urls
+    * even though the owner document is also a file: url
     * Note the actual file is displayed in the call back docReady not this method.
     * @param id of pre to insert source file contents
     * @param name of file to retreive
-    */
+    *//*
     getSourceFile : function(name, func)
     {
         // TBD: handle multilple requests better - max 3 at present
@@ -969,7 +987,7 @@ toUnicodes: function(text)
         request.open('get',name, true);
         request.onreadystatechange = returnFunc;
         request.send("");
-    },
+    },*/
     langIcon: function(type, index, lang)
     {
         return "myK." + type + index + lang + "Icon";
@@ -1116,7 +1134,7 @@ toUnicodes: function(text)
             }
         }
     },
-
+/*
     keyboardReadyA: function(e)
     {
         if (myK.requestA.readyState == 4)
@@ -1138,9 +1156,10 @@ toUnicodes: function(text)
             myK.appendKeyboard(myK.requestC.responseText);
         }
     },
-    
+*/
     appendKeyboard: function(docText)
     {
+//        alert(document.getElementsByTagName('title')[0].innerHTML);
         var div = document.createElement('div');
         var fixedLinks = docText.replace(/ThanLwinIcon.png/g,myK.pathStem + "ThanLwinIcon.png");
         if (div)
