@@ -38,9 +38,10 @@ inputNode : undefined,
 consMode : 0,
 numLevels : 14,
 lang : '',
+langAvailable : [],
 keyboardIcon : "Keyboard.png",
 keyboardOffIcon : "KeyboardOff.png",
-keyboardVisible : true,
+keyboardVisible : false,
 keyboardSrc : "Keyboard.xml",
 selectionColor : "#c0c0ff",
 lastTokenLength : 1, // used by myK.getCharOrder()
@@ -274,7 +275,12 @@ updateOverlay : function(inputId, cursorA, cursorB)
     var inputElement = document.getElementById(inputId);
     var text = inputElement.value.replace(/ /g,'\xA0');
     // see if there is an overlay that should have some text added
-    var overlay = document.getElementById(inputId + "_innerDiv")
+    var overlay = document.getElementById(inputId + "_innerDiv");
+    var selObj = (window.getSelection)?window.getSelection():undefined;
+    if (selObj)
+    {
+        selObj.removeAllRanges();
+    }
     if (overlay)
     {
         if (cursorA == undefined) 
@@ -296,12 +302,14 @@ updateOverlay : function(inputId, cursorA, cursorB)
         }
         else
         {
-            var selectionSpan = document.createElement("span");
+            //var selectionSpan = document.createElement("span");
             var selectionText = document.createTextNode(text.substring(cursorA, cursorB));
-            selectionSpan.appendChild(selectionText);
-            selectionSpan.style.backgroundColor = myK.selectionColor;
-            overlay.appendChild(selectionSpan);
-            selection = selectionSpan;
+            //selectionSpan.appendChild(selectionText);
+            //selectionSpan.style.backgroundColor = myK.selectionColor;
+            //overlay.appendChild(selectionSpan);
+            overlay.appendChild(selectionText);
+            //selection = selectionSpan;
+            selection = selectionText;
         }
         var afterCursor = document.createTextNode(text.substring(cursorB));
         overlay.appendChild(afterCursor);
@@ -309,10 +317,33 @@ updateOverlay : function(inputId, cursorA, cursorB)
         var selObj = (window.getSelection)?window.getSelection():undefined;
         if (selObj)
         {
-            selObj.removeAllRanges();
             var r = document.createRange();
-            r.setStart(selection, 0);
-            r.setEnd(selection, selection.childNodes.length);
+            if (selection.nodeType == 1 && selection.tagName.toLowerCase() == "img")
+            {
+                r.setStart(selection, 0);
+                r.setEnd(selection, selection.childNodes.length);
+            }
+            else
+            {
+                var i = 0;
+                var charIndex = 0;
+                for (i = 0; i < overlay.childNodes.length; i++)
+                {
+                    var nodeChars = myK.countCharacters(overlay.childNodes[i]);
+                    if (charIndex + nodeChars > cursorA)
+                        break;
+                    charIndex+= nodeChars;
+                }
+                r.setStart(overlay, i);
+                for (; i < overlay.childNodes.length; i++)
+                {
+                    var nodeChars = myK.countCharacters(overlay.childNodes[i]);
+                    if (charIndex + nodeChars > cursorB)
+                        break;
+                    charIndex+= nodeChars;
+                }
+                r.setEnd(overlay, i);
+            }
         }
     }
   }
@@ -851,14 +882,14 @@ switchInput: function(newId)
 * Call this in the onload method of a page
 * @param array of languages
 */
-registerKeyboard: function(lang)
+registerKeyboard: function(langArray)
 {
     myK.findPathStem();
     var inputCount = 0;
     var textareaNodes = document.getElementsByTagName('textarea');
     for (var i = 0; i < textareaNodes.length; i++)
     {
-        myK.addOnEventLink(textareaNodes[i], 'textarea', i, lang);
+        myK.addOnEventLink(textareaNodes[i], 'textarea', i, langArray);
         inputCount++;
     }
     var inputNodes = document.getElementsByTagName('input');
@@ -866,20 +897,21 @@ registerKeyboard: function(lang)
     {
         if (inputNodes[j].getAttribute('type') == 'text')
         {
-            myK.addOnEventLink(inputNodes[j], 'input', j, lang);
+            myK.addOnEventLink(inputNodes[j], 'input', j, langArray);
             inputCount++;
         }
     }
     if (inputCount > 0)
     {
-        for (var k = 0; k < lang.length; k++)
+        for (var k = 0; k < langArray.length; k++)
         {
-            if (!(document.getElementById(lang[k] + "_keyboard")))
+            if (!(document.getElementById(langArray[k] + "_keyboard")))
             {
-                myK.getSourceFile(myK.pathStem + lang[k] + myK.keyboardSrc);
+                myK.getSourceFile(myK.pathStem + langArray[k] + myK.keyboardSrc);
             }
         }
     }
+    myK.langAvailable = langArray;
 },
 
 toUnicodes: function(text)
@@ -979,8 +1011,8 @@ toUnicodes: function(text)
                 var langIcon = document.createElement('img');
                 langIcon.setAttribute('src', myK.pathStem + lang[i] + myK.keyboardOffIcon);
                 langIcon.setAttribute('id', nodeId + "_" + lang[i]);
-                langIcon.setAttribute('alt', "Show Keyboard");
-                langIcon.setAttribute('title', "Show Keyboard");
+                langIcon.setAttribute('alt', "Enable Keyboard");
+                langIcon.setAttribute('title', "Enable Keyboard");
                 langIcon.myK_lang = lang[i];
                 langIcon.myK_nodeId = nodeId;
                 langIcon.onclick = function() {myK.toggleLangKeyboard(this.myK_lang,this.myK_nodeId);}
@@ -989,11 +1021,11 @@ toUnicodes: function(text)
                 inputOuterDiv.appendChild(langIcon);
             }
             var keyboardIcon = document.createElement('img');
-            keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindow" + ((myK.keyboardVisible)?"":"Off") + ".png");
+            keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
             keyboardIcon.setAttribute('id', nodeId + "_keyboardDialog");
             keyboardIcon.setAttribute('alt', "Show Keyboard");
             keyboardIcon.setAttribute('title', "Show Keyboard");
-            keyboardIcon.onclick = function() {myK.toggleAlphabetWindow();};
+            keyboardIcon.onclick = function() {myK.toggleAlphabetWindow(this.myK_nodeId);};
             keyboardIcon.style.cssFloat = "right";
             keyboardIcon.style.cursor = "pointer";
             inputOuterDiv.appendChild(keyboardIcon);
@@ -1050,8 +1082,12 @@ toUnicodes: function(text)
             node.onkeypress = function(event) { return myKeyMapper.keyPress(event); };
         }
     },
-    toggleAlphabetWindow : function()
+    toggleAlphabetWindow : function(inputId)
     {
+        if (myK.lang == '' && myK.langAvailable.length > 0) 
+        {
+            myK.toggleLangKeyboard(myK.langAvailable[0], inputId);
+        }
         var keyboard = document.getElementById(myK.lang + '_keyboard');
         if (keyboard)
         {
@@ -1170,7 +1206,7 @@ toUnicodes: function(text)
                     len += myK.countCharacters(node.childNodes[i]);
             }
         }
-        myK.debugText(node + " count=" + len + " ");
+        myK.debugText("count " + node + " =" + len + " ");
         return len;
     },
     getCursorPosition : function()
@@ -1192,19 +1228,28 @@ toUnicodes: function(text)
                     r.commonAncestorContainer.parentNode.parentNode == innerDiv)
                 {
                     this.selectionStart = this.selectionEnd = 0;
+                    var startNode = r.startContainer;
+                    var endNode = r.endContainer;
+                    // find top level start node as a child of innerDiv
+                    if (startNode != innerDiv)
+                        while (startNode.parentNode != innerDiv) startNode = startNode.parentNode;
+                    if (endNode != innerDiv)
+                        while (endNode.parentNode != innerDiv) endNode = endNode.parentNode;
                     for (var i = 0; i < innerDiv.childNodes.length; i++)
                     {
                         if (r.startContainer == innerDiv)
                         {
-                            if (r.startOffset < i) 
+                            if (i < r.startOffset) 
                                 this.selectionStart += myK.countCharacters(innerDiv.childNodes[i]);
                             else break;
                         }
                         else
                         {
-                            if (innerDiv.childNodes[i] == r.startContainer)
+                            if (innerDiv.childNodes[i] == startNode)
                             {
-                                this.selectionStart += r.startOffset;
+                                if (startNode.nodeType == 3 && r.startContainer == startNode)
+                                    this.selectionStart += r.startOffset;
+                                // TODO handle nested levels below this
                                 break;
                             }
                             this.selectionStart += myK.countCharacters(innerDiv.childNodes[i]);
@@ -1215,15 +1260,17 @@ toUnicodes: function(text)
                     {
                         if (r.endContainer == innerDiv)
                         {
-                            if (r.endOffset < i) 
+                            if (i < r.endOffset) 
                                 this.selectionEnd += myK.countCharacters(innerDiv.childNodes[i]);
                             else break;
                         }
                         else
                         {
-                            if (innerDiv.childNodes[i] == r.endContainer)
+                            if (innerDiv.childNodes[i] == endNode)
                             {
-                                this.selectionEnd += r.endOffset;
+                                if (endNode.nodeType == 3 && r.endContainer == endNode)
+                                    this.selectionEnd += r.endOffset;
+                                // TODO handle nested levels below this
                                 break;
                             }
                             this.selectionEnd += myK.countCharacters(innerDiv.childNodes[i]);
@@ -1237,6 +1284,7 @@ toUnicodes: function(text)
             {
                 if (myK.inputNode)
                     this.selectionStart = this.selectionEnd = myK.inputNode.myK_cursor;
+                myK.debugText("No selection found, using old value" +this.selectionStart);
             }
         }
         else
@@ -1283,7 +1331,7 @@ toUnicodes: function(text)
             }
         }
 
-        //if (myK.debug()) myK.debug().innerHTML = "range:" + this.selectionStart + ':' + this.selectionEnd;
+        myK.debugText("range:" + this.selectionStart + ':' + this.selectionEnd + "," + ((myK.inputNode)?myK.inputNode.myK_cursor:""));
         return this;
     },
     setCursorPosition : function(start, end)
@@ -1657,45 +1705,45 @@ var myKeyMapper = {
         }
         var oldValue = String(myK.inputNode.value);
         var newText = "";
-        var selectionStart = 0;
-        var selectionEnd = 0;
+        var cursor = myK.getCursorPosition();
+        // TODO handle clusters
         switch (evt.keyCode)
             {
             case 13:// enter
                 newText = "\n";
                 break;
-            case 36:// end
-                selectionEnd = selectionStart = 0;
+            case 36:// home
+                cursor.selectionEnd = cursor.selectionStart = 0;
                 break;
-            case 35:// home
-                selectionStart = oldValue.length;
-                selectionEnd = oldValue.length;
+            case 35:// end
+                cursor.selectionStart = oldValue.length;
+                cursor.selectionEnd = oldValue.length;
                 break;
             case 37:// left arrow
-                selectionStart = selectionStart - 1;
-                selectionEnd = selectionStart;
+                cursor.selectionStart = cursor.selectionStart - 1;
+                cursor.selectionEnd = cursor.selectionStart;
                 break;
             case 39:// right arrow
-                selectionStart = selectionStart + 1;
-                selectionEnd = selectionStart;
+                cursor.selectionStart = cursor.selectionStart + 1;
+                cursor.selectionEnd = cursor.selectionStart;
                 break;
             case 46:// del
-                selectionEnd = selectionEnd + 1;
+                cursor.selectionEnd = cursor.selectionEnd + 1;
                 break;
             case 8:// backspace
-                selectionStart = selectionStart - 1;
+                cursor.selectionStart = cursor.selectionStart - 1;
                 break;
             default:
                 return true;
             }
-            if (selectionStart < 0)
-                selectionStart = selectionEnd = 0;
-            if (selectionStart > oldValue.length)
-                selectionStart = selectionEnd = oldValue.length;
-            myK.inputNode.myK_cursor = selectionStart;
-            myK.inputNode.value = oldValue.substring(0, selectionStart)
-                    + newText + oldValue.substring(selectionEnd);
-            var newPos = selectionStart + newText.length;
+            if (cursor.selectionStart < 0)
+                cursor.selectionStart = cursor.selectionEnd = 0;
+            if (cursor.selectionStart > oldValue.length)
+                cursor.selectionStart = cursor.selectionEnd = oldValue.length;
+            myK.inputNode.myK_cursor = cursor.selectionStart;
+            myK.inputNode.value = oldValue.substring(0, cursor.selectionStart)
+                    + newText + oldValue.substring(cursor.selectionEnd);
+            var newPos = cursor.selectionStart + newText.length;
             myK.inputNode.myK_cursor = newPos;
             myK.updateOverlay(myK.inputId, newPos, newPos);
             return false;
@@ -1753,7 +1801,6 @@ var myKeyMapper = {
             }
 
             var oldValue = String(myK.inputNode.value);
-            var cursor = myK.getCursorPosition();
             var newText = "";
             if (key == 0)
             {
@@ -1763,6 +1810,7 @@ var myKeyMapper = {
             {
                 newText = String.fromCharCode(key);
             }
+            var cursor = myK.getCursorPosition();
             myK.inputNode.value = oldValue.substring(0, cursor.selectionStart)
                     + newText + oldValue.substring(cursor.selectionEnd);
             var newPos = cursor.selectionStart + newText.length;

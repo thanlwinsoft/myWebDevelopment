@@ -35,7 +35,7 @@ Note: the <span>s must be before the script, so they are available as the page l
         color: red;
     }
     .myText {
-        font-family: Padauk, Myanmar3, Parabaik;
+        font-family: Padauk, PadaukOT, Myanmar3, Parabaik;
         font-size: 1em;
     }
     .myTextMsg {
@@ -59,7 +59,6 @@ Note: the <span>s must be before the script, so they are available as the page l
     }
 </style>
 
-<script type="text/javascript" src="../PadaukOT.js"></script>
 <script type="text/javascript" src="../myDetection.js"></script>
 <script type="text/javascript" src="../xmlRequest.js"></script>
 <script type="text/javascript" src="../mySource.js"></script>
@@ -85,13 +84,12 @@ Note: the <span>s must be before the script, so they are available as the page l
 <pre>
 ...
 &lt;meta content="text/html; charset=UTF-8" http-equiv="content-type" /&gt;
-&lt;script type="text/javascript" src="/styles/PadaukOT.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="/styles/myDetection.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="/styles/xmlRequest.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body  onload="myUnicode.initParse('/styles/');" &gt;
-&lt;span style="font-family: 'Padauk','Myanmar3','Myanmar2'" id="myWidth2"&gt;ကက&lt;/span&gt;
-&lt;span style="font-family: 'Padauk','Myanmar3','Myanmar2'" id="myWidth1"&gt;က္က&lt;/span&gt;
+&lt;span style="font-family: 'Padauk','Myanmar3','Parabaik'" id="myWidth2"&gt;ကက&lt;/span&gt;
+&lt;span style="font-family: 'Padauk','Myanmar3','Parabaik'" id="myWidth1"&gt;က္က&lt;/span&gt;
 ...
 </pre>
 <p>Change the styles directory as appropriate for your website. 
