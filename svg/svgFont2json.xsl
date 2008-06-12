@@ -8,6 +8,7 @@ xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg"
 <xsl:text>var svgFont_</xsl:text>
 <xsl:value-of select="svg:font-face/@font-family"/>
 <xsl:text> = {
+name:"</xsl:text><xsl:value-of select="svg:font-face/@font-family"/><xsl:text>",
 unitsPerEm:</xsl:text><xsl:value-of select="svg:font-face/@units-per-em"/><xsl:text>,
 ascent:</xsl:text><xsl:value-of select="svg:font-face/@ascent"/><xsl:text>,
 descent:</xsl:text><xsl:value-of select="svg:font-face/@descent"/><xsl:text>,
@@ -15,10 +16,17 @@ glyphs:[
 </xsl:text>
 <xsl:apply-templates/>
 <xsl:text>]};
-mySvgFont.fonts.setFont("</xsl:text>
+if (typeof mySvgFont != "undefined") mySvgFont.fonts.setFont("</xsl:text>
 <xsl:value-of select="svg:font-face/@font-family"/>
 <xsl:text>", svgFont_</xsl:text>
 <xsl:value-of select="svg:font-face/@font-family"/><xsl:text>);
+if (typeof tlsFontCache != "undefined") {
+    tlsFontCache.registerFontData("</xsl:text>
+<xsl:value-of select="svg:font-face/@font-family"/>
+<xsl:text>", svgFont_</xsl:text>
+<xsl:value-of select="svg:font-face/@font-family"/>
+<xsl:text>);
+}
 </xsl:text>
 <!--<xsl:text>glyphCount:</xsl:text><xsl:value-of select="count(svg:missing-glyph|svg:glyph)"/>-->
 </xsl:template>

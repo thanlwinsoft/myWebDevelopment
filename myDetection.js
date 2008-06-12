@@ -428,7 +428,7 @@ var myUnicode = {
     {
         if (myKeyboardMover != undefined)
         {
-            //myK.addOverlay(node);
+            myK.addOverlay(node);
         }
         //else alert("no myOverlay");
     },

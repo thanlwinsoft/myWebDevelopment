@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+Most computers do not have a  Myanmar Unicode Input Method installed. 
+Even if people have one, they may not be familiar with typing in Myanmar. 
+To get around these problems you can use a visual keyboard like this.
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Dynamic Canvas font</title>
+<script type="text/javascript" src="../mySource.js"></script>
+<!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="../canvas/tlsCanvasFont.js"></script>
+<script type="text/javascript" src="../svg/Padauk.js"></script>
+<script type="text/javascript" src="../svg/PadaukRendered.js"></script>
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+</head>
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<body id='body' onload="setTimeout(testCanvas, 100);">
+<h1>Dynamic Canvas font</h1>
+<div>
+</div>
+<div onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">show cv html</div>
+<div onclick="TlsDebug().clear().print(document.getElementById('svgContainer').innerHTML);">show html</div>
+<div onclick="document.getElementById('canvasPadauk0').getContext('2d').fillRect(0,0,100,100);">show html</div>
+<div id="svgContainer">
+Canvas text: </div>
+<div></div><p id="containerP"></p>
+<script type="text/javascript">
+<!--
+function testCanvas()
+{
+if (!tlsFontCache["Padauk"]) alert("Padauk not found");
+var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
+
+var svgContainer = document.getElementById("svgContainer");
+/*
+var cv = document.getElementById("cv");
+var ctx = cv.getContext("2d");
+var text = "မြန်မာစကား။";
+var run = new TlsTextRun(myCanvasFont.font, 14, text);
+run.drawText(myCanvasFont.font, 0);
+ctx.fillStyle = "rgb(200,255,200)";
+ctx.fillRect(0,0,run.width, run.height);
+ctx.fillStyle = "rgb(255,0,0)";
+var run = myCanvasFont.drawTextOnCanvas(ctx,14,text);
+ctx.fillStyle = "rgb(255,0,255)";
+ctx.translate(0,run.height);
+myCanvasFont.drawTextOnCanvas(ctx,20,"အက္ခရာ။ ");
+*/
+myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ");
+myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(0,255,0)", "rgb(200,255,200)");
+myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,0)");
+svgContainer = document.getElementById("containerP");
+myCanvasFont.appendText(svgContainer, 20, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(0,0,255)");
+
+}
+-->
+</script>
+</p>
+<hr />
+<div id="tlsDebug">
+</div>
+
+<p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
+For more details <a href="javascript:getSourceFile('source','mySvgFontTest.html')">View the Source HTML, CSS</a> and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Javascript</a> for instructions on how to use in your own pages. In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, which will automatically convert Myanmar Unicode text to SVG when appropriate. </p></p>
+<hr />
+<p>You are free to use this on your own website without charge or waranty, though it would be appreciated you could add a link of acknowledgement to 
+<a href="http://www.thanlwinsoft.org/"><img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/>www.thanlwinsoft.org</a>.
+</p>
+<div class="source" style="display:none;">
+<h2>Page HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source" style="display:none;">
+<h2>Keyboard HTML Source</h2>
+<pre id="keySrc" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>CSS Source</h2>
+<pre id="cssPre" style="display:none;">
+</pre>
+</div>
+</body>
+</html>

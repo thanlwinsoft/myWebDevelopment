@@ -85,7 +85,7 @@ myK.afterKey = showUnicodes;
 <a href="javascript:getSourceFile('js','../myKeyboard.js')">Javascript</a> and  
 <a href="javascript:getSourceFile('cssPre','../myKeyboard.css')">CSS</a> 
 for more instructions on how to use in your own pages.</p>
-<p>This script can be combined with <tt>myUnicode.initParse('/styles/');</tt> to allow the Myanmar text to be converted to images automatically when Unicode support is not available. If your browser supports Myanmar Unicode you can <a href="javascript:{ myUnicode.isSupported=false; myUnicode.parseDoc(); }">force the conversion</a> of Myanmar <span class="my">[မြန်မာ]</span> text to images. 
+<p>This script can be combined with <tt>myUnicode.initParse('/styles/');</tt> to allow the Myanmar text to be converted to images automatically when Unicode support is not available. If your browser supports Myanmar Unicode you can <a href="javascript:{ myUnicode.isSupported=false; myUnicode.initParse('../'); }">force the conversion</a> of Myanmar <span class="my">[မြန်မာ]</span> text to images. 
 </p>
 <p>An overlay div is used to contain the images, which is placed on top of text-input and textarea tags. The content of the input box is left as real text so that the form submission is still correct, though it may be displayed wrongly. The div overlay is only displayed when the Myanmar keyboard is visible. The overlay is not used at all when image conversion is not needed.</p>
 <p>See also the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>. </p>

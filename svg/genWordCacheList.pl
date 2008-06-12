@@ -286,29 +286,36 @@ for ($k = 0; $k<=$#killed; $k++)
     }
 }
 
-for ($i = 0; $i < $#medials; $i++)
+for ($i = 0x1000; $i < 0x10A0; $i++)
 {
-    if (length($medials[$i]) == 1)
-    {
-        printf("%s\n", $medials[$i]);
-    }
-}
-for ($i = 0; $i < $#vowels; $i++)
-{
-    if (length($vowels[$i]) == 1)
-    {
-        printf("%s\n", $vowels[$i]);
-    }
-}
-for ($i = 0; $i < $#tones; $i++)
-{
-    if (length($tones[$i]) == 1)
-    {
-        printf("%s\n", $tones[$i]);
-    }
+	printf("%s\n",chr($i));
 }
 
+# for ($i = 0; $i < $#medials; $i++)
+# {
+    # if (length($medials[$i]) == 1)
+    # {
+        # printf("%s\n", $medials[$i]);
+    # }
+# }
+# for ($i = 0; $i < $#vowels; $i++)
+# {
+    # if (length($vowels[$i]) == 1)
+    # {
+        # printf("%s\n", $vowels[$i]);
+    # }
+# }
+# for ($i = 0; $i < $#tones; $i++)
+# {
+    # if (length($tones[$i]) == 1)
+    # {
+        # printf("%s\n", $tones[$i]);
+    # }
+# }
+
 print <<'EOT';
+◌‌ေ
+က္ကြ
 က်ျ
 န်ု
 က္ချ
@@ -317,11 +324,14 @@ print <<'EOT';
 သ္တြ
 င်္
 ါ်
-ါ
-့
-်
 ဥုံ
 တ္တွ
+၎င်း
+ဦး
+ဋ္ဌ
+ာ်
+ၣ်
+ၢ်
 EOT
 
 

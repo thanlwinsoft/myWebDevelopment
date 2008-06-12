@@ -46,6 +46,7 @@ keyboardSrc : "Keyboard.html",
 selectionColor : "#c0c0ff",
 lastTokenLength : 1, // used by myK.getCharOrder()
 afterKey : 0,
+fillerChar : "\u200B",
 debug : function() { return document.getElementById("myDebug");},
 debugText : function(text) { 
     if (myK.debug())
@@ -78,7 +79,6 @@ initKeyboard: function(path, lang)
 {
     myK.pathStem = path;
     var langArray = lang;
-    alert(typeof lang);
     if (typeof lang == "string")
         langArray = new Array(lang);
     myK.registerKeyboard(langArray);
@@ -93,8 +93,10 @@ initKeyboard: function(path, lang)
 */
 findOldText: function(inputElement, cursor)
 {
-  var oldText = inputElement.value.substring(0, cursor.selectionEnd);
-  this.suffix = inputElement.value.substring(cursor.selectionEnd);
+  var pos = inputElement.value.length;
+  if (cursor != undefined) pos = cursor.selectionEnd;
+  var oldText = inputElement.value.substring(0, pos);
+  this.suffix = inputElement.value.substring(pos);
   // strip off current syllable
   var oldSyllable = myK.syllableToString();
   var oldIndex = -1;
@@ -136,7 +138,7 @@ typeChar: function(charValue, pos)
     if (myK.consMode == 0)
     {
       if (myK.currentSyllable[pos] != "" && 
-          myK.currentSyllable[pos] != "\u25cc")
+          myK.currentSyllable[pos] != myK.fillerChar)
       {
         oldText.prefix = oldText.prefix + myK.syllableToString();
         myK.resetSyllable();
@@ -276,12 +278,13 @@ updateOverlay : function(inputId, cursorA, cursorB)
     var text = inputElement.value.replace(/ /g,'\xA0');
     // see if there is an overlay that should have some text added
     var overlay = document.getElementById(inputId + "_innerDiv");
-    var selObj = (window.getSelection)?window.getSelection():undefined;
+    var selObj = (window.getSelection)?window.getSelection():document.selection;
     if (selObj)
     {
-        selObj.removeAllRanges();
+        if (selObj.removeAllRanges) selObj.removeAllRanges();
+		if (selObj.empty) selObj.empty();
     }
-    if (overlay)
+    if (overlay && overlay.style.display != "none")
     {
         if (cursorA == undefined) 
         {
@@ -314,8 +317,8 @@ updateOverlay : function(inputId, cursorA, cursorB)
         var afterCursor = document.createTextNode(text.substring(cursorB));
         overlay.appendChild(afterCursor);
         myUnicode.parseNodeIfNeeded(overlay);
-        var selObj = (window.getSelection)?window.getSelection():undefined;
-        if (selObj)
+        var selObj = (window.getSelection)?window.getSelection():document.selection;
+        if (window.getSelection && selObj)
         {
             var r = document.createRange();
             if (selection.nodeType == 1 && selection.tagName.toLowerCase() == "img")
@@ -345,6 +348,20 @@ updateOverlay : function(inputId, cursorA, cursorB)
                 r.setEnd(overlay, i);
             }
         }
+		else if (document.selection)
+		{
+			if (selection.nodeType == 1 && selection.tagName.toLowerCase() == "img")
+			{
+				var r = document.body.createControlRange();
+				try
+				{
+					r.addElement(selection);
+					r.select();
+					myK.debugText("selected range " + cursorA);
+				}
+				catch (e) {}
+			}
+		}
     }
   }
 },
@@ -588,12 +605,12 @@ syllableToString: function()
   {
     if (i == 1 && myK.currentSyllable[i] == "")
     {
-      text = text + '\u25cc';
+      text = text + myK.fillerChar;
     }
     else text = text + myK.currentSyllable[i];
   }
   // check for empty string
-  if (text == "\u25cc") text = "";
+  if (text == myK.fillerChar) text = "";
   return text;
 },
 
@@ -690,13 +707,13 @@ toggleStack: function(prefix)
                     if (myK.consMode == 0)
                     {
                         var lastSlash = oldSrc.lastIndexOf("/");
-                        newSrc = oldSrc.substring(0,lastSlash + 1) + "25cc1039" +
+                        newSrc = oldSrc.substring(0,lastSlash + 1) + "1039" +
                             oldSrc.substring(lastSlash + 1, oldSrc.length);
-                        //newSrc = oldSrc.replace("/10","/25cc103910");
+                        //newSrc = oldSrc.replace("/10","/103910");
                     }
                     else
                     {
-                      newSrc = oldSrc.replace("/25cc1039","/");
+                      newSrc = oldSrc.replace("/1039","/");
                     }
                     children.item(j).setAttribute("src",newSrc);
                 }
@@ -709,11 +726,11 @@ toggleStack: function(prefix)
                         var text = svgChild.firstChild.firstChild.firstChild.textContent;
                         if (myK.consMode == 0)
                         {
-                            text = "\u25cc\u1039" + text;
+                            text = "\u1039" + text;
                         }
                         else
                         {
-                            if (text[0] == '\u25cc' && text[1] == '\u1039') text = text.substring(2);
+                            if (text[0] == '\u1039') text = text.substring(1);
                         }
                         var fontSize = mySvgFont.nodeFontSize(element);
                         var textColor = mySvgFont.computedStyle(element).color;
@@ -746,7 +763,7 @@ toggleStack: function(prefix)
       if (element)
     {
       var text = new String(element.firstChild.nodeValue);
-      var u25cc = document.createTextNode('\u25cc\u1039' + text);
+      var u25cc = document.createTextNode('\u1039' + text);
       element.replaceChild(u25cc, element.firstChild);
     }
     }
@@ -766,7 +783,7 @@ toggleStack: function(prefix)
         if (element)
         {
           var text = new String(element.firstChild.nodeValue);
-          var removed = text.replace("\u25cc\u1039", "");
+          var removed = text.replace("\u1039", "");
           var no25cc = document.createTextNode(removed);
           element.replaceChild(no25cc, element.firstChild);
         }
@@ -814,14 +831,19 @@ toggleLangKeyboard: function(lang, nodeId)
     if (!keyboard)
     {
         var keyboardIframe = document.getElementById(lang + '_keyboardFrame');
-        if (keyboardIframe && keyboardIframe.contentDocument)
+        if (keyboardIframe)
         {
-            myK.appendKeyboard(keyboardIframe.contentDocument.body.innerHTML);
-            document.body.removeChild(keyboardIframe);
+			var keyboardDoc = (keyboardIframe.contentDocument)? keyboardIframe.contentDocument : keyboardIframe.contentWindow.document;
+			if (keyboardDoc != undefined)
+			{
+				myK.appendKeyboard(keyboardDoc.body.innerHTML);
+				document.body.removeChild(keyboardIframe);
+			}
+            keyboard = document.getElementById(lang + '_keyboard');
         }
     }
     myKeyboardMover.keyboardId = lang + '_keyboard';
-    if (myK.keyboardVisible && keyboard.style.display == "none")
+    if (myK.keyboardVisible && keyboard && keyboard.style.display == "none")
     {
         keyboard.style.display = "";
         myKeyboardMover.inputId = nodeId;
@@ -844,6 +866,7 @@ toggleLangKeyboard: function(lang, nodeId)
 */
 switchInput: function(newId)
 {
+	//if (myK.inputId == newId) return;
   var oldInput = document.getElementById(myK.inputId);
   if (oldInput)
   {
@@ -863,7 +886,8 @@ switchInput: function(newId)
   if (newInput)
   { 
     myK.inputNode = newInput;
-    myK.findOldText(newInput, myK.getCursorPosition());
+    var cursor = myK.getCursorPosition();
+    myK.findOldText(newInput, cursor);
     //alert(myK.getCursorPosition().selectionStart);
     myKeyboardMover.inputId = newId;
     myKeyboardMover.inputNode = newInput;
@@ -874,7 +898,7 @@ switchInput: function(newId)
         var inputInnerDiv = document.getElementById(newId + "_innerDiv");
         if (inputInnerDiv)
         {
-            myK.updateOverlay(myK.inputId);
+            myK.updateOverlay(myK.inputId, cursor.selectionStart, cursor.selectionEnd);
         }
     }
     var icon = document.getElementById(myK.inputId + "_keyboardDialog");
@@ -898,7 +922,7 @@ registerKeyboard: function(langArray)
     var textareaNodes = document.getElementsByTagName('textarea');
     for (var i = 0; i < textareaNodes.length; i++)
     {
-        myK.addOnEventLink(textareaNodes[i], 'textarea', i, langArray);
+        myK.wrapInput(textareaNodes[i], 'textarea', i, langArray);
         inputCount++;
     }
     var inputNodes = document.getElementsByTagName('input');
@@ -906,7 +930,7 @@ registerKeyboard: function(langArray)
     {
         if (inputNodes[j].getAttribute('type') == 'text')
         {
-            myK.addOnEventLink(inputNodes[j], 'input', j, langArray);
+            myK.wrapInput(inputNodes[j], 'input', j, langArray);
             inputCount++;
         }
     }
@@ -993,7 +1017,7 @@ toUnicodes: function(text)
         return "myK." + type + index + lang + "Icon";
     },
 
-    addOnEventLink: function(node, type, index, lang)
+    wrapInput: function(node, type, index, lang)
     {
         var nodeId = node.getAttribute("id");
         var inputFrag = 0;
@@ -1024,6 +1048,7 @@ toUnicodes: function(text)
             inputInnerDiv.setAttribute("id",nodeId + "_innerDiv");
             
             // add lang icons
+            var iconSpan = document.createElement("div");
             for (var i = 0; i < lang.length; i++)
             {
                 var langIcon = document.createElement('img');
@@ -1034,9 +1059,10 @@ toUnicodes: function(text)
                 langIcon.myK_lang = lang[i];
                 langIcon.myK_nodeId = nodeId;
                 langIcon.onclick = function() {myK.toggleLangKeyboard(this.myK_lang,this.myK_nodeId);}
-                langIcon.style.cssFloat = "right";
+                //langIcon.style.cssFloat = "right";
                 langIcon.style.cursor = "pointer";
-                inputOuterDiv.appendChild(langIcon);
+                //inputOuterDiv.appendChild(langIcon);
+                iconSpan.appendChild(langIcon);
             }
             var keyboardIcon = document.createElement('img');
             keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
@@ -1044,18 +1070,28 @@ toUnicodes: function(text)
             keyboardIcon.setAttribute('alt', "Show Keyboard");
             keyboardIcon.setAttribute('title', "Show Keyboard");
             keyboardIcon.onclick = function() {myK.toggleAlphabetWindow(this.myK_nodeId);};
-            keyboardIcon.style.cssFloat = "right";
+            //keyboardIcon.style.cssFloat = "right";
             keyboardIcon.style.cursor = "pointer";
-            inputOuterDiv.appendChild(keyboardIcon);
+            iconSpan.appendChild(keyboardIcon);
 
+            iconSpan.style.cssFloat = "right";
+			iconSpan.style.styleFloat = "right";
+            inputOuterDiv.appendChild(iconSpan);
 
             inputFrag.appendChild(inputOuterDiv);
+
             //inputOuterDiv.appendChild(node);
             inputOuterDiv.myK_nodeId = nodeId;
             inputOuterDiv.appendChild(inputInnerDiv);
             inputOuterDiv.setAttribute("class", "myKeyInput");
+            inputOuterDiv.style.padding = "5px";
+            inputOuterDiv.style.backgroundColor = "#aaf";
+            inputOuterDiv.style.borderColor = "blue";
+            inputOuterDiv.style.borderWidth = "1px"; 
+            inputOuterDiv.style.borderStyle = "solid"; 
             inputOuterDiv.style.width = inputDim.width + "px";
             inputOuterDiv.style.height = inputDim.height + "px";
+            inputOuterDiv.style.dispay = "inline-block";
             inputOuterDiv.onclick = function(){myK.switchInput(this.myK_nodeId);};
             inputInnerDiv.style.borderWidth = "1px";
             inputInnerDiv.style.borderColor = "black";
@@ -1067,7 +1103,7 @@ toUnicodes: function(text)
             inputInnerDiv.style.height = inputDim.height + "px";
             //alert("width " + inputDim.width + " " + inputDim.height);
             
-            if (myUnicode && myUnicode.isSupported)
+            if (myUnicode && (myUnicode.checkFinished == false || myUnicode.isSupported))
                 inputInnerDiv.style.display = "none";
             else
                 node.style.display = "none";
@@ -1232,7 +1268,7 @@ toUnicodes: function(text)
     {
         this.selectionStart = -1;
         this.selectionEnd = -1;
-        var selObj = (window.getSelection)? window.getSelection() : undefined;
+        var selObj = (window.getSelection)? window.getSelection() : document.selection;
         if (myUnicode && myUnicode.isSupported == false)
         {
             var innerDiv = document.getElementById(myK.inputId + "_innerDiv");
@@ -1295,10 +1331,27 @@ toUnicodes: function(text)
                             this.selectionEnd += myK.countCharacters(innerDiv.childNodes[i]);
                         }
                     }
-                    myK.inputNode.myK_cursor = this.selectionEnd;
                 }
                 if (myK.debug()) myK.debug().appendChild(document.createTextNode(this.selectionStart + " " + this.selectionEnd));
             }
+			else if (selObj.type == "Text")
+			{
+				var textRange = document.selection.createRange();
+				var selParent = textRange.getParentElement();
+				if (selParent == innerDiv)
+				{
+					
+				}
+			}
+			else if (selObj.type == "Control")
+			{
+				var controlRange = document.selection.createRange();
+				for (var i = 0; i < controlRange.length; i++)
+				{
+					var selItem = selObj.item(i);
+					
+				}
+			}
             if (this.selectionStart < 0)
             {
                 if (myK.inputNode)
@@ -1309,27 +1362,30 @@ toUnicodes: function(text)
         else
         {
 
-            if (document.selection && inputObject.selectionStart == undefined)
+            if (document.selection && myK.inputNode.selectionStart == undefined)
             {
-                myK.inputNode.focus();
+                if (myK.inputNode.style.display != "none") myK.inputNode.focus();
 			    var orig = myK.inputNode.value;
                 var range = document.selection.createRange();
 			    var oldRange = range.text;
                 if (range.parentElement() != myK.inputNode)
                 {
-                    return;
+					this.selectionStart = this.selectionEnd = 0;
+                    return this;
                 }
                 var prefixRange = myK.inputNode.createTextRange();
 			    try
 			    {
 				    range.text= "\u200C";// Assume this won't occur naturally
-				    var pos = inputObject.value.indexOf('\u200C');
-				    inputObject.value = orig;//restore original value
+				    var pos = myK.inputNode.value.indexOf('\u200C');
+				    myK.inputNode.value = orig;//restore original value
 				    //prefixRange = prefixRange.setEndPoint("EndToStart", range);
 				    //var suffixRange = inputObject.createTextRange();
 				    //suffixRange = suffixRange.setEndPoint("StartToEnd", range);
 				    this.selectionStart = pos;
 				    this.selectionEnd = pos + oldRange.length;
+				    // restore selectin
+				    myK.setCursorPosition(pos, this.selectionEnd);
 			    }
 			    catch (e)
 			    {
@@ -1350,6 +1406,7 @@ toUnicodes: function(text)
             }
         }
 
+        if (myK.inputNode) myK.inputNode.myK_cursor = this.selectionEnd;
         myK.debugText("range:" + this.selectionStart + ':' + this.selectionEnd + "," + ((myK.inputNode)?myK.inputNode.myK_cursor:""));
         return this;
     },
@@ -1389,10 +1446,18 @@ toUnicodes: function(text)
         myK.inputNode.myK_cursor = start;
     },
     /** add overlay to an input box
-    * see also addOnEventLink - TODO make a more logical combined overlay 
-    */
+	    * see also wrapInput 
+	    */
     addOverlay : function(node)
     {
+		var nodeId = (node.getAttribute("id"))? node.getAttribute("id") : node.id;
+		if (myUnicode.checkFinished && myUnicode.isSupported == false)
+		{
+			var innerDiv = document.getElementById(nodeId + "_innerDiv");
+			innerDiv.style.display = "";
+			node.style.display = "none";
+			myK.updateOverlay(nodeId);
+		}
     }
 };// end MyKeyboard
 
@@ -1455,7 +1520,7 @@ var myKeyboardMover = {
         }
         catch (exception)
         {
-            alert(exception);
+            alert("Exception:" + exception);
         }
         return rectangle;
     },
@@ -1476,6 +1541,10 @@ var myKeyboardMover = {
             {
                 myKeyboardMover.dialog.x = newSize.x;
                 myKeyboardMover.dialog.y = newSize.y;
+				if (myKeyboardMover.dialog.width < newSize.width)
+					myKeyboardMover.dialog.width = newSize.width;
+				if (myKeyboardMover.dialog.height < newSize.height)
+					myKeyboardMover.dialog.height = newSize.height;
             }
         }
     },
@@ -1601,6 +1670,7 @@ var myKeyboardMover = {
         keyboardDiv.style.top = yPos + "px";
 
         if (window.getSelection) window.getSelection().removeAllRanges();
+		if (document.selection) document.selection.empty();
     },
     
     activeMove:function(e)
@@ -1718,7 +1788,8 @@ var myKeyMapper = {
 
     controlKey : function(evt)
     {
-        if (evt.shiftKey == true) 
+        if (evt.shiftKey == true || (myK.inputNode == undefined ||
+			myK.inputNode.style.display != "none"))
         {
             return true;
         }
@@ -1815,7 +1886,6 @@ var myKeyMapper = {
             // don't interpret events if the input is still visible
             if (myK.inputNode.style.display != "none")
             {
-                alert(myK.inputNode.style.display);
                 return true;
             }
 

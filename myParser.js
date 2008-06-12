@@ -368,7 +368,7 @@ function MyParser()
     var length = text.length;
     var language = myParser.MM_LANG_MY;
     var prevChar = 0x0020;
-    for (i = 0; i < length && language == myParser.MM_LANG_MY; i++)
+    for (var i = 0; i < length && language == myParser.MM_LANG_MY; i++)
     {
         // we could look for specific sequences that are Karen specific as well
         switch (text[i])
