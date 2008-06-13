@@ -358,7 +358,6 @@ TlsCanvasSvgPath.prototype.M = function(args)
 
 TlsCanvasSvgPath.prototype.Z = function(args)
 {
-    this.ctx.lineTo(this.dx + this.xStart, this.dy + this.yStart);
     this.prevCx = this.x = this.xStart;
     this.prevCy = this.y = this.yStart;
 };
