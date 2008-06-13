@@ -31,11 +31,10 @@ To get around these problems you can use a visual keyboard like this.
 <h1>Dynamic Canvas font</h1>
 <div>
 </div>
-<div onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">show cv html</div>
 <div id="svgContainer">
 Canvas text: </div>
 <div></div><p id="containerP"></p>
-<canvas width="98%" height="100" id="cv"></canvas>
+<canvas width="200" height="100" id="cv"></canvas>
 <script type="text/javascript">
 <!--
 function testCanvas()
@@ -53,15 +52,16 @@ run.layoutText(myCanvasFont.font);
 ctx.fillStyle = "rgb(200,255,200)";
 ctx.fillRect(0,0,run.width, run.height);
 ctx.fillStyle = "rgb(255,0,0)";
-//run = myCanvasFont.drawTextRun(ctx,run);
+run = myCanvasFont.drawTextRun(ctx,run);
 myCanvasFont.fill = false;
 myCanvasFont.stroke = true;
 ctx.fillStyle = "rgb(255,0,255)";
 ctx.strokeStyle = "rgb(0,0,255)";
-ctx.lineWidth = 5;
+
 ctx.translate(0,run.height);
 myCanvasFont.drawText(ctx,60,"အက္ခရာ။ ");
-
+myCanvasFont.fill = true;
+myCanvasFont.stroke = false;
 myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ","rgb(0,255,255)");
 myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(255,255,0)", "rgb(200,255,200)");
 myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,255)");
@@ -74,7 +74,9 @@ myCanvasFont.appendText(svgContainer, 50, "ဗမာကျပ်။ သင်္
 -->
 </script>
 </p>
-<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<p style="cursor:pointer;"><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>/
+<span onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>
+</p>
 <div id="tlsDebug" style="display:none;"></div>
 
 <p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.

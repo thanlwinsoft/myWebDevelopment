@@ -1337,7 +1337,7 @@ toUnicodes: function(text)
 			else if (selObj.type == "Text")
 			{
 				var textRange = document.selection.createRange();
-				var selParent = textRange.getParentElement();
+				var selParent = textRange.parentElement();
 				if (selParent == innerDiv)
 				{
 					

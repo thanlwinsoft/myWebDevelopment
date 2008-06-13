@@ -40,7 +40,7 @@ var tlsFontCache = new function () {
 function TlsColor(color)
 {
 	this.red = this.green = this.blue = 0;
-	this.alpha = 255;
+	this.alpha = 1;
     var i;
 	if (color.charAt(0) == '#')
 	{
@@ -107,7 +107,7 @@ TlsFont.prototype.computedStyle = function(node)
 
 TlsFont.prototype.nodeFontSize = function(node)
     {
-        var fontSize = mySvgFont.defaultFontSize;
+        var fontSize = this.defaultFontSize;
         var computedStyle = this.computedStyle(node);
         if (computedStyle)
         {
@@ -240,14 +240,11 @@ function TlsCanvasFont(tlsFont)
 }
 TlsCanvasFont.prototype.getGlyph = function(uChar) { return this.font.getGlyph(uChar); }
 TlsCanvasFont.prototype.nodeFontSize = function(node) { return this.font.nodeFontSize(node); }
+TlsCanvasFont.prototype.computedStyle = function(node) { return this.font.computedStyle(node); }
 
 TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, background)
 {
 	var doc = document;
-	/*
-	if (!doc.namespaces["g_vml_"]) {
-	  doc.namespaces.add("g_vml_", "urn:schemas-microsoft-com:vml");
-	}*/
     var canvas = doc.createElement("canvas");
     if (!canvas) return false;
     var run = new TlsTextRun(this.font, fontSize, text);
@@ -258,12 +255,12 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     canvas.setAttribute("id", cId);
     this.canvasCount++;
     parent.appendChild(canvas);
-	//canvas.appendChild(document.createTextNode(text));
+	canvas.appendChild(document.createTextNode(text));
     TlsDebug().print("size("+ run.width + "," + run.height + ")");
 	if (!canvas.getContext && G_vmlCanvasManager)
 	{
 		canvas = G_vmlCanvasManager.initElement(canvas);
-//		canvas = doc.getElementById(cId);
+		canvas = doc.getElementById(cId);
 	}
     var ctx = canvas.getContext("2d");
     if (!ctx) return false;
@@ -336,8 +333,7 @@ TlsCanvasFont.prototype.drawPath = function(ctx, x, y, svgPath)
     var path = new TlsCanvasSvgPath(ctx, x, y);
     path.create(svgPath);
     if (this.fill) ctx.fill();
-	if (this.stroke) ctx.stroke();
-    ctx.closePath();
+	if (this.stroke) { ctx.stroke();}
 };
 
 TlsCanvasSvgPath.prototype.M = function(args)

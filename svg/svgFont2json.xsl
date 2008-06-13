@@ -4,6 +4,8 @@ xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg"
 >
 <xsl:output method="text" indent="no"/>
 
+<xsl:variable name="glyphCount" select="count(//svg:missing-glyph|//svg:glyph)" />
+
 <xsl:template match="svg:font">
 <xsl:text>var svgFont_</xsl:text>
 <xsl:value-of select="svg:font-face/@font-family"/>
@@ -48,8 +50,12 @@ if (typeof tlsFontCache != "undefined") {
     <xsl:otherwise><xsl:value-of select="@unicode"/></xsl:otherwise>
     </xsl:choose>
 <xsl:text>",a:</xsl:text><xsl:value-of select="@horiz-adv-x"/>
-<xsl:text>},
+<xsl:text>}</xsl:text>
+<xsl:variable name="gId" select="count(preceding-sibling::svg:glyph|preceding-sibling::svg:missing-glyph)"/>
+<xsl:if test="$gId + 1 &lt; $glyphCount">
+<xsl:text>,
 </xsl:text>
+</xsl:if>
 </xsl:template>
 
 <!-- strip text to remove unneeded whitespace-->

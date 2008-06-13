@@ -37,14 +37,10 @@ To get around these problems you can use a visual keyboard like this.
 </style>
 </head>
 <!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
-<body id='body' onload="setTimeout(testCanvas, 100);">
+<body id='body' onload="setTimeout(displayGlyph, 100);">
 <h1>Dynamic Canvas font</h1>
 <div>
 </div>
-<div onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">show cv html</div>
-<div id="svgContainer">
-Canvas text: </div>
-<div></div><p id="containerP"></p>
 
 <canvas width="400" height="200" id="cv" style="border-style: solid; float: left;"></canvas>
 
@@ -57,36 +53,44 @@ Canvas text: </div>
 <tr><td>Advance: </td><td id="advance"></td></tr>
 </table>
 <p>
-<span class="playControl" onclick="increment=((increment==1)? -1:1);if (!play) { play=true; testCanvas();}">Reverse</span>
-<span class="playControl" onclick="play = false;">Pause</span>
-<span class="playControl" onclick="if (!play){play=true;testCanvas();}">Play</span>
+<span class="playControl" onclick="increment=((increment==1)? -1:1);if (!play) { play=true; displayGlyph();}">Reverse</span>
+<span class="playControl" onclick="gId-=increment;increment=0;displayGlyph();displayGlyph();play=false;increment=1;">Pause</span>
+<span class="playControl" onclick="if (!play){play=true;displayGlyph();}">Play</span>
 </p>
 </div>
-<p style="clear: both;">
+<p style="clear: both; margin-bottom: 1em;">&nbsp;</p>
 <script type="text/javascript">
 <!--
-var gId = 99;
 var play = true;
 var increment = 1;
 if (!tlsFontCache["Padauk"]) alert("Padauk not found");
 var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
+var gId = Math.round(myCanvasFont.font.data.glyphs.length * Math.random());//99;
 
-function testCanvas()
+function displayGlyph()
 {
 if (!play) return;
 
+if (gId >= myCanvasFont.font.data.glyphs.length)
+{
+    gId = 0;
+}
+else if (gId < 0)
+{
+    gId = myCanvasFont.font.data.glyphs.length - 1;
+}
 var svgContainer = document.getElementById("svgContainer");
 
 var cv = document.getElementById("cv");
 var ctx = cv.getContext("2d");
 ctx.save();
-var text = "မ";
 myCanvasFont.fill = false;
 myCanvasFont.stroke = true;
 
 // erase canvas
 //ctx.fillStyle="rgba(255,255,255,0.8)";
-ctx.fillStyle="rgba(255,255,255,.75)";
+// omit the zero for alpha in opera
+ctx.fillStyle="rgba(255,255,255,.8)";
 ctx.fillRect(0,0,400,200);
 // axes
 ctx.lineWidth = 2;
@@ -115,23 +119,22 @@ ctx.stroke();
 
 ctx.fillStyle = "rgb(255,0,255)";
 ctx.strokeStyle = "rgb(0,0,255)";
-ctx.lineWidth = 3;
+var lineScaling = scaling;
+if (typeof G_vmlCanvasManager != "undefined") lineScaling = 1;
+ctx.lineWidth = 2/lineScaling;
 
 var charGlyph = [0,0,gId,myCanvasFont.font.data.glyphs[gId].a];
 //myCanvasFont.getGlyph(text);
 var run = myCanvasFont.drawGlyphs(ctx,charGlyph, 0, 0);
 
 // advance
-ctx.lineWidth = 2;
-ctx.strokeStyle = "rgb(0,0,0)";
+ctx.lineWidth = 2/lineScaling;
+ctx.strokeStyle = "rgb(50,50,50)";
 ctx.beginPath();
 var advance = ((charGlyph.length>0)? charGlyph[charGlyph.length - 1]:0);
 ctx.moveTo(advance,1.5*em);
 ctx.lineTo(advance,-0.5*em);
 ctx.stroke();
-gId += increment;
-if (gId >= myCanvasFont.font.data.glyphs.length) gId = 0;
-else if (gId < 0) gId = myCanvasFont.font.data.glyphs.length - 1;
 ctx.restore();
 
 // update info
@@ -147,15 +150,18 @@ hexCodes += text.charCodeAt(i).toString(16) + " ";
 document.getElementById("unicodeDec").innerHTML = codes;
 document.getElementById("unicodeHex").innerHTML = hexCodes.toUpperCase();
 
-setTimeout(testCanvas,1000);
+// increment glyph
+gId += increment;
+
+setTimeout(displayGlyph,1000);
 }
 -->
 </script>
-</p>
 <!--
 <p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
 <div id="tlsDebug" style="display:none;"></div>
 -->
+
 <hr />
 <p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
 In IE it should work with the help of <a href="http://sourceforge.net/projects/iecanvas">IECanvas</a></p>
