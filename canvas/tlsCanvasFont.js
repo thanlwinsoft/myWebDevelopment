@@ -41,6 +41,7 @@ function TlsColor(color)
 {
 	this.red = this.green = this.blue = 0;
 	this.alpha = 255;
+    var i;
 	if (color.charAt(0) == '#')
 	{
 		if(color.length < 5)
@@ -57,16 +58,16 @@ function TlsColor(color)
 			this.blue = parseInt(color.substring(5,6), 16);
 		}
 	}
-	else if (color.startsWith("rgba("))
+	else if (i = color.indexOf("rgba(") > -1)
 	{
 		var bracket = color.indexOf(")");
-		values = color.substring(5,brackget).split(",");
+		values = color.substring(i + 5,bracket).split(",");
 		this.red = values[0]; this.green = values[1]; this.blue = values[2]; this.alpha = values[3];
 	}
-	else if (color.startsWith("rgb("))
+	else if (i = color.indexOf("rgb(") > -1)
 	{
 		var bracket = color.indexOf(")");
-		values = color.substring(4,brackget).split(",");
+		values = color.substring(i + 4,bracket).split(",");
 		this.red = values[0]; this.green = values[1]; this.blue = values[2]; 
 	}
 	else if (color == "white") { this.red = 255; this.green = 255; this.blue = 255;}
@@ -81,7 +82,7 @@ function TlsColor(color)
 
 TlsColor.prototype.asRgb = function()
 {
-	if (alpha < 255)
+	if (this.alpha < 255)
 		return "rgba(" + this.red +"," + this.green + "," + this.blue + "," + this.alpha + ")";
 	return "rgb(" + this.red +"," + this.green + "," + this.blue + ")";
 }
@@ -106,15 +107,15 @@ TlsFont.prototype.computedStyle = function(node)
 
 TlsFont.prototype.nodeFontSize = function(node)
     {
+        var fontSize = mySvgFont.defaultFontSize;
         var computedStyle = this.computedStyle(node);
         if (computedStyle)
         {
             var fontSizeText = String(computedStyle.fontSize);
             if (fontSizeText.indexOf("px") > -1) 
                 fontSize = fontSizeText.substring(0, fontSizeText.indexOf("px"));
-            if (fontSize > 0) return fontSize;
         }
-        return mySvgFont.defaultFontSize;
+        return fontSize;
     };
 
 TlsFont.prototype.getGlyph = function(uChar)
@@ -250,7 +251,7 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     var canvas = doc.createElement("canvas");
     if (!canvas) return false;
     var run = new TlsTextRun(this.font, fontSize, text);
-    run.layoutText(this.font);// dummy to measure text
+    run.layoutText(this.font);// to measure text
     canvas.setAttribute("width",run.width);
     canvas.setAttribute("height", run.height);
 	var cId = "canvas" + this.font.data.name + this.canvasCount;
@@ -261,8 +262,8 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     TlsDebug().print("size("+ run.width + "," + run.height + ")");
 	if (!canvas.getContext && G_vmlCanvasManager)
 	{
-		G_vmlCanvasManager.initElement(canvas);
-		canvas = doc.getElementById(cId);
+		canvas = G_vmlCanvasManager.initElement(canvas);
+//		canvas = doc.getElementById(cId);
 	}
     var ctx = canvas.getContext("2d");
     if (!ctx) return false;
@@ -300,22 +301,22 @@ TlsCanvasFont.prototype.drawTextRun = function(ctx, run)
     ctx.translate(0, -this.font.data.ascent);
     try
     {
-        this.drawGlyphs(ctx, this.font.data, run.glyphLayout, 0, 0);
+        this.drawGlyphs(ctx, run.glyphLayout, 0, 0);
     }
     catch (e) { TlsDebug().print(e + " " + e.description); }
     ctx.restore();
     return run;
 }
 
-TlsCanvasFont.prototype.drawGlyphs = function(canvasRef, fontData, gData, dx, dy)
+TlsCanvasFont.prototype.drawGlyphs = function(canvasRef, gData, dx, dy)
 {
-    //this.font.drawGlyphs(canvasRef, fontData, gData, dx, dy);
+    //this.font.drawGlyphs(canvasRef, this.font.data, gData, dx, dy);
     for (var i = 0; i < gData.length - 1; i+= 3)
     {
         var gX = dx + ((gData[i] == undefined)? 0 : gData[i]);
         var gY = dy + ((gData[i+1] == undefined)? 0 : gData[i+1]);
-        //TlsDebug().print("draw " + i + " " + gX + "," + gY + " " + fontData.glyphs[gData[i+2]].d);
-        this.drawPath(canvasRef, gX, gY, fontData.glyphs[gData[i+2]].d);
+        //TlsDebug().print("draw " + i + " " + gX + "," + gY + " " + this.font.data.glyphs[gData[i+2]].d);
+        this.drawPath(canvasRef, gX, gY, this.font.data.glyphs[gData[i+2]].d);
     }
 }
 
@@ -331,10 +332,12 @@ function TlsCanvasSvgPath(ctx, x, y)
 
 TlsCanvasFont.prototype.drawPath = function(ctx, x, y, svgPath)
 {
+    ctx.beginPath();
     var path = new TlsCanvasSvgPath(ctx, x, y);
     path.create(svgPath);
     if (this.fill) ctx.fill();
 	if (this.stroke) ctx.stroke();
+    ctx.closePath();
 };
 
 TlsCanvasSvgPath.prototype.M = function(args)
@@ -428,7 +431,7 @@ TlsCanvasSvgPath.prototype.T = function(args)
 
 TlsCanvasSvgPath.prototype.create = function(data)
 {
-    this.ctx.beginPath();
+    //this.ctx.beginPath();
     var args = new Array();
     var f = 0;
     var num = "";
@@ -489,6 +492,6 @@ TlsCanvasSvgPath.prototype.create = function(data)
             args.push("");
         }
     }
-    this.ctx.closePath();
+    //this.ctx.closePath();
 }
 

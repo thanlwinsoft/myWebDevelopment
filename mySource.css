@@ -49,9 +49,9 @@ div.source {
 }
 
 pre {
-background-color: #ffd0ff;
-overflow: scroll;
-width: 98%;
+  background-color: #ffd0ff;
+  overflow: scroll;
+  margin: 10px;
 }
 
 .source  pre {

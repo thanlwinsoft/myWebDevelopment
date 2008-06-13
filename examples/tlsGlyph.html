@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2005 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+You are free to modify this code to meet your requirements, as specified in the above 
+license. Please include a link to www.thanlwinsoft.org on your website.
+
+Most computers do not have a  Myanmar Unicode Input Method installed. 
+Even if people have one, they may not be familiar with typing in Myanmar. 
+To get around these problems you can use a visual keyboard like this.
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Dynamic Canvas font</title>
+<script type="text/javascript" src="../mySource.js"></script>
+<!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="../canvas/tlsCanvasFont.js"></script>
+<script type="text/javascript" src="../svg/Padauk.js"></script>
+<script type="text/javascript" src="../svg/PadaukRendered.js"></script>
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+
+<style type="text/css">
+.playControl { 
+    -moz-border-radius: 5px; border-style: solid; border-width: 2px;
+    cursor: pointer;
+    padding: 2px;
+    background-color: rgb(200,200,200);
+}
+#glyphProperties { padding: 10px; }
+</style>
+</head>
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<body id='body' onload="setTimeout(testCanvas, 100);">
+<h1>Dynamic Canvas font</h1>
+<div>
+</div>
+<div onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">show cv html</div>
+<div id="svgContainer">
+Canvas text: </div>
+<div></div><p id="containerP"></p>
+
+<canvas width="400" height="200" id="cv" style="border-style: solid; float: left;"></canvas>
+
+<div style="float:left;" id="glyphProperties">
+<table>
+<tr><td>Glyph Id: </td><td id="glyphId"></td></tr>
+<tr><td>Glyph name: </td><td id="glyphName"></td></tr>
+<tr><td>Unicode (decimal): </td><td id="unicodeDec"></td></tr>
+<tr><td>Unicode (hex): </td><td id="unicodeHex"></td></tr>
+<tr><td>Advance: </td><td id="advance"></td></tr>
+</table>
+<p>
+<span class="playControl" onclick="increment=((increment==1)? -1:1);if (!play) { play=true; testCanvas();}">Reverse</span>
+<span class="playControl" onclick="play = false;">Pause</span>
+<span class="playControl" onclick="if (!play){play=true;testCanvas();}">Play</span>
+</p>
+</div>
+<p style="clear: both;">
+<script type="text/javascript">
+<!--
+var gId = 99;
+var play = true;
+var increment = 1;
+if (!tlsFontCache["Padauk"]) alert("Padauk not found");
+var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
+
+function testCanvas()
+{
+if (!play) return;
+
+var svgContainer = document.getElementById("svgContainer");
+
+var cv = document.getElementById("cv");
+var ctx = cv.getContext("2d");
+ctx.save();
+var text = "မ";
+myCanvasFont.fill = false;
+myCanvasFont.stroke = true;
+
+// erase canvas
+ctx.fillStyle="rgba(255,255,255,0.8)";
+ctx.fillRect(0,0,400,200);
+// axes
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.strokeStyle = "rgb(0,255,0)";
+ctx.moveTo(100,0);
+ctx.lineTo(100,200);
+ctx.moveTo(0,150);
+ctx.lineTo(400,150);
+ctx.stroke();
+
+var em = myCanvasFont.font.data.unitsPerEm;
+var scaling = 100 / em;
+ctx.translate(100,150);
+ctx.scale(scaling, -scaling);
+
+// ascent, descent
+ctx.lineWidth = 2;
+ctx.strokeStyle = "rgb(255,0,0)";
+ctx.beginPath();
+ctx.moveTo(-em,myCanvasFont.font.data.ascent);
+ctx.lineTo(3*em,myCanvasFont.font.data.ascent);
+ctx.moveTo(-em,myCanvasFont.font.data.descent);
+ctx.lineTo(3*em,myCanvasFont.font.data.descent);
+ctx.stroke();
+
+ctx.fillStyle = "rgb(255,0,255)";
+ctx.strokeStyle = "rgb(0,0,255)";
+ctx.lineWidth = 3;
+
+var charGlyph = [0,0,gId,myCanvasFont.font.data.glyphs[gId].a];
+//myCanvasFont.getGlyph(text);
+var run = myCanvasFont.drawGlyphs(ctx,charGlyph, 0, 0);
+
+// advance
+ctx.lineWidth = 2;
+ctx.strokeStyle = "rgb(0,0,0)";
+ctx.beginPath();
+var advance = ((charGlyph.length>0)? charGlyph[charGlyph.length - 1]:0);
+ctx.moveTo(advance,1.5*em);
+ctx.lineTo(advance,-0.5*em);
+ctx.stroke();
+gId += increment;
+if (gId >= myCanvasFont.font.data.glyphs.length) gId = 0;
+else if (gId < 0) gId = myCanvasFont.font.data.glyphs.length - 1;
+ctx.restore();
+
+// update info
+document.getElementById("glyphId").innerHTML = gId;
+document.getElementById("glyphName").innerHTML = myCanvasFont.font.data.glyphs[gId].n;
+document.getElementById("advance").innerHTML = myCanvasFont.font.data.glyphs[gId].a;
+var text = myCanvasFont.font.data.glyphs[gId].u;
+var codes = "";
+var hexCodes = "";
+for (var i = 0; i < text.length; i++) { codes += text.charCodeAt(i) + " ";
+hexCodes += text.charCodeAt(i).toString(16) + " ";
+}
+document.getElementById("unicodeDec").innerHTML = codes;
+document.getElementById("unicodeHex").innerHTML = hexCodes.toUpperCase();
+
+setTimeout(testCanvas,1000);
+}
+-->
+</script>
+</p>
+<!--
+<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<div id="tlsDebug" style="display:none;"></div>
+-->
+<hr />
+<p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
+In IE it should work with the help of <a href="http://sourceforge.net/projects/iecanvas">IECanvas</a></p>
+<p>You are free to use this on your own website without charge or waranty, though it would be appreciated you could add a link of acknowledgement to 
+<a href="http://www.thanlwinsoft.org/"><img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/>www.thanlwinsoft.org</a>.
+</p>
+<div class="source" style="display:none;">
+<h2>Page HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source" style="display:none;">
+<h2>Keyboard HTML Source</h2>
+<pre id="keySrc" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>CSS Source</h2>
+<pre id="cssPre" style="display:none;">
+</pre>
+</div>
+</body>
+</html>

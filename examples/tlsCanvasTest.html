@@ -32,11 +32,10 @@ To get around these problems you can use a visual keyboard like this.
 <div>
 </div>
 <div onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">show cv html</div>
-<div onclick="TlsDebug().clear().print(document.getElementById('svgContainer').innerHTML);">show html</div>
-<div onclick="document.getElementById('canvasPadauk0').getContext('2d').fillRect(0,0,100,100);">show html</div>
 <div id="svgContainer">
 Canvas text: </div>
 <div></div><p id="containerP"></p>
+<canvas width="98%" height="100" id="cv"></canvas>
 <script type="text/javascript">
 <!--
 function testCanvas()
@@ -45,35 +44,38 @@ if (!tlsFontCache["Padauk"]) alert("Padauk not found");
 var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
 
 var svgContainer = document.getElementById("svgContainer");
-/*
+
 var cv = document.getElementById("cv");
 var ctx = cv.getContext("2d");
 var text = "မြန်မာစကား။";
 var run = new TlsTextRun(myCanvasFont.font, 14, text);
-run.drawText(myCanvasFont.font, 0);
+run.layoutText(myCanvasFont.font);
 ctx.fillStyle = "rgb(200,255,200)";
 ctx.fillRect(0,0,run.width, run.height);
 ctx.fillStyle = "rgb(255,0,0)";
-var run = myCanvasFont.drawTextOnCanvas(ctx,14,text);
+//run = myCanvasFont.drawTextRun(ctx,run);
+myCanvasFont.fill = false;
+myCanvasFont.stroke = true;
 ctx.fillStyle = "rgb(255,0,255)";
+ctx.strokeStyle = "rgb(0,0,255)";
+ctx.lineWidth = 5;
 ctx.translate(0,run.height);
-myCanvasFont.drawTextOnCanvas(ctx,20,"အက္ခရာ။ ");
-*/
+myCanvasFont.drawText(ctx,60,"အက္ခရာ။ ");
+
 myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ","rgb(0,255,255)");
 myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(255,255,0)", "rgb(200,255,200)");
 myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,255)");
 svgContainer = document.getElementById("containerP");
 myCanvasFont.stroke = true;
 myCanvasFont.fill = false;
-myCanvasFont.appendText(svgContainer, 50, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(0,255,255)");
+myCanvasFont.appendText(svgContainer, 50, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(255,255,255)");
 
 }
 -->
 </script>
 </p>
-<hr />
-<div id="tlsDebug">
-</div>
+<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<div id="tlsDebug" style="display:none;"></div>
 
 <p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
 For more details <a href="javascript:getSourceFile('source','mySvgFontTest.html')">View the Source HTML, CSS</a> and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Javascript</a> for instructions on how to use in your own pages. In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, which will automatically convert Myanmar Unicode text to SVG when appropriate. </p></p>

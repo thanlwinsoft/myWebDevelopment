@@ -65,7 +65,8 @@ myK.afterKey = showUnicodes;
 <br />
 <span id="unicodeDump" style="font-family: monospace; color: gray;">Click on some characters to see their codes.</span><br />
 </form>
-<div id="myDebug"></div>
+<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<div id="tlsDebug" style="display:none;"></div>
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 
 <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>
 </p>

@@ -191,9 +191,17 @@ div.myKeyInput {
     -moz-border-radius: 5px;
 }
 
-svg {
+svg, canvas {
     display: inline;
     vertical-align: top;
     overflow: visible;
+}
+
+#myDebug, #tlsDebug {
+    margin: 10px;
+    font-family: sans-serif;
+    background: #ccc;
+    overflow: scroll;
+    max-height: 200px;
 }
 

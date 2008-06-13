@@ -163,7 +163,7 @@ var myUnicode = {
     fontData  : "Padauk",// can be overridden
     imageFonts:new Object(),
     svgFont : "Padauk",
-	canvasFont : 0,
+    canvasFont : 0,
     codeStart : 4096,// u1000 - inclusive
     codeEnd   : 4256,//u10A0 - exclusive
     imgPrefix : "",// prefix path to images
@@ -289,9 +289,9 @@ var myUnicode = {
         myUnicode.isGecko = (userAgent.indexOf('gecko') != -1);
         myUnicode.isIe = (userAgent.indexOf("msie")!=-1);
         myUnicode.addScript(theImgPrefix + "myParser.js");
-		if (myUnicode.isIe)
-			myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
-		myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
+        if (myUnicode.isIe)
+            myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
+        myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
         myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + ".js");
         myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + "Rendered.js");
         if (!myUnicode.isIe)
@@ -328,7 +328,8 @@ var myUnicode = {
                 try
                 {
                     // wait for the script additions to take affect
-                    if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
+                    //if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
+                    if (tlsFontCache.hasFont(myUnicode.fontData) == false)
                     {
                         setTimeout("myUnicode.parseDoc()", 500);
                         myUnicode.retryCount++;
@@ -356,8 +357,8 @@ var myUnicode = {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
             if ((myUnicode.isIe && typeof myUnicode.imageFonts[myUnicode.fontData] != "undefined")
-                || (typeof mySvgFont != "undefined" && 
-                mySvgFont.hasFontData(myUnicode.svgFont) == true))
+                || (typeof tlsFontCache != "undefined" && 
+                tlsFontCache.hasFont(myUnicode.fontData) == true))
             {
                 myUnicode.parseNode(node);
             }
@@ -521,11 +522,11 @@ var myUnicode = {
                         height = fontHeights[sizeIndex];
                         fontSize = fontData.fontSize[sizeIndex];
                     }
-					if (tlsFontCache && tlsFontCache.hasFont(myUnicode.svgFont))
-					{
-						if (!myUnicode.canvasFont)
-							canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
-					}
+                    if (tlsFontCache && tlsFontCache.hasFont(myUnicode.svgFont))
+                    {
+                        if (!myUnicode.canvasFont)
+                            myUnicode.canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
+                    }
                 }
                 if (false && myUnicode.isIe) // convert to images
                 {
@@ -609,26 +610,27 @@ var myUnicode = {
                     }
                     try
                     {
-						var fontSize = mySvgFont.nodeFontSize(node.parentNode);
-						var textColor = document.fgColor;
-						var backColor = document.bgColor;
-						var computedStyle = mySvgFont.computedStyle(node.parentNode);
-						if (computedStyle) 
-							textColor = computedStyle.color;
+                        var textColor = document.fgColor;
+                        var backColor = document.bgColor;
+                        var computedStyle = mySvgFont.computedStyle(node.parentNode);
+                        if (computedStyle) 
+                            textColor = computedStyle.color;
                             
-						if (myUnicode.canvasFont)
-						{
-							textColor = TlsColor(textColor).asRgb();
-							myUnicode.canvasFont.appendText(docFrag, myUnicode.canvasFont, fontSize, text.substring(i,j), textColor, undefined);
-							i = j - 1;
-						}
+                        if (myUnicode.canvasFont)
+                        {
+                            textColor = (new TlsColor(textColor)).asRgb();
+                            var fontSize = myUnicode.canvasFont.nodeFontSize(node.parentNode);
+                            myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined);
+                            i = j - 1;
+                        }
                         else if (mySvgFont != undefined)
                         {
+                            var fontSize = mySvgFont.nodeFontSize(node.parentNode);
                             mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, undefined);
                             i = j - 1;
                         }
                     }
-                    catch (e) {}
+                    catch (e) { TlsDebug().print("Exception:" + e); }
                 }
             }
             else if (docFrag != undefined)
