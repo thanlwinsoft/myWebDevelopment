@@ -59,11 +59,13 @@ ctx.fillStyle = "rgb(255,0,255)";
 ctx.translate(0,run.height);
 myCanvasFont.drawTextOnCanvas(ctx,20,"အက္ခရာ။ ");
 */
-myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ");
-myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(0,255,0)", "rgb(200,255,200)");
-myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,0)");
+myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ","rgb(0,255,255)");
+myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(255,255,0)", "rgb(200,255,200)");
+myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,255)");
 svgContainer = document.getElementById("containerP");
-myCanvasFont.appendText(svgContainer, 20, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(0,0,255)");
+myCanvasFont.stroke = true;
+myCanvasFont.fill = false;
+myCanvasFont.appendText(svgContainer, 50, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(0,255,255)");
 
 }
 -->
