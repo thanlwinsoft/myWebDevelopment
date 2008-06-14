@@ -104,6 +104,10 @@ MyNodeParser.prototype.parse = function()
              myUnicode.addOverlay(node);
              return; // don't mess with fields
         }
+        else if (node.tagName.toLowerCase() == "option")
+        {
+             return; // don't mess with fields
+        }
         else if (node.tagName.toLowerCase() == "svg")
         {
              return; // already processed
@@ -188,6 +192,7 @@ var myUnicode = {
     retryCount: 0,
     queue : new Array(),
     parseCount : 0,
+    noticeNodeOffset : 8,
     debug : function() { return document.getElementById("myDebug");},
     /** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
@@ -383,7 +388,7 @@ var myUnicode = {
         if (document.createElementNS) notice = document.createElementNS("http://www.w3.org/1999/xhtml","div");
         else notice = document.createElement('div');
         notice.setAttribute("id",'myParseNotice');
-        notice.setAttribute("title","Your browser doesn't support Myanmar Unicode. See www.thanlwinsoft.org for more details.");
+        notice.setAttribute("title","Your browser doesn't support Myanmar Unicode or you don't have a suitable font. Please see www.thanlwinsoft.org.");
         // firefox supports position: fixed, so place it at the bottom of the screen
         notice.setAttribute("style","background-color: red; color: white; position: fixed; right: 0px; bottom: 0px; z-index: 5;");
         if (notice.style)
@@ -394,7 +399,11 @@ var myUnicode = {
         {
             notice.style.position = "absolute";
             notice.style.right = "0px";
-            notice.style.top = "0px";
+            notice.style.fontHeight = "12px";
+            //notice.style.top = "0px";
+            if( document.documentElement)
+                notice.style.top = (document.documentElement.clientHeight - 36) + "px";
+            else notice.style.top = "0px";
         }
         notice.style.zIndex = 5;
         notice.style.fontWeight = "bold";
@@ -420,7 +429,7 @@ var myUnicode = {
         if (notice) 
         {
             notice.style.display = "none";
-            for (var i = 8; i < notice.childNodes.length; i++)
+            for (var i = myUnicode.noticeNodeOffset; i < notice.childNodes.length; i++)
             {
                 notice.removeChild(notice.childNodes[i]);
             }
@@ -444,11 +453,14 @@ var myUnicode = {
             var nParser = myUnicode.queue[0];
             nParser.parse();
             myUnicode.queue.shift();
-            if (myUnicode.parseCount++ %20 == 0)
+            if (myUnicode.parseCount++ %10 == 0)
             {
-                setTimeout("myUnicode.parseNextNode()",10);
+                setTimeout("myUnicode.parseNextNode()",5);
                 myUnicode.createNotice();
                 var notice = document.getElementById('myParseNotice');
+                if (notice.childNodes.length > 100)
+                    for (var i = notice.childNodes.length - 1; i > myUnicode.noticeNodeOffset; i--)
+                        notice.removeChild(notice.childNodes[i]);
                 notice.appendChild(document.createTextNode("."));
             }
             else 
@@ -525,7 +537,10 @@ var myUnicode = {
                     if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(myUnicode.svgFont))
                     {
                         if (!myUnicode.canvasFont)
+                        {
+                            TlsDebug().print("Loaded font: " + myUnicode.fontData);
                             myUnicode.canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
+                        }
                     }
                 }
                 if (false && myUnicode.isIe) // convert to images
@@ -616,13 +631,16 @@ var myUnicode = {
                         if (myUnicode.canvasFont != undefined)
                         {
                             var computedStyle = myUnicode.canvasFont.computedStyle(node.parentNode);
-                            if (computedStyle) 
+                            //TlsDebug().dump(computedStyle,2);
+                            if (computedStyle && computedStyle.color)
                                 textColor = computedStyle.color;
+                            else if (node.parentNode.style.color.specified)
+                                textColor = node.parentNode.style.color;
                             textColor = (new TlsColor(textColor)).asRgb();
 
                             var fontSize = myUnicode.canvasFont.nodeFontSize(node.parentNode);
-                            myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined);
-                            i = j - 1;
+                            if (myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))
+                                i = j - 1;
                         }
                         else if (typeof mySvgFont != "undefined")
                         {
@@ -630,6 +648,7 @@ var myUnicode = {
                             if (computedStyle) 
                                 textColor = computedStyle.color;
                             var fontSize = mySvgFont.nodeFontSize(node.parentNode);
+fontSize = 20;
                             mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, undefined);
                             i = j - 1;
                         }

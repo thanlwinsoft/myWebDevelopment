@@ -1348,7 +1348,7 @@ toUnicodes: function(text)
 				var controlRange = document.selection.createRange();
 				for (var i = 0; i < controlRange.length; i++)
 				{
-					var selItem = selObj.item(i);
+					var selItem = controlRange.item(i);
 					
 				}
 			}

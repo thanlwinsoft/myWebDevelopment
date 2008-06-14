@@ -52,6 +52,7 @@ pre {
   background-color: #ffd0ff;
   overflow: scroll;
   margin: 10px;
+  color: #202020;
 }
 
 .source  pre {

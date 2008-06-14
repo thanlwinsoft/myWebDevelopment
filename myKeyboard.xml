@@ -33,8 +33,9 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html><head><title>Myanmar Keyboard</title></head><body>
-<div xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Myanmar Keyboard</title></head>
+<body>
+<div>
 <div class="keyboard" id="my_keyboard" style="display:none;"
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <div  id='myKeyboardTopBar' class='keyboardTopBar' >
@@ -102,7 +103,7 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <td class="keyboard"><a class="keyboard" id="my_u103F"  href="javascript:myK.typeChar('\u103F', 1)">ဿ</a></td>
 </tr>
 <tr>
-<td class="keyboard"><a class="keyboard" id="my_u101f"  href="javascript:myK.typeChar('\u0020', 1)">_</a></td>
+<td class="keyboard"><a class="keyboard" id="my_u0020"  href="javascript:myK.typeChar('\u0020', 1)">_</a></td>
 <td class="keyboard"><a class="keyboard" id="my_u101f"  href="javascript:myK.typeChar('\u101f', 1)">ဟ</a></td>
 <td class="keyboard"><a class="keyboard"  id="my_u1020" href="javascript:myK.typeChar('\u1020', 1)">ဠ</a></td>
 <td class="keyboard"><a class="keyboard"  id="my_u1021" href="javascript:myK.typeChar('\u1021', 1)">အ</a></td>
@@ -344,4 +345,5 @@ onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 
 </div>
 </div>
-
+</body>
+</html>

@@ -58,7 +58,8 @@ Note: the <span>s must be before the script, so they are available as the page l
       border-top-color: black;
     }
 </style>
-
+<!--If excanvas is added later, it doesn't seem to work-->
+<!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="../myDetection.js"></script>
 <script type="text/javascript" src="../xmlRequest.js"></script>
 <script type="text/javascript" src="../mySource.js"></script>
@@ -78,9 +79,11 @@ Note: the <span>s must be before the script, so they are available as the page l
 <!-- End of Myanmar Unicode Support Testing -->
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>.</p>
 <p>To use this script on your site you need to:
-<ul><li>include a few scripts e.g. in the /styles directory</li> 
-<li>add 2 spans with the test text</li><li>add an onload function</li></ul>
 </p>
+<ul><li>include a few scripts e.g. in the /styles directory</li> 
+<li>add 2 spans with the test text</li>
+<li>add an onload function</li>
+</ul>
 <pre>
 ...
 &lt;meta content="text/html; charset=UTF-8" http-equiv="content-type" /&gt;
@@ -101,7 +104,7 @@ For more details <a href="javascript:getSourceFile('source','myDetection.html')"
 
 <p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
 <!-- Creative Commons License -->
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
 <!-- /Creative Commons License -->
 </p>
@@ -138,7 +141,10 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <pre id="js">
 </pre>
 </div>
-<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<p><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show DHTML</span>|
+<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
+</p>
 <div id="tlsDebug" style="display:none;"></div>
 </body>
 </html>

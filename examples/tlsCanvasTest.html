@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!-- 
 Testing for Myanmar Unicode Support
 
@@ -68,21 +67,29 @@ myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,25
 svgContainer = document.getElementById("containerP");
 myCanvasFont.stroke = true;
 myCanvasFont.fill = false;
-myCanvasFont.appendText(svgContainer, 50, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(255,255,255)");
+myCanvasFont.appendText(svgContainer, 10, "ဗမာကျပ်။ သင်္ချိုင်း ","rgb(255,0,255)");
 
 }
 -->
 </script>
-</p>
-<p style="cursor:pointer;"><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>/
-<span onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>
+
+<p style="cursor:pointer;text-decoration:underline;"><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
+<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
 </p>
 <div id="tlsDebug" style="display:none;"></div>
 
 <p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
-For more details <a href="javascript:getSourceFile('source','mySvgFontTest.html')">View the Source HTML, CSS</a> and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Javascript</a> for instructions on how to use in your own pages. In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, which will automatically convert Myanmar Unicode text to SVG when appropriate. </p></p>
+For more details <a href="javascript:getSourceFile('source','mySvgFontTest.html')">View the Source HTML, CSS</a> 
+and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Javascript</a> 
+for instructions on how to use in your own pages. 
+In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; 
+see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, 
+which will automatically convert Myanmar Unicode text to SVG when appropriate. </p>
 <hr />
-<p>You are free to use this on your own website without charge or waranty, though it would be appreciated you could add a link of acknowledgement to 
+<p>You are free to use this on your own website without charge or waranty, 
+though it would be appreciated you could add a link of acknowledgement to 
 <a href="http://www.thanlwinsoft.org/"><img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/>www.thanlwinsoft.org</a>.
 </p>
 <div class="source" style="display:none;">

@@ -1,17 +1,41 @@
-
+var tlsAlertOnce  = true;
 function TlsDebug()
 {
     this.debug = document.getElementById("tlsDebug");
-    this.print = function(t) 
-    { 
+    this.indent = "";
+    this.dumpLevel = 0;
+    this.print = function(t)
+    {
         if (this.debug) 
         {
             this.debug.appendChild(document.createTextNode(t));
             this.debug.appendChild(document.createElement("br"));
         }
-		return this;
+        return this;
     }
     this.clear = function() { if (this.debug) this.debug.innerHTML = ""; return this; };
+    this.dump = function(obj, levels) {
+        var indent = this.indent;
+        if (levels == undefined) levels = 1;
+        this.dumpLevel++;
+        var i = 0;
+        for (var p in obj)
+        {
+            this.print(this.indent + p + ":" + obj[p]);
+            if (typeof obj[p] == "object" && this.dumpLevel < levels) 
+            {
+                this.indent = indent + "\u00A0\u00A0";
+                this.dump(obj[p], levels - 1);
+                this.indent = indent;
+            }
+            if (++i > 100) 
+            {
+                this.print("Only printed first 100 properties."); break; 
+            }
+        }
+        this.dumpLevel--;
+        return this;
+    };
     return this;
 }
 
@@ -39,50 +63,63 @@ var tlsFontCache = new function () {
 
 function TlsColor(color)
 {
+    this.origColor = color;
 	this.red = this.green = this.blue = 0;
 	this.alpha = 1;
     var i;
-	if (color.charAt(0) == '#')
-	{
-		if(color.length < 5)
-		{
-			this.red = parseInt(color.charAt(1), 16);
-			this.green = parseInt(color.charAt(2), 16);
-			this.blue = parseInt(color.charAt(3), 16);
-		}
-		else if (color.length == 7)
-		{
-			
-			this.red = parseInt(color.substring(1,2), 16);
-			this.green = parseInt(color.substring(3,4), 16);
-			this.blue = parseInt(color.substring(5,6), 16);
-		}
-	}
-	else if (i = color.indexOf("rgba(") > -1)
-	{
-		var bracket = color.indexOf(")");
-		values = color.substring(i + 5,bracket).split(",");
-		this.red = values[0]; this.green = values[1]; this.blue = values[2]; this.alpha = values[3];
-	}
-	else if (i = color.indexOf("rgb(") > -1)
-	{
-		var bracket = color.indexOf(")");
-		values = color.substring(i + 4,bracket).split(",");
-		this.red = values[0]; this.green = values[1]; this.blue = values[2]; 
-	}
-	else if (color == "white") { this.red = 255; this.green = 255; this.blue = 255;}
-	else if (color == "red") this.red = 255;
-	else if (color == "green") this.green = 255;
-	else if (color == "blue") this.blue = 255;
-	else if (color == "yellow") { this.red = 255; this.green = 255; }
-	else if (color == "magenta") {this.red = 255; this.blue = 255;}
-	else if (color == "cyan") {this.green = 255; this.blue = 255;}
-	return this;
+    try
+    {
+	    if (color.charAt(0) == '#')
+	    {
+		    if(color.length < 5)
+		    {
+			    this.red = parseInt(color.charAt(1), 16);
+			    this.green = parseInt(color.charAt(2), 16);
+			    this.blue = parseInt(color.charAt(3), 16);
+		    }
+		    else if (color.length == 7)
+		    {
+			    this.red = parseInt(color.substring(1,3), 16);
+			    this.green = parseInt(color.substring(3,5), 16);
+			    this.blue = parseInt(color.substring(5,7), 16);
+		    }
+	    }
+	    else if ((i = color.indexOf("rgba(")) > -1)
+	    {
+		    var bracket = color.indexOf(")");
+		    values = color.substring(i + 5,bracket).split(",");
+		    this.red = Number(values[0]);
+            this.green = Number(values[1]);
+            this.blue = Number(values[2]);
+            this.alpha = Number(values[3]);
+	    }
+	    else if ((i = color.indexOf("rgb(")) > -1)
+	    {
+		    var bracket = color.indexOf(")");
+		    values = color.substring(i + 4,bracket).split(",");
+		    this.red = Number(values[0]);
+            this.green = Number(values[1]);
+            this.blue = Number(values[2]);
+	    }
+	    else if (color == "white") { this.red = 255; this.green = 255; this.blue = 255;}
+	    else if (color == "red") this.red = 255;
+	    else if (color == "green") this.green = 255;
+	    else if (color == "blue") this.blue = 255;
+	    else if (color == "yellow") { this.red = 255; this.green = 255; }
+	    else if (color == "magenta") {this.red = 255; this.blue = 255;}
+	    else if (color == "cyan") {this.green = 255; this.blue = 255;}
+        if (this.red == undefined) this.red = 0;
+        if (this.green == undefined) this.green = 0;
+        if (this.blue == undefined) this.blue = 0;
+    }
+    catch (e) { TlsDebug().print("TlsColor exception: " + e);}
+    TlsDebug().print("orig:" + this.origColor + " now:" + this.asRgb());
+    return this;
 };
 
 TlsColor.prototype.asRgb = function()
 {
-	if (this.alpha < 255)
+	if (this.alpha < 1)
 		return "rgba(" + this.red +"," + this.green + "," + this.blue + "," + this.alpha + ")";
 	return "rgb(" + this.red +"," + this.green + "," + this.blue + ")";
 }
@@ -91,7 +128,7 @@ function TlsFont(fontData)
 {
     this.data = fontData;
     this.rendered = undefined;// If you don't need rendered use new Object();
-    this.defaultFontSize = 12;
+    this.defaultFontSize = 14;
     this.maxContext = 12;// max ligature length
     this.font = this;
     return this;
@@ -100,6 +137,8 @@ function TlsFont(fontData)
 
 TlsFont.prototype.computedStyle = function(node)
     {
+        if (typeof node.currentStyle != 'undefined')
+            return node.currentStyle;
         return (window.getComputedStyle)? 
             window.getComputedStyle(node,null) : node.computedStyle;
     };
@@ -140,6 +179,8 @@ function TlsTextRun(tlsFont, fontSize, text)
 	this.glyphLayout = new Array();
 	this.glyphLayout.push(0);
 	this.charToGlyph = new Array(text.length);
+    this.mouseDown = undefined;
+    this.selection = undefined;
     return this;
 }
 
@@ -217,7 +258,68 @@ TlsTextRun.prototype.addGlyphs = function(startChar, endChar, glyphData)
 	// update positions
 	for (i = startChar; i <= endChar; i++)
 		this.charToGlyph[i] = glyphIndex;
-},
+};
+
+TlsTextRun.prototype.onmousedown = function(evt)
+{
+    this.selection = this.findCharPosition(evt);
+    return true;
+}
+
+TlsTextRun.prototype.onmouseup = function(evt)
+{
+    var endRange = this.findCharPosition(evt);
+    if (this.selection)
+    {
+        if (this.selection.first > endRange.first)
+            this.selection.first = endRange.first;
+        if (this.selection.last < endRange.last)
+            this.selection.last = endRange.last;
+    }
+    else this.selection = endRange;
+    TlsDebug().print(this.text.substring(this.selection.first, this.selection.last + 1));
+    return true;
+}
+
+TlsTextRun.prototype.findCharPosition = function(evt)
+{
+    var event = (window.event)? window.event : evt;
+    var targetPos = TlsNodePosition(evt.target);
+    var dx = event.clientX - targetPos.x;
+    var dy = event.clientY - targetPos.y;
+    if (dx > targetPos.width)
+        TlsDebug().print(dx + "," + dy).dump(targetPos);
+    var scaledDx = dx / this.scaling;
+    var gIndex = 0;
+    for (; gIndex < this.glyphLayout.length; gIndex += 3)
+    {
+        if (this.glyphLayout[gIndex] > scaledDx)
+        {
+            gIndex /= 3;
+            if (gIndex > 0) gIndex--;
+            break;
+        }
+    }
+    var char = 0;
+    var endChar = 0;
+    for (; char < this.charToGlyph.length; char++)
+    {
+        endChar = char;
+        while (endChar+1 < this.charToGlyph.length &&
+            this.charToGlyph[endChar + 1] == this.charToGlyph[char])
+            endChar++;
+        if (endChar + 1 < this.charToGlyph.length && 
+            this.charToGlyph[endChar + 1] > gIndex)
+            break;
+    }
+    if (endChar < char) endChar = char;
+    TlsDebug().clear().print("glyph: " + gIndex + " char: " + char + "," + endChar + " at " + scaledDx + " " + this.text.substring(char, endChar+1));
+    var range = new Object();
+    range.first = char;
+    range.last = endChar;
+    range.glyph = gIndex;
+    return range;
+};
 
 TlsFont.prototype.appendText = function(parent, fontName, size, text, color, background)
 {
@@ -242,42 +344,94 @@ TlsCanvasFont.prototype.getGlyph = function(uChar) { return this.font.getGlyph(u
 TlsCanvasFont.prototype.nodeFontSize = function(node) { return this.font.nodeFontSize(node); }
 TlsCanvasFont.prototype.computedStyle = function(node) { return this.font.computedStyle(node); }
 
+/** Append a canvas node to the given parent - which may be a document fragment
+* @param parent - node
+* @param fontSize - size in pixels
+* @param text - text to display
+* @param color - text color
+* @param background - optional background if it should be painted 
+*/
 TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, background)
 {
 	var doc = document;
     var canvas = doc.createElement("canvas");
     if (!canvas) return false;
+    var cId = "canvas" + this.font.data.name + ":" + fontSize + ":" + color + ":" + text;
+    var sourceCanvas = document.getElementById(cId);
+    // it should be faster to clone a previous rendering of the same text
+    if (sourceCanvas)
+    {
+        canvas.setAttribute("width", sourceCanvas.getAttribute("width"));
+        canvas.setAttribute("height", sourceCanvas.getAttribute("height"));
+        parent.appendChild(canvas);
+        if (!canvas.getContext && G_vmlCanvasManager)
+        {
+            canvas.style.width = sourceCanvas.style.width;
+            canvas.style.height = sourceCanvas.style.height;
+            canvas = G_vmlCanvasManager.initElement(canvas);
+            canvas.innerHTML = sourceCanvas.innerHTML;
+            return true;
+        }
+        var ctx = ((canvas.getContext)? canvas.getContext("2d") : undefined);
+        if (ctx)
+        {
+            try
+            {
+                ctx.drawImage(sourceCanvas, 0, 0);
+                return true;
+            } catch (e) { TlsDebug().print(e); }
+        }
+        parent.removeChild(canvas);
+    }
     var run = new TlsTextRun(this.font, fontSize, text);
     run.layoutText(this.font);// to measure text
+    canvas.style.width = run.width;
+    canvas.style.height = run.height;
     canvas.setAttribute("width",run.width);
     canvas.setAttribute("height", run.height);
-	var cId = "canvas" + this.font.data.name + this.canvasCount;
     canvas.setAttribute("id", cId);
     this.canvasCount++;
     parent.appendChild(canvas);
-	canvas.appendChild(document.createTextNode(text));
     TlsDebug().print("size("+ run.width + "," + run.height + ")");
 	if (!canvas.getContext && G_vmlCanvasManager)
 	{
+        TlsDebug().print("canvas size("+ canvas.clientWidth + "," + canvas.clientHeight + ")");
 		canvas = G_vmlCanvasManager.initElement(canvas);
-		canvas = doc.getElementById(cId);
+        // fix up span
+//		canvas = doc.getElementById(cId);
 	}
-    var ctx = canvas.getContext("2d");
-    if (!ctx) return false;
+    var ctx = ((canvas.getContext)? canvas.getContext("2d") : undefined);
+    // don't put anything inside the canvas node since excanvas will remove it
+    // unless we don't have a context
+    if (!ctx)
+    {
+        canvas.appendChild(document.createTextNode(text));
+        return false;
+    }
 	var oldColor = ctx.fillStyle;
+
     if (background != undefined)
     {
-        ctx.fillStyle = background;
-        ctx.fillRect(0,0,run.width, run.height);
+        // set the background on the canvas itself so that we can reuse other canvas
+        canvas.style.backgroundColor = background;
+//        ctx.fillStyle = background;
+//        ctx.fillRect(0,0,run.width, run.height);
     }
-    if (color == undefined)
-	{
-//        ctx.fillStyle = "rgb(0,0,0)";
-		ctx.fillStyle = oldColor;
-	}
-    else
-        ctx.fillStyle = color;
+
+    try
+    {
+        if (color == undefined)
+	    {
+            ctx.fillStyle = "rgb(0,0,0)";
+//		    ctx.fillStyle = oldColor;
+	    }
+        else
+            ctx.fillStyle = color;
+    }
+    catch (e) { TlsDebug.print("Color exception" + color + " " + e); color = oldColor; }
 	canvas.tlsTextRun = run;
+    canvas.onmousedown = function (evt) { this.tlsTextRun.onmousedown(evt); }
+    canvas.onmouseup = function (evt) { this.tlsTextRun.onmouseup(evt); }
     run = this.drawTextRun(ctx, run);
     return true;
 };
@@ -489,4 +643,30 @@ TlsCanvasSvgPath.prototype.create = function(data)
     }
     //this.ctx.closePath();
 }
+
+function TlsNodePosition(node)
+{
+    this.x = this.y = 0;
+    this.x = node.offsetLeft;
+    this.y = node.offsetTop;
+    var parentElem = node.offsetParent;
+    var hasOffsetParent = true;
+    if (!parentElem)
+    {
+        parentElem = node.parent;
+        hasOffsetParent = false;
+    }
+    while (parentElem)
+    {                
+        this.x += parentElem.offsetLeft;
+        this.y += parentElem.offsetTop;
+        if (hasOffsetParent)
+            parentElem = parentElem.offsetParent;
+        else
+            parentElem = parentElem.parent;
+    }
+    this.width = node.offsetWidth;
+    this.height = node.offsetHeight;
+    return this;
+};
 

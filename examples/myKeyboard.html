@@ -18,6 +18,8 @@ To get around these problems you can use a visual keyboard like this.
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
 <title>Myanmar Unicode Virtual Keyboard</title>
+<!--If excanvas is added later, it doesn't seem to work-->
+<!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="../xmlRequest.js"></script>
 <script type="text/javascript" src="../myKeyboard.js"></script>
 <script type="text/javascript" src="../mySource.js"></script>
@@ -65,7 +67,10 @@ myK.afterKey = showUnicodes;
 <br />
 <span id="unicodeDump" style="font-family: monospace; color: gray;">Click on some characters to see their codes.</span><br />
 </form>
-<p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
+<p><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show DHTML</span>|
+<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
+</p>
 <div id="tlsDebug" style="display:none;"></div>
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to 
 <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>
@@ -94,7 +99,7 @@ for more instructions on how to use in your own pages.</p>
 
 <p class='thanlwinsoft'>Myanmar Unicode technology from <a class="my" href='http://www.thanlwinsoft.org'>သံလွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
 <!-- Creative Commons License -->
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.gif" /></a><br />
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
 <!-- /Creative Commons License -->
 </p>
