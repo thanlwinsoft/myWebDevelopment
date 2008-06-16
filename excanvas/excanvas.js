@@ -33,7 +33,7 @@
 // only add this code if we do not already have a canvas implementation
 if (!window.CanvasRenderingContext2D) {
 
-(function () {
+//(function () {
 
   // alias some functions to make (compiled) code shorter
   var m = Math;
@@ -278,7 +278,8 @@ if (!window.CanvasRenderingContext2D) {
     this.globalAlpha = 1;
     this.canvas = surfaceElement;
 
-    var el = surfaceElement.ownerDocument.createElement('div');
+    // div prevents insertion inside a p, so use a span instead.
+    var el = surfaceElement.ownerDocument.createElement('span');
     el.style.width =  surfaceElement.clientWidth + 'px';
     el.style.height = surfaceElement.clientHeight + 'px';
     el.style.overflow = 'hidden';
@@ -780,6 +781,6 @@ if (!window.CanvasRenderingContext2D) {
   CanvasGradient = CanvasGradient_;
   CanvasPattern = CanvasPattern_;
 
-})();
+//})();
 
 } // if
