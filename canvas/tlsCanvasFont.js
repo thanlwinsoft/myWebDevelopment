@@ -87,7 +87,7 @@ function TlsColor(color)
 	    else if ((i = color.indexOf("rgba(")) > -1)
 	    {
 		    var bracket = color.indexOf(")");
-		    values = color.substring(i + 5,bracket).split(",");
+		    var values = color.substring(i + 5,bracket).split(",");
 		    this.red = Number(values[0]);
             this.green = Number(values[1]);
             this.blue = Number(values[2]);
@@ -96,7 +96,7 @@ function TlsColor(color)
 	    else if ((i = color.indexOf("rgb(")) > -1)
 	    {
 		    var bracket = color.indexOf(")");
-		    values = color.substring(i + 4,bracket).split(",");
+		    var values = color.substring(i + 4,bracket).split(",");
 		    this.red = Number(values[0]);
             this.green = Number(values[1]);
             this.blue = Number(values[2]);
@@ -122,6 +122,26 @@ TlsColor.prototype.asRgb = function()
 	if (this.alpha < 1)
 		return "rgba(" + this.red +"," + this.green + "," + this.blue + "," + this.alpha + ")";
 	return "rgb(" + this.red +"," + this.green + "," + this.blue + ")";
+}
+
+TlsColor.prototype.asHex = function()
+{
+	var hexColor = "";
+	var hex = Number(this.red).toString(16);
+	if (hex.length == 1) hex = "0" + hex;
+	hexColor += hex;
+	hex = Number(this.green).toString(16);
+	if (hex.length == 1) hex = "0" + hex;
+	hexColor += hex;
+	hex = Number(this.blue).toString(16);
+	if (hex.length == 1) hex = "0" + hex;
+	hexColor += hex;
+	return hexColor;
+}
+
+TlsColor.prototype.asHash = function()
+{
+	return "#" + this.asHex();
 }
 
 function TlsFont(fontData)
@@ -283,10 +303,11 @@ TlsTextRun.prototype.onmouseup = function(evt)
 
 TlsTextRun.prototype.findCharPosition = function(evt)
 {
-    var event = (window.event)? window.event : evt;
-    var targetPos = TlsNodePosition(evt.target);
-    var dx = event.clientX - targetPos.x;
-    var dy = event.clientY - targetPos.y;
+    var theEvent = (window.event)? window.event : evt;
+    var srcNode = (theEvent.srcElement)? theEvent.srcElement : theEvent.target;
+    var targetPos = TlsNodePosition(srcNode);
+    var dx = theEvent.clientX - targetPos.x;
+    var dy = theEvent.clientY - targetPos.y;
     if (dx > targetPos.width)
         TlsDebug().print(dx + "," + dy).dump(targetPos);
     var scaledDx = dx / this.scaling;
@@ -300,22 +321,22 @@ TlsTextRun.prototype.findCharPosition = function(evt)
             break;
         }
     }
-    var char = 0;
+    var startChar = 0;
     var endChar = 0;
-    for (; char < this.charToGlyph.length; char++)
+    for (; startChar < this.charToGlyph.length; startChar++)
     {
-        endChar = char;
+        endChar = startChar;
         while (endChar+1 < this.charToGlyph.length &&
-            this.charToGlyph[endChar + 1] == this.charToGlyph[char])
+            this.charToGlyph[endChar + 1] == this.charToGlyph[startChar])
             endChar++;
         if (endChar + 1 < this.charToGlyph.length && 
             this.charToGlyph[endChar + 1] > gIndex)
             break;
     }
-    if (endChar < char) endChar = char;
-    TlsDebug().clear().print("glyph: " + gIndex + " char: " + char + "," + endChar + " at " + scaledDx + " " + this.text.substring(char, endChar+1));
+    if (endChar < startChar) endChar = startChar;
+    TlsDebug().clear().print("glyph: " + gIndex + " char: " + startChar + "," + endChar + " at " + scaledDx + " " + this.text.substring(startChar, endChar+1));
     var range = new Object();
-    range.first = char;
+    range.first = startChar;
     range.last = endChar;
     range.glyph = gIndex;
     return range;
@@ -356,7 +377,13 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
 	var doc = document;
     var canvas = doc.createElement("canvas");
     if (!canvas) return false;
-    var cId = "canvas" + this.font.data.name + ":" + fontSize + ":" + color + ":" + text;
+	var textId = "";
+	for (var i = 0; i < text.length; i++)
+	{
+		if (text.charCodeAt(i) < 256) textId+= "00";
+		textId+= text.charCodeAt(i).toString(16);
+	}
+    var cId = "canvas" + this.font.data.name + ":" + fontSize + ":" + (new TlsColor(color)).asHex() + ":" + textId;
     var sourceCanvas = document.getElementById(cId);
     // it should be faster to clone a previous rendering of the same text
     if (sourceCanvas)

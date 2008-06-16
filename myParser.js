@@ -338,7 +338,7 @@ function MyParser()
   {
     var length = contextText.length;
     var text = new Array(0, 0, 0);
-      for (i = 0; i<myParser.MM_CONTEXT_LEN; i++)
+      for (var i = 0; i<myParser.MM_CONTEXT_LEN; i++)
       {
         if (offset + i < length)
           text[i] = contextText.charCodeAt(offset + i);

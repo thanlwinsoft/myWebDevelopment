@@ -946,6 +946,7 @@ registerKeyboard: function(langArray)
                 iframe.style.display = "none";
                 iframe.id = langArray[k] + "_keyboardFrame";
                 iframe.src = myK.pathStem + langArray[k] + myK.keyboardSrc;
+				// Offline, firefox won't load from a higher directory in an iframe, only the same dir (or lower?)
                 //iframe.onload = "myK.appendKeyboard(this.contentDocument.body.innerHTML);";
                 document.body.appendChild(iframe);
             }
