@@ -396,6 +396,7 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
             canvas.style.width = sourceCanvas.style.width;
             canvas.style.height = sourceCanvas.style.height;
             canvas = G_vmlCanvasManager.initElement(canvas);
+            // cloneNode doesn't seem to work properly with vml
             canvas.innerHTML = sourceCanvas.innerHTML;
             return true;
         }
@@ -406,9 +407,13 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
             {
                 ctx.drawImage(sourceCanvas, 0, 0);
                 return true;
-            } catch (e) { TlsDebug().print(e); }
+            }
+            catch (e) 
+            { 
+                TlsDebug().print(e);
+                parent.removeChild(canvas);
+            }
         }
-        parent.removeChild(canvas);
     }
     var run = new TlsTextRun(this.font, fontSize, text);
     run.layoutText(this.font);// to measure text
@@ -457,8 +462,9 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     }
     catch (e) { TlsDebug.print("Color exception" + color + " " + e); color = oldColor; }
 	canvas.tlsTextRun = run;
-    canvas.onmousedown = function (evt) { this.tlsTextRun.onmousedown(evt); }
-    canvas.onmouseup = function (evt) { this.tlsTextRun.onmouseup(evt); }
+	// don't enable the mouse handlers by default
+//    canvas.onmousedown = function (evt) { this.tlsTextRun.onmousedown(evt); }
+//    canvas.onmouseup = function (evt) { this.tlsTextRun.onmouseup(evt); }
     run = this.drawTextRun(ctx, run);
     return true;
 };

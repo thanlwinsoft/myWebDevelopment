@@ -286,6 +286,13 @@ if (!window.CanvasRenderingContext2D) {
     el.style.position = 'absolute';
     surfaceElement.appendChild(el);
 
+//    var group = surfaceElement.ownerDocument.createElement("g_vml_:group");
+//    if (surfaceElement.id) group.id = surfaceElement.id + "group";
+//    group.setAttribute("coordorigin","0 0");
+//    group.setAttribute("coordsize", "100 100");
+//    group.style.width = el.style.width;
+//    group.style.height = el.style.height;
+//    el.appendChild(group);
     this.element_ = el;
     this.arcScaleX_ = 1;
     this.arcScaleY_ = 1;

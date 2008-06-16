@@ -297,11 +297,11 @@ var myUnicode = {
         if (myUnicode.isIe)
             myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
         myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
-        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + ".js");
-        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.svgFont + "Rendered.js");
+        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + ".js");
+        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + "Rendered.js");
         if (!myUnicode.isIe)
         {
-            myUnicode.addScript(theImgPrefix + "svg/mySvgFont.js");
+//            myUnicode.addScript(theImgPrefix + "svg/mySvgFont.js");
         }
         else
         {
@@ -328,26 +328,24 @@ var myUnicode = {
     {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
-            if (!myUnicode.isIe)
+            try
             {
-                try
+                // wait for the script additions to take affect
+                //if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
+                if (tlsFontCache.hasFont(myUnicode.fontData) == false)
                 {
-                    // wait for the script additions to take affect
-                    //if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
-                    if (tlsFontCache.hasFont(myUnicode.fontData) == false)
-                    {
-                        setTimeout("myUnicode.parseDoc()", 500);
-                        myUnicode.retryCount++;
-                        return;
-                    }
-                }
-                catch (notDefException)
-                { 
                     setTimeout("myUnicode.parseDoc()", 500);
                     myUnicode.retryCount++;
                     return;
                 }
             }
+            catch (notDefException)
+            { 
+                setTimeout("myUnicode.parseDoc()", 500);
+                myUnicode.retryCount++;
+                return;
+            }
+
             //myUnicode.createNotice();
             myUnicode.nodeCount = 0;
             myUnicode.parseDocWorker();
@@ -361,8 +359,7 @@ var myUnicode = {
     {
         if (myUnicode.checkFinished && myUnicode.isSupported == false)
         {
-            if ((myUnicode.isIe && typeof myUnicode.imageFonts[myUnicode.fontData] != "undefined")
-                || (typeof tlsFontCache != "undefined" && 
+            if ((typeof tlsFontCache != "undefined" && 
                 tlsFontCache.hasFont(myUnicode.fontData) == true))
             {
                 myUnicode.parseNode(node);
@@ -372,7 +369,7 @@ var myUnicode = {
     /** call back from parseDoc */
     parseDocWorker : function ()
     {
-            myUnicode.parseNode(document.getElementsByTagName("body").item(0));
+        myUnicode.parseNode(document.getElementsByTagName("body").item(0));
     },
     /** createNotice at top (bottom if fixed is supported) while conversion is 
     * running */
@@ -513,7 +510,7 @@ var myUnicode = {
             
             if (myUnicode.inRange(text.charCodeAt(i)))
             {
-                if (docFrag == undefined)
+                if (typeof docFrag == "undefined")
                 {
 //                    if (myUnicode.debug()) 
 //                        myUnicode.debug().appendChild(document.createTextNode(text));
@@ -522,7 +519,7 @@ var myUnicode = {
                     var prefix = document.createTextNode(text.substring(0,i));
                     docFrag.appendChild(prefix);
                     // these don't change between strings, so set them once
-                    if (myUnicode.isIe && 
+/*                    if (myUnicode.isIe && 
                         typeof myUnicode.imageFonts[myUnicode.fontData] != "undefined")
                     {
                         var fontData = myUnicode.imageFonts[myUnicode.fontData];
@@ -533,8 +530,8 @@ var myUnicode = {
                             sizeIndex = fontHeights.length - 1;
                         height = fontHeights[sizeIndex];
                         fontSize = fontData.fontSize[sizeIndex];
-                    }
-                    if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(myUnicode.svgFont))
+                    }*/
+                    if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(myUnicode.fontData))
                     {
                         if (!myUnicode.canvasFont)
                         {
@@ -543,6 +540,7 @@ var myUnicode = {
                         }
                     }
                 }
+/*
                 if (false && myUnicode.isIe) // convert to images
                 {
                     codeString = "u";                
@@ -576,11 +574,6 @@ var myUnicode = {
                                         "_" + fontSize + "/" +
                                          codeString.substring(1,codeString.length) +
                                          myUnicode.imgSuffix;
-/*
-                        var img = myCommon.createElement("img");
-                        img.setAttribute("src", imgSrc);
-                        img.setAttribute("alt", text.substring(i,lastMatchEnd + 1));
-*/
 
                         var img = document.createElement("span");
                         img.setAttribute("title", text.substring(i,lastMatchEnd + 1));
@@ -611,8 +604,9 @@ var myUnicode = {
                         docFrag.appendChild(unexpectedText);
                     }
                 }
-                else // svg
-                {
+                */
+                //else // svg
+                //{
                     var j;
                     for (j = i + 1; j < i + text.length; j++)
                     {
@@ -628,7 +622,7 @@ var myUnicode = {
                         var textColor = document.fgColor;
                         var backColor = document.bgColor;
 
-                        if (myUnicode.canvasFont != undefined)
+                        if (typeof myUnicode.canvasFont != "undefined")
                         {
                             var computedStyle = myUnicode.canvasFont.computedStyle(node.parentNode);
                             //TlsDebug().dump(computedStyle,2);
@@ -659,7 +653,7 @@ fontSize = 20;
                             TlsDebug().print("Exception:" + e + 
                                 ((e.description)? e.description + e.line : "")); 
                     }
-                }
+                //}
             }
             else if (docFrag != undefined)
             {
