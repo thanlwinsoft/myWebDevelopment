@@ -39,7 +39,8 @@ function TlsDebug()
     return this;
 }
 
-var tlsFontCache = new function () {
+var tlsFontCache = new function ()
+{
     this.registerFontData = function(name, data)
     {
         if (this[name]) this[name].data = data;
@@ -73,9 +74,9 @@ function TlsColor(color)
 	    {
 		    if(color.length < 5)
 		    {
-			    this.red = parseInt(color.charAt(1), 16);
-			    this.green = parseInt(color.charAt(2), 16);
-			    this.blue = parseInt(color.charAt(3), 16);
+			    this.red = parseInt(color.charAt(1), 16) * 16;
+			    this.green = parseInt(color.charAt(2), 16) * 16;
+			    this.blue = parseInt(color.charAt(3), 16) * 16;
 		    }
 		    else if (color.length == 7)
 		    {
@@ -144,6 +145,17 @@ TlsColor.prototype.asHash = function()
 	return "#" + this.asHex();
 }
 
+TlsColor.prototype.inverse = function()
+{
+    var inverted = new TlsColor("#000");
+	if (this.alpha < 1)
+		inverted.alpha = 1 - this.alpha;
+	inverted.red = 255 - this.red;
+	inverted.green = 255 - this.green;
+	inverted.blue = 255 - this.blue;
+	return inverted;
+}
+
 function TlsFont(fontData)
 {
     this.data = fontData;
@@ -165,29 +177,29 @@ TlsFont.prototype.computedStyle = function(node)
 
 
 TlsFont.prototype.nodeFontSize = function(node)
-    {
-        var fontSize = this.defaultFontSize;
-        var computedStyle = this.computedStyle(node);
-        if (computedStyle)
-        {
-            var fontSizeText = String(computedStyle.fontSize);
-            if (fontSizeText.indexOf("px") > -1) 
-                fontSize = fontSizeText.substring(0, fontSizeText.indexOf("px"));
-        }
-        return fontSize;
-    };
+{
+	var fontSize = this.defaultFontSize;
+	var computedStyle = this.computedStyle(node);
+	if (computedStyle)
+	{
+		var fontSizeText = String(computedStyle.fontSize);
+		if (fontSizeText.indexOf("px") > -1) 
+			fontSize = fontSizeText.substring(0, fontSizeText.indexOf("px"));
+	}
+	return fontSize;
+};
 
 TlsFont.prototype.getGlyph = function(uChar)
-    {
-        for (var i = 0; i < this.data.glyphs.length; i++)
-        {
-            if (this.data.glyphs[i] && this.data.glyphs[i].u == uChar)
-            {
-                return [0,0,i,this.data.glyphs[i].a];
-            }
-        }
-        return [0,0,0,this.data.glyphs[0].a];
-    };
+{
+	for (var i = 0; i < this.data.glyphs.length; i++)
+	{
+		if (this.data.glyphs[i] && this.data.glyphs[i].u == uChar)
+		{
+			return [0,0,i,this.data.glyphs[i].a];
+		}
+	}
+	return [0,0,0,this.data.glyphs[0].a];
+};
 
 function TlsTextRun(tlsFont, fontSize, text)
 {
@@ -375,6 +387,7 @@ TlsCanvasFont.prototype.computedStyle = function(node) { return this.font.comput
 TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, background)
 {
 	var doc = document;
+	var foreColor = new TlsColor(color);
     var canvas = doc.createElement("canvas");
     if (!canvas) return false;
 	var textId = "";
@@ -383,7 +396,7 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
 		if (text.charCodeAt(i) < 256) textId+= "00";
 		textId+= text.charCodeAt(i).toString(16);
 	}
-    var cId = "canvas" + this.font.data.name + ":" + fontSize + ":" + (new TlsColor(color)).asHex() + ":" + textId;
+    var cId = "canvas" + this.font.data.name + ":" + fontSize + ":" + (foreColor).asHex() + ":" + textId;
     var sourceCanvas = document.getElementById(cId);
     // it should be faster to clone a previous rendering of the same text
     if (sourceCanvas)
@@ -393,11 +406,25 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
         parent.appendChild(canvas);
         if (!canvas.getContext && G_vmlCanvasManager)
         {
-            canvas.style.width = sourceCanvas.style.width;
-            canvas.style.height = sourceCanvas.style.height;
-            canvas = G_vmlCanvasManager.initElement(canvas);
-            // cloneNode doesn't seem to work properly with vml
-            canvas.innerHTML = sourceCanvas.innerHTML;
+            //canvas.style.width = sourceCanvas.style.width;
+            canvas.style.width = sourceCanvas.clientWidth;
+            canvas.style.height = sourceCanvas.clientHeight;
+            //canvas.style.height = sourceCanvas.style.height;
+            //canvas = G_vmlCanvasManager.initElement(canvas);
+			// cloneNode doesn't seem to work properly with vml
+            //canvas.innerHTML = sourceCanvas.innerHTML;
+
+            // sizing is hard without a background rect, background rect is 
+			var vmlSrcGroup = document.getElementById(cId + "group");
+			var vmlFrame = document.createElement("g_vml_:vmlFrame");
+			// offsetWidth/Height doesn't seem to help
+			vmlFrame.style.width = sourceCanvas.style.width;
+            vmlFrame.style.height = sourceCanvas.style.height;
+            // the code below must draw a background rect otherwise the size
+            // gets distorted for text that doesn't use the full height range
+			vmlFrame.setAttribute("src","#" + cId + "group");
+			vmlFrame.style.position = "absolute";
+			canvas.appendChild(vmlFrame);
             return true;
         }
         var ctx = ((canvas.getContext)? canvas.getContext("2d") : undefined);
@@ -425,8 +452,10 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     this.canvasCount++;
     parent.appendChild(canvas);
     TlsDebug().print("size("+ run.width + "," + run.height + ")");
+    var isIe = false;
 	if (!canvas.getContext && G_vmlCanvasManager)
 	{
+	    isIe = true;
         TlsDebug().print("canvas size("+ canvas.clientWidth + "," + canvas.clientHeight + ")");
 		canvas = G_vmlCanvasManager.initElement(canvas);
         // fix up span
@@ -445,11 +474,23 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
     if (background != undefined)
     {
         // set the background on the canvas itself so that we can reuse other canvas
-        canvas.style.backgroundColor = background;
-//        ctx.fillStyle = background;
-//        ctx.fillRect(0,0,run.width, run.height);
+        //if (!isIe) 
+            canvas.style.backgroundColor = background;
+        //else
+        {
+//            var backColor = new TlsColor(background);
+//            if (foreColor.asRgb() == backColor.asRgb())
+//            {
+//                backColor = foreColor.inverse();
+//            }
+            
+        }
     }
-
+    if (isIe)
+    {
+        ctx.fillStyle = "rgba(0,0,0,0)";
+        ctx.fillRect(0,0,run.width, run.height);
+    }
     try
     {
         if (color == undefined)
@@ -458,7 +499,7 @@ TlsCanvasFont.prototype.appendText = function(parent, fontSize, text, color, bac
 //		    ctx.fillStyle = oldColor;
 	    }
         else
-            ctx.fillStyle = color;
+            ctx.fillStyle = foreColor.asRgb();
     }
     catch (e) { TlsDebug.print("Color exception" + color + " " + e); color = oldColor; }
 	canvas.tlsTextRun = run;

@@ -399,7 +399,7 @@ var myUnicode = {
             notice.style.fontHeight = "12px";
             //notice.style.top = "0px";
             if( document.documentElement)
-                notice.style.top = (document.documentElement.clientHeight - 36) + "px";
+                notice.style.top = (document.documentElement.clientHeight - 40) + "px";
             else notice.style.top = "0px";
         }
         notice.style.zIndex = 5;
@@ -627,14 +627,25 @@ var myUnicode = {
                             var computedStyle = myUnicode.canvasFont.computedStyle(node.parentNode);
                             //TlsDebug().dump(computedStyle,2);
                             if (computedStyle && computedStyle.color)
+                            {
                                 textColor = computedStyle.color;
+                                if (myUnicode.isIe) 
+                                {
+                                    if (computedStyle.backgroundColor)
+                                        backColor = computedStyle.backgroundColor;
+                                    else
+                                        backColor = "#fff";
+                                }
+                            }
                             else if (node.parentNode.style.color.specified)
                                 textColor = node.parentNode.style.color;
-                            textColor = (new TlsColor(textColor)).asRgb();
 
                             var fontSize = myUnicode.canvasFont.nodeFontSize(node.parentNode);
-                            if (myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))
+                            if (myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))//(myUnicode.isIe)?backColor:undefined
+                            {
                                 i = j - 1;
+                            }
+                            else return;// something failed, best not to replace anything
                         }
                         else if (typeof mySvgFont != "undefined")
                         {
@@ -642,7 +653,6 @@ var myUnicode = {
                             if (computedStyle) 
                                 textColor = computedStyle.color;
                             var fontSize = mySvgFont.nodeFontSize(node.parentNode);
-fontSize = 20;
                             mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, undefined);
                             i = j - 1;
                         }
