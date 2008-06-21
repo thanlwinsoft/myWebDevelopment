@@ -352,7 +352,7 @@ updateOverlay : function(inputId, cursorA, cursorB)
 		{
 			if (selection.nodeType == 1 && selection.tagName.toLowerCase() == "img")
 			{
-				var r = document.body.createControlRange();
+				var r = document.selection.createRange();
 				try
 				{
 					r.addElement(selection);

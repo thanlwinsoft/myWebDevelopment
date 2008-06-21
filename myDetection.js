@@ -591,6 +591,20 @@ var myUnicode = {
         if (docFrag != undefined)
         {
             var parent = node.parentNode;
+			if (myUnicode.isIe && parent.getAttribute("href"))
+			{
+				for (var j = 0; j < docFrag.childNodes.length; j++)
+				{
+					if (docFrag.childNodes[j].nodeType != 1) continue;
+					for (var k = 0; k < docFrag.childNodes[j].childNodes.length; k++)
+					{
+						var sNode = docFrag.childNodes[j].childNodes[k];
+						if (sNode.nodeType != 1) continue;
+						if (sNode.tagName.toLowerCase().indexOf("shape") > -1)
+							sNode.setAttribute("href", parent.getAttribute("href"));
+					}
+				}
+			}
             if (parent) parent.replaceChild(docFrag, node);
         }
     },

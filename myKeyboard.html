@@ -42,7 +42,7 @@ by the myK.registerKeyboard('my'); call usin an AJAX based technique.
 <div class="keyboard" id="my_keyboard" style="display:none;"
 onmouseover="this.style.opacity=1;" onmouseout="this.style.opacity=0.5;">
 <div  id='myKeyboardTopBar' class='keyboardTopBar' >
-<p style="float:left; display:inherit;" class="keyboardTab">
+<p style="float:left; display:inherit;cursor:pointer;" class="keyboardTab">
 <span style="background-color: white;" onclick="document.getElementById('myKeyboardLayoutOn').style.backgroundColor='white';document.getElementById('myAlphabetOn').style.backgroundColor='blue';myK.enable('my_keyboardLayoutUnshifted');myK.enable('my_keyboardLayoutShifted');myK.disable('my_alphabet');" title="Show keyboard" id="myKeyboardLayoutOn">ခလုပ်ကွက်</span><span style="background-color: blue;" onclick="document.getElementById('myAlphabetOn').style.backgroundColor='white';document.getElementById('myKeyboardLayoutOn').style.backgroundColor='blue';myK.disable('my_keyboardLayoutUnshifted');myK.disable('my_keyboardLayoutShifted');myK.enable('my_alphabet');" title="Show alphabet" id="myAlphabetOn">အက္ခရာ</span>
 </p>
 <!-- If you remove this link please add a link to www.thanlwinsoft.org somewhere else on each site which uses this script + html code. -->

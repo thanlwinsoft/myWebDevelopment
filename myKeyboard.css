@@ -203,7 +203,7 @@ svg, canvas {
     margin: 10px;
     font-family: sans-serif;
     background: #ccc;
-    overflow: scroll;
-    max-height: 200px;
+    /*overflow: scroll;
+    max-height: 200px;*/
 }
 

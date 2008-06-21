@@ -48,12 +48,16 @@ TlsVmlFont.prototype.appendText = function(parent, fontSize, text, color, backgr
     var run = new TlsTextRun(this.font, fontSize, text);
     run.layoutText(this.font);// to measure text
 
-    var placeHolder = parent.appendChild(document.createElement("span"));
-    placeHolder.style.display = "inline-block";
-    placeHolder.style.width = run.width + "px";
-    placeHolder.style.height = run.height + "px";
-    var canvas = placeHolder.appendChild(document.createElement("span"));
-    canvas.style.position = "absolute";
+    //var placeHolder = parent.appendChild(document.createElement("span"));
+    //placeHolder.style.display = "inline-block";
+    //placeHolder.style.width = run.width + "px";
+    //placeHolder.style.height = run.height + "px";
+    var canvas = parent.appendChild(document.createElement("span"));
+    //canvas.style.position = "absolute";
+	canvas.style.display = "inline-block";
+	canvas.style.position = "static";
+	canvas.style.textAlign = "left";
+	canvas.style.verticalAlign = "text-top";
     canvas.style.width = run.width + "px";
     canvas.style.height = run.height + "px";
     if (background != undefined)
@@ -86,7 +90,7 @@ TlsVmlFont.prototype.init = function()
     }
 }
 
-TlsVmlFont.prototype.initGlyph = function(gid)
+TlsVmlFont.prototype.initGlyph = function(gid, scaling)
 {
     var glyphVmlShapes = document.getElementById(this.font.data.name + "_vmlGlyphs");
     if (!glyphVmlShapes)
@@ -98,19 +102,14 @@ TlsVmlFont.prototype.initGlyph = function(gid)
     }
     var shapeType = document.createElement("vml:shapeType");
     shapeType.setAttribute("id",this.font.data.name + "_g" + gid);
-    shapeType.setAttribute("coordOrigin","0," + this.font.data.ascent);
-    shapeType.setAttribute("coordSize",this.font.data.unitsPerEm + ",-" + this.font.data.unitsPerEm);
-    var glyphPath = new TlsVmlSvgPath(0,0);
+    shapeType.setAttribute("coordOrigin","0 0");
+    shapeType.setAttribute("coordSize",this.font.data.unitsPerEm + " " + this.font.data.unitsPerEm);
+    var glyphPath = new TlsVmlSvgPath(0,-this.font.data.ascent);
+	glyphPath.scaleX = scaling;
+	glyphPath.scaleY = -scaling;
     glyphPath.create(this.font.data.glyphs[gid].d);
     shapeType.setAttribute("path",glyphPath.path);
-    //shapeType.setAttribute("stroked",true);
-    shapeType.setAttribute("strokeWeight","1pt");    
-    //shapeType.setAttribute("filled",true);
-    //shapeType.setAttribute("fillColor","black");
-    //shapeType.setAttribute("strokeColor","black");
-    //var fill = document.createElement("vml:fill");
-    //fill.setAttribute("opacity", 1);
-    //shapeType.appendChild(fill);
+    shapeType.setAttribute("strokeWeight","1pt");
     glyphVmlShapes.appendChild(shapeType);
     return shapeType;
 }
@@ -118,8 +117,6 @@ TlsVmlFont.prototype.initGlyph = function(gid)
 TlsVmlFont.prototype.drawTextRun = function(ctx, run)
 {
     TlsDebug().print("ctx.scale(" + run.scaling + "," + run.scaling + ")");
-    //ctx.scale(run.scaling, -run.scaling);
-    //ctx.translate(0, -this.font.data.ascent);
     try
     {
         this.drawGlyphs(ctx, run.glyphLayout, 0, 0);
@@ -130,33 +127,31 @@ TlsVmlFont.prototype.drawTextRun = function(ctx, run)
 
 TlsVmlFont.prototype.drawGlyphs = function(canvasRef, gData, dx, dy)
 {
-    //this.font.drawGlyphs(canvasRef, this.font.data, gData, dx, dy);
     for (var i = 0; i < gData.length - 1; i+= 3)
     {
         var gX = dx + ((gData[i] == undefined)? 0 : gData[i]);
         var gY = dy + ((gData[i+1] == undefined)? 0 : gData[i+1]);
         //TlsDebug().print("draw " + i + " " + gX + "," + gY + " " + this.font.data.glyphs[gData[i+2]].d);
-        //this.drawPath(canvasRef, gX, gY, this.font.data.glyphs[gData[i+2]].d);
         var gid = this.font.data.name + "_g" + gData[i+2];
         var glyphPath = document.getElementById(gid);
-        if (!glyphPath) glyphPath = this.initGlyph(gData[i+2]);
+        if (!glyphPath) glyphPath = this.initGlyph(gData[i+2], 1.0);
         var vmlPath = document.createElement("vml:shape");
         vmlPath.style.position = "absolute";
-        vmlPath.style.left = (gX * canvasRef.tlsTextRun.scaling) + "px";
-        vmlPath.style.top = (gY * canvasRef.tlsTextRun.scaling) + "px";
+        //vmlPath.style.left = (gX * canvasRef.tlsTextRun.scaling) + "px";
+        //vmlPath.style.top = (gY * canvasRef.tlsTextRun.scaling) + "px";
         vmlPath.style.width = this.font.data.unitsPerEm * canvasRef.tlsTextRun.scaling + "px";
         vmlPath.style.height = this.font.data.unitsPerEm * canvasRef.tlsTextRun.scaling + "px";
-//        vmlPath.setAttribute("type","#" + gid);
-        vmlPath.setAttribute("path",glyphPath.getAttribute("path"));
-
-        vmlPath.setAttribute("coordOrigin","0," + this.font.data.ascent);
-        vmlPath.setAttribute("coordSize",this.font.data.unitsPerEm + ",-" + this.font.data.unitsPerEm);
+		vmlPath.setAttribute("type","#" + gid);
+        vmlPath.setAttribute("coordOrigin",-gX + " " + -gY);
+		vmlPath.setAttribute("coordSize",this.font.data.unitsPerEm + " " + this.font.data.unitsPerEm);
         if (this.stroke)
             vmlPath.setAttribute("strokeColor", this.strokeColor);
         vmlPath.setAttribute("stroked", this.stroke);
         if (this.fill)
             vmlPath.setAttribute("fillColor", this.fillColor);
         vmlPath.setAttribute("filled", this.fill);
+		if (i == 0)
+			vmlPath.setAttribute("alt", canvasRef.tlsTextRun.text);
         canvasRef.appendChild(vmlPath);
     }
 }
@@ -166,22 +161,34 @@ function TlsVmlSvgPath(x, y)
     this.path = "";
     this.dx = x;
     this.dy = y;
-    this.xStart = this.prevCx = this.x = 0;
-    this.yStart = this.prevCy = this.y = 0;
+	this.scaleX = 1.0;
+	this.scaleY = -1.0;
+    this.xStart = this.prevCx = this.x = 0.0;
+    this.yStart = this.prevCy = this.y = 0.0;
     return this;
+}
+
+TlsVmlSvgPath.prototype.transformX = function(x)
+{
+	return Math.round((x + this.dx)*this.scaleX-.5);
+}
+
+TlsVmlSvgPath.prototype.transformY = function(y)
+{
+	return Math.round((y + this.dy)*this.scaleY-.5);
 }
 
 TlsVmlSvgPath.prototype.M = function(args)
 {
     this.x = Number(args.shift());
     this.y = Number(args.shift());
-    this.path += "m " + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + " ";
+    this.path += "m " + this.transformX(this.x) + "," + this.transformY(this.y) + " ";
     TlsDebug().print("ctx.moveTo (" + (this.dx + this.x) + "," + (this.dy + this.y) + ")");
     while (args.length > 0)
     {
         this.x = Number(args.shift());
         this.y = Number(args.shift());
-        this.path += "l " + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + " ";
+        this.path += "l " + this.transformX(this.x) + "," + this.transformY(this.y) + " ";
     }
     this.prevCx = this.x;
     this.prevCy = this.y;
@@ -189,7 +196,7 @@ TlsVmlSvgPath.prototype.M = function(args)
 
 TlsVmlSvgPath.prototype.Z = function(args)
 {
-    this.path += " e";
+    //this.path += " e";
     this.prevCx = this.x = this.xStart;
     this.prevCy = this.y = this.yStart;
 };
@@ -200,7 +207,7 @@ TlsVmlSvgPath.prototype.L = function(args)
     {
         this.x = Number(args.shift());
         this.y = Number(args.shift());
-        this.path += "l " + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + " ";
+        this.path += "l " + this.transformX(this.x) + "," + this.transformY(this.y) + " ";
     } + " "
     this.prevCx = this.x;
     this.prevCy = this.y;
@@ -211,8 +218,8 @@ TlsVmlSvgPath.prototype.H = function(args)
     while (args.length > 0)
     {
         this.x = Number(args.shift());
-        this.path += "l " + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + " ";
-        TlsDebug().print("ctx.lineTo(" + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + ")");
+        this.path += "l " + this.transformX(this.x) + "," + this.transformY(this.y) + " ";
+        TlsDebug().print("ctx.lineTo(" + (this.dx + this.x) + "," + (this.dy + this.y) + ")");
     }
     this.prevCx = this.x;
     this.prevCy = this.y;
@@ -223,8 +230,8 @@ TlsVmlSvgPath.prototype.V = function(args)
     while (args.length > 0)
     {
         this.y = Number(args.shift());
-        this.path += "l " + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + " ";
-        TlsDebug().print("ctx.lineTo(" + Math.round(this.dx + this.x) + "," + Math.round(this.dy + this.y) + ")");
+        this.path += "l " + this.transformX(this.x) + "," + this.transformY(this.y) + " ";
+        TlsDebug().print("ctx.lineTo(" + (this.dx + this.x) + "," + (this.dy + this.y) + ")");
     }
     this.prevCx = this.x;
     this.prevCy = this.y;
@@ -236,11 +243,13 @@ TlsVmlSvgPath.prototype.Q = function(args)
     {
         this.prevCx = Number(args.shift());
         this.prevCy = Number(args.shift());
-        this.x = Number(args.shift());
-        this.y = Number(args.shift());
+        var newX = Number(args.shift());
+        var newY = Number(args.shift());
         TlsDebug().print("ctx.quadraticCurveTo(" + (this.dx + this.prevCx) + "," 
             + (this.dy + this.prevCy) + "," + (this.dx + this.x) + "," + (this.dy + this.y) + ")");
-        this.quadToCubic(this.dx + this.prevCx, this.dy + this.prevCy, this.dx + this.x, this.dy + this.y);
+        this.quadToCubic(this.prevCx, this.prevCy, newX, newY);
+		this.x = newX;
+		this.y = newY;
     }
 }
 
@@ -250,11 +259,13 @@ TlsVmlSvgPath.prototype.T = function(args)
     {
         var cX = this.x * 2 - this.prevCx;
         var cY= this.y * 2 - this.prevCy;
-        this.x = Number(args.shift());
-        this.y = Number(args.shift());
+        var newX = Number(args.shift());
+        var newY = Number(args.shift());
         this.prevCx = cX;
         this.prevCy = cY;
-        this.quadToCubic(this.dx + this.prevCx, this.dy + this.prevCy, this.dx + this.x, this.dy + this.y);
+        this.quadToCubic(this.prevCx, this.prevCy, newX, newY);
+		this.x = newX;
+		this.y = newY;
     }
 }
 
@@ -266,9 +277,9 @@ TlsVmlSvgPath.prototype.quadToCubic = function(aCPx, aCPy, aX, aY)
     var cp1y = this.y + 2.0 / 3.0 * (aCPy - this.y);
     var cp2x = cp1x + (aX - this.x) / 3.0;
     var cp2y = cp1y + (aY - this.y) / 3.0;
-    this.path += "c " + Math.round(cp1x) + "," + Math.round(cp1y) + "," + 
-        Math.round(cp2x) + "," + Math.round(cp2y) + "," + 
-        Math.round(aX) + "," + Math.round(aY) + " ";
+    this.path += "c " + this.transformX(cp1x) + "," + this.transformY(cp1y) + "," + 
+        this.transformX(cp2x) + "," + this.transformY(cp2y) + "," + 
+        this.transformX(aX) + "," + this.transformY(aY) + " ";
 }
 
 // TODO A,C,S, relative versions
@@ -337,6 +348,7 @@ TlsVmlSvgPath.prototype.create = function(data)
         }
     }
     if (f) this[f](args);
+	this.path +=" e";
     //this.ctx.closePath();
 }
 

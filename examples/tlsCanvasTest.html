@@ -81,9 +81,9 @@ myCanvasFont.appendText(svgContainer, 10, "ဗမာကျပ်။ သင်္
 -->
 </script>
 
-<p style="cursor:pointer;text-decoration:underline;"><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
-<span onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>|
-<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
+<p style="cursor:pointer;text-decoration:underline;">
+<span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.getElementsByTagName('head')[0].innerHTML);TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
 <span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
 </p>
 <div id="tlsDebug" style="display:none;"></div>

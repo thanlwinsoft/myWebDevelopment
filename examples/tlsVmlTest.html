@@ -19,9 +19,11 @@ To get around these problems you can use a visual keyboard like this.
 <title>Dynamic VML font</title>
 <script type="text/javascript" src="../mySource.js"></script>
 <!--[if IE]>
-<style>vml\: * { behavior:url(#default#VML); display:inline-block }</style>
+<style>vml\: * { behavior:url(#default#VML); display:inline-block }
+</style>
 <xml:namespace ns="urn:schemas-microsoft-com:vml" prefix="vml" />
 <![endif]-->
+
 <script type="text/javascript" src="../canvas/tlsFont.js"></script>
 <script type="text/javascript" src="../canvas/tlsVmlFont.js"></script>
 <script type="text/javascript" src="../svg/Padauk.js"></script>
@@ -65,7 +67,6 @@ myCanvasFont.appendText(svgContainer, 10, "ဗမာကျပ်။ သင်္
 
 <p style="text-decoration:underline;">
 <span style="cursor:pointer; style="cursor:pointer;"" onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
-<span  style="cursor:pointer;" onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>|
 <span  style="cursor:pointer;" onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
 <span  style="cursor:pointer;" onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
 </p>
