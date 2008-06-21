@@ -189,10 +189,13 @@ var myUnicode = {
     nodeCount : 0,
     isIe: false,
     isGecko: false,
+    isOpera: false,
     retryCount: 0,
     queue : new Array(),
     parseCount : 0,
     noticeNodeOffset : 8,
+    conversionCount : 0,
+    countThreshold : 10,
     debug : function() { return document.getElementById("myDebug");},
     /** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
@@ -293,24 +296,21 @@ var myUnicode = {
         var userAgent =navigator.userAgent.toLowerCase();
         myUnicode.isGecko = (userAgent.indexOf('gecko') != -1);
         myUnicode.isIe = (userAgent.indexOf("msie")!=-1);
+        myUnicode.isOpera = (userAgent.indexOf("opera")!=-1);
         myUnicode.addScript(theImgPrefix + "myParser.js");
+        myUnicode.addScript(theImgPrefix + "canvas/tlsFont.js");
         if (myUnicode.isIe)
-            myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
-        myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
+            //myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
+            myUnicode.addScript(theImgPrefix + "canvas/tlsVmlFont.js");
+        else
+            myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
         myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + ".js");
         myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + "Rendered.js");
-        if (!myUnicode.isIe)
-        {
-//            myUnicode.addScript(theImgPrefix + "svg/mySvgFont.js");
-        }
-        else
-        {
-//            myUnicode.addScript(theImgPrefix + myUnicode.fontData + "_images.js");
-        }
         myUnicode.imgPrefix = theImgPrefix;
         if (myUnicode.checkFinished == false) myUnicode.check();
         myUnicode.parseDoc();
         myUnicode.retryCount = 0;
+        if (myUnicode.isOpera) myUnicode.countThreshold = 0;
     },
     addScript: function(src)
     {
@@ -450,9 +450,11 @@ var myUnicode = {
             var nParser = myUnicode.queue[0];
             nParser.parse();
             myUnicode.queue.shift();
-            if (myUnicode.parseCount++ %10 == 0)
+            //if (myUnicode.parseCount++ %10 == 0)
+            if (myUnicode.conversionCount > myUnicode.countThreshold)
             {
-                setTimeout("myUnicode.parseNextNode()",5);
+                myUnicode.conversionCount = 0;
+                setTimeout("myUnicode.parseNextNode()",1);
                 myUnicode.createNotice();
                 var notice = document.getElementById('myParseNotice');
                 if (notice.childNodes.length > 100)
@@ -465,6 +467,7 @@ var myUnicode = {
         }
         else
         {
+            myUnicode.conversionCount = 0;
             myUnicode.hideNotice();
         }
     },
@@ -495,7 +498,7 @@ var myUnicode = {
     {
         if (text == undefined) return;
 
-        var docFrag;
+        var docFrag = undefined;
         var lastMatchEnd = -1;
         var codeString = "u";
         var lastOutput = 0;
@@ -512,101 +515,23 @@ var myUnicode = {
             {
                 if (typeof docFrag == "undefined")
                 {
-//                    if (myUnicode.debug()) 
-//                        myUnicode.debug().appendChild(document.createTextNode(text));
-
                     docFrag = document.createDocumentFragment();
                     var prefix = document.createTextNode(text.substring(0,i));
                     docFrag.appendChild(prefix);
+                    myUnicode.conversionCount++;
                     // these don't change between strings, so set them once
-/*                    if (myUnicode.isIe && 
-                        typeof myUnicode.imageFonts[myUnicode.fontData] != "undefined")
-                    {
-                        var fontData = myUnicode.imageFonts[myUnicode.fontData];
-                        maxCharLen = fontData.maxCharLen;
-                        var fontHeights = fontData.fontHeight;
-                        sizeIndex = myUnicode.chooseFontIndex(node.parentNode);
-                        if (sizeIndex >= fontHeights.length) 
-                            sizeIndex = fontHeights.length - 1;
-                        height = fontHeights[sizeIndex];
-                        fontSize = fontData.fontSize[sizeIndex];
-                    }*/
                     if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(myUnicode.fontData))
                     {
                         if (!myUnicode.canvasFont)
                         {
                             TlsDebug().print("Loaded font: " + myUnicode.fontData);
-                            myUnicode.canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
-                        }
-                    }
-                }
-/*
-                if (false && myUnicode.isIe) // convert to images
-                {
-                    codeString = "u";                
-                    lastMatchEnd = -1;
-                    for (var j = i; j < i + maxCharLen; j++)
-                    {
-                        code = text.charCodeAt(j);
-                        if (myUnicode.inRange(code) == false) break;
-                        if (code < 256) codeString += "00";
-                        codeString += code.toString(16);
-                        try
-                        {
-                            var imageProp = myUnicode.imageFonts[myUnicode.fontData][codeString];
-                            if (imageProp == undefined)
-                            {
-                            }
+                            if (myUnicode.isIe)
+                                myUnicode.canvasFont = new TlsVmlFont(tlsFontCache[myUnicode.fontData]);
                             else
-                            {
-                                lastMatchEnd = j;
-                                width = imageProp[sizeIndex];
-                            }
+                                myUnicode.canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
                         }
-                        catch (e){}
-                    }
-                    // was there a match?
-                    if (lastMatchEnd > -1) // yes
-                    {
-                        
-                        codeString = codeString.substring(0, (lastMatchEnd - i + 1) * 4 + 1);
-                        var imgSrc = myUnicode.imgPrefix + myUnicode.fontData + 
-                                        "_" + fontSize + "/" +
-                                         codeString.substring(1,codeString.length) +
-                                         myUnicode.imgSuffix;
-
-                        var img = document.createElement("span");
-                        img.setAttribute("title", text.substring(i,lastMatchEnd + 1));
-
-                        if (img.style) // ie ignores the above style attributes
-                        {
-                            img.style.height = height + "px";
-                            img.style.width = width + "px";
-                            img.style.verticalAlign = "middle";
-                            img.style.borderLeftStyle = "none";
-                            img.style.borderRightStyle = "none";
-                            img.style.borderTopStyle = "none";
-                            img.style.display="inline-block";
-                            var method = "image";// or "scaled"?
-                            img.style.filter="progid:DXImageTransform.Microsoft.AlphaImageLoader"
-                                + "(src=\'" + imgSrc + "\', sizingMethod='image')";
-                        }
-
-                        docFrag.appendChild(img);
-                        // advance i
-                        i = lastMatchEnd;
-                        //alert(codeString);
-                    }
-                    else
-                    {
-                        // no, just output raw unicode, we can't do anything else
-                        var unexpectedText = document.createTextNode(text.substring(i,i+1));
-                        docFrag.appendChild(unexpectedText);
                     }
                 }
-                */
-                //else // svg
-                //{
                     var j;
                     for (j = i + 1; j < i + text.length; j++)
                     {
@@ -647,15 +572,6 @@ var myUnicode = {
                             }
                             else return;// something failed, best not to replace anything
                         }
-                        else if (typeof mySvgFont != "undefined")
-                        {
-                            var computedStyle = mySvgFont.computedStyle(node.parentNode);
-                            if (computedStyle) 
-                                textColor = computedStyle.color;
-                            var fontSize = mySvgFont.nodeFontSize(node.parentNode);
-                            mySvgFont.appendSvgText(docFrag, myUnicode.svgFont, fontSize, text.substring(i,j), textColor, undefined);
-                            i = j - 1;
-                        }
                     }
                     catch (e) 
                     { 
@@ -663,7 +579,7 @@ var myUnicode = {
                             TlsDebug().print("Exception:" + e + 
                                 ((e.description)? e.description + e.line : "")); 
                     }
-                //}
+
             }
             else if (docFrag != undefined)
             {

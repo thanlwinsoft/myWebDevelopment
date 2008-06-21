@@ -1038,6 +1038,9 @@ toUnicodes: function(text)
         {
             var parentNode = node.parentNode;
             var inputDim = myKeyboardMover.initItemPos(node);
+            // default size if this was zero
+            if (inputDim.height < 1) inputDim.height = 20;
+            if (inputDim.width < 1) inputDim.width = 100;
             var iconsWidth = 16 * (lang.length + 1) + 2;
             inputDim.width += iconsWidth;
             

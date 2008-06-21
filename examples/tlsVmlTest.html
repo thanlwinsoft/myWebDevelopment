@@ -16,60 +16,42 @@ To get around these problems you can use a visual keyboard like this.
 <html>
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-<title>Dynamic Canvas font</title>
+<title>Dynamic VML font</title>
 <script type="text/javascript" src="../mySource.js"></script>
-<!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
+<!--[if IE]>
+<style>vml\: * { behavior:url(#default#VML); display:inline-block }</style>
+<xml:namespace ns="urn:schemas-microsoft-com:vml" prefix="vml" />
+<![endif]-->
 <script type="text/javascript" src="../canvas/tlsFont.js"></script>
-<script type="text/javascript" src="../canvas/tlsCanvasFont.js"></script>
+<script type="text/javascript" src="../canvas/tlsVmlFont.js"></script>
 <script type="text/javascript" src="../svg/Padauk.js"></script>
 <script type="text/javascript" src="../svg/PadaukRendered.js"></script>
 <link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
 <link type="text/css" rel="stylesheet" href="../mySource.css"/>
 </head>
-<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
+<!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. 
+
+-->
 <body id='body' onload="setTimeout(testCanvas, 100);">
-<h1>Dynamic Canvas font</h1>
+<h1>Dynamic VML font</h1>
 <div>
 </div>
 <div id="svgContainer">
 Canvas text: </div>
-<div></div><p id="containerP"></p>
-<!--
-<canvas width="200" height="100" id="cv"></canvas>
--->
+
+<p id="containerP">
+</p>
+
 <script type="text/javascript">
 <!--
 function testCanvas()
 {
 if (!tlsFontCache["Padauk"]) alert("Padauk not found");
-var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
+var myCanvasFont = new TlsVmlFont(tlsFontCache["Padauk"]);
 
 var svgContainer = document.getElementById("svgContainer");
-/*
-var cv = document.getElementById("cv");
-var ctx = cv.getContext("2d");
-var text = "မြန်မာစကား။";
-var run = new TlsTextRun(myCanvasFont.font, 14, text);
-run.layoutText(myCanvasFont.font);
-ctx.fillStyle = "rgb(200,255,200)";
-ctx.fillRect(0,0,run.width, run.height);
-ctx.fillStyle = "rgb(255,0,0)";
-run = myCanvasFont.drawTextRun(ctx,run);
-myCanvasFont.fill = false;
-myCanvasFont.stroke = true;
-ctx.fillStyle = "rgb(255,0,255)";
-ctx.strokeStyle = "rgb(0,0,255)";
 
-ctx.translate(0,run.height);
-myCanvasFont.drawText(ctx,60,"အက္ခရာ။ ");
-*/
-myCanvasFont.fill = true;
-myCanvasFont.stroke = false;
-
-//myCanvasFont.fill = false;
-//myCanvasFont.stroke = true;
-
-myCanvasFont.appendText(svgContainer, 1024, "အက္ခရာ။ ","rgb(0,255,255)");
+myCanvasFont.appendText(svgContainer, 50, "အက္ခရာ။ ","rgb(0,255,255)");
 myCanvasFont.appendText(svgContainer, 102.4, "မြန်မာစကား။", "rgb(255,255,0)", "rgb(200,255,200)");
 myCanvasFont.appendText(svgContainer, 20, "ကော်ဖီ။ ","rgb(255,0,255)");
 svgContainer = document.getElementById("containerP");
@@ -81,10 +63,11 @@ myCanvasFont.appendText(svgContainer, 10, "ဗမာကျပ်။ သင်္
 -->
 </script>
 
-<p style="cursor:pointer;text-decoration:underline;"><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
-<span onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>|
-<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
-<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
+<p style="text-decoration:underline;">
+<span style="cursor:pointer; style="cursor:pointer;"" onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span  style="cursor:pointer;" onclick="TlsDebug().clear().print(document.getElementById('cv').innerHTML);">Show canvas html</span>|
+<span  style="cursor:pointer;" onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show doc DHTML</span>|
+<span  style="cursor:pointer;" onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
 </p>
 <div id="tlsDebug" style="display:none;"></div>
 
@@ -94,7 +77,7 @@ and <a href="javascript:mySource.getSourceFile('js','../svg/mySvgFont.js')">Java
 for instructions on how to use in your own pages. 
 In most cases, you will want to use this as part of <tt>myDetection.js</tt> &ndash; 
 see the example of detecting <a href="myDetection.html">Myanmar Unicode support</a>, 
-which will automatically convert Myanmar Unicode text to SVG when appropriate. </p>
+which will automatically convert Myanmar Unicode text to VML when appropriate. </p>
 <hr />
 <p>You are free to use this on your own website without charge or waranty, 
 though it would be appreciated you could add a link of acknowledgement to 
