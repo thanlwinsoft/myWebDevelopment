@@ -111,7 +111,15 @@ MyNodeParser.prototype.parse = function()
         else if (node.tagName.toLowerCase() == "svg")
         {
              return; // already processed
-        }        
+        }
+        else if (node.tagName.toLowerCase() == "shape")
+        {
+             return; // already processed
+        }
+        else if (node.tagName.toLowerCase() == "canvas")
+        {
+             return; // already processed
+        }
         else if (node.hasChildNodes())
         {
             
@@ -161,51 +169,55 @@ MyNodeParser.prototype.parse = function()
 * Call this function from inside a script element inside the body of your web page.
 * @return true if the browser has Myanmar Unicode support.
 */
-var myUnicode = {
+function TlsMyUnicode()
+{
     // config variables
-    fontNames : "PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode'",
-    fontData  : "Padauk",// can be overridden
-    imageFonts:new Object(),
-    svgFont : "Padauk",
-    canvasFont : undefined,
-    codeStart : 4096,// u1000 - inclusive
-    codeEnd   : 4256,//u10A0 - exclusive
-    imgPrefix : "",// prefix path to images
-    imgSuffix : ".png",// image extension
+    this.fontNames = "PadaukOT, Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode'";
+    this.fontData  = "Padauk";// can be overridden
+    this.imageFonts=new Object();
+    this.svgFont = "Padauk";
+    this.canvasFont = undefined;
+    this.codeStart = 4096;// u1000 - inclusive
+    this.codeEnd   = 4256;//u10A0 - exclusive
+    this.imgPrefix = "";// prefix path to images
+    this.imgSuffix = ".png";// image extension
     // index of font size to use in fontImage array e.g. if images exist for {10,12,14,16}pt
-    defaultFont : 1,// index of default font
-    h1Font : 2,
-    h2Font : 2,
-    h3Font : 1,
-    h4Font : 1,
-    thFont : 2,
-    supFont : 1,// smallest index
-    subFont : 1,
+    this.defaultFont = 1;// index of default font
+    this.h1Font = 2;
+    this.h2Font = 2;
+    this.h3Font = 1;
+    this.h4Font = 1;
+    this.thFont = 2;
+    this.supFont = 1;// smallest index
+    this.subFont = 1;
     // end user config variables
-    isSupported : false,// flag determining support level - only valid after myUnicode.check();
-    checkFinished : false,
-    overlayCount : 0,
-    currentNode : null,
-    nodeCount : 0,
-    isIe: false,
-    isGecko: false,
-    isOpera: false,
-    retryCount: 0,
-    queue : new Array(),
-    parseCount : 0,
-    noticeNodeOffset : 8,
-    conversionCount : 0,
-    countThreshold : 10,
-    debug : function() { return document.getElementById("myDebug");},
+    this.isSupported = false;// flag determining support level - only valid after myUnicode.check();
+    this.checkFinished = false;
+    this.overlayCount = 0;
+    this.currentNode = null;
+    this.nodeCount = 0;
+    this.isIe= false;
+    this.isGecko= false;
+    this.isOpera= false;
+    this.retryCount= 0;
+    this.queue = new Array();
+    this.parseCount = 0;
+    this.noticeNodeOffset = 8;
+    this.conversionCount = 0;
+    this.countThreshold = 5;
+    this.debug = function() { return document.getElementById("myDebug");};
+    return this;
+}
+    
     /** tests the width of the myWidth1/2 spans to see if Myanmar
     * Unicode support is available and displays a 
     * message to the user.
     */
-    checkWithMsg : function()
+TlsMyUnicode.prototype.checkWithMsg = function()
     {
-        if (myUnicode.check())
+        if (this.check())
         {
-            var mySupported = mySupportedMsg(myUnicode.imgPrefix);
+            var mySupported = mySupportedMsg(this.imgPrefix);
             if (mySupported.length > 0)
             {
                 document.writeln(mySupported);
@@ -213,18 +225,18 @@ var myUnicode = {
         }
         else
         {
-            var myUnsupported = myUnsupportedMsg(myUnicode.imgPrefix);
+            var myUnsupported = myUnsupportedMsg(this.imgPrefix);
             if (myUnsupported.length > 0)
                 document.writeln(myUnsupported);
         }
-    },
+    };
 
     /** tests the width of the myWidth1/2 spans to see if Myanmar 
     * Unicode support is available 
     */
-    check : function ()
+TlsMyUnicode.prototype.check = function ()
     {
-        if (myUnicode.checkFinished == true) return myUnicode.isSupported;
+        if (this.checkFinished == true) return this.isSupported;
         var widthTest = 0;
         var myW2 = document.getElementById('myWidth2');
         var myW1 = document.getElementById('myWidth1');
@@ -234,20 +246,20 @@ var myUnicode = {
         document.body.appendChild(widthTest);
 
             myW2 = document.createElement("span");
-            myW2.style.fontFamily = myUnicode.fontNames;
+            myW2.style.fontFamily = this.fontNames;
             myW2.setAttribute("id","myWidth2");
             widthTest.appendChild(myW2);
             myW2.innerHTML = "ကက";
 
             myW1 = document.createElement("span");
-            myW1.style.fontFamily = myUnicode.fontNames;
+            myW1.style.fontFamily = this.fontNames;
             myW1.setAttribute("id","myWidth1");
             widthTest.appendChild(myW1);
             myW1.innerHTML = "က္ကြ";
         }
         var myW1Width = 0;
         var myW2Width = 0;
-        myUnicode.checkFinished = true;
+        this.checkFinished = true;
         if (myW1 && myW2)
         {
             myW1Width = myW1.offsetWidth;
@@ -257,13 +269,13 @@ var myUnicode = {
             if (myW2Width == undefined) myW2Width = myW2.width;
             if (myW1Width == undefined && myW2Width == undefined || (myW2Width == 0 && myW1Width == 0))
             {
-                myUnicode.isSupported = true;
+                this.isSupported = true;
                 return true; // probably not visible, so we don't know
             }
         }
         else
         {
-            myUnicode.isSupported = true;
+            this.isSupported = true;
             return true; // no test spans, so best not to convert to images
         }
     // debug line - you will probably not need this unless you have trouble
@@ -278,41 +290,41 @@ var myUnicode = {
         else 
         {
             // comment out the next line to test non-Unicode support on supported browsers
-            myUnicode.isSupported = true;
+            this.isSupported = true;
         } 
         myW1.removeChild(myW1.firstChild);
         myW2.removeChild(myW2.firstChild);
-    if (widthTest != 0)
+        if (widthTest != 0)
             document.body.removeChild(widthTest);
-        return myUnicode.isSupported;
-    },
+        return this.isSupported;
+    };
     /** initialise the img location, check for unicode support and convert to 
     * images if needed 
     * This is designed to be called in the onload function of body.
     * @param imgPrefix path (relative or absolute) to the PadaukOT.js file.
     */
-    initParse : function(theImgPrefix)
+TlsMyUnicode.prototype.initParse = function(theImgPrefix)
     {
         var userAgent =navigator.userAgent.toLowerCase();
-        myUnicode.isGecko = (userAgent.indexOf('gecko') != -1);
-        myUnicode.isIe = (userAgent.indexOf("msie")!=-1);
-        myUnicode.isOpera = (userAgent.indexOf("opera")!=-1);
-        myUnicode.addScript(theImgPrefix + "myParser.js");
-        myUnicode.addScript(theImgPrefix + "canvas/tlsFont.js");
-        if (myUnicode.isIe)
-            //myUnicode.addScript(theImgPrefix + "excanvas/excanvas.js");
-            myUnicode.addScript(theImgPrefix + "canvas/tlsVmlFont.js");
+        this.isGecko = (userAgent.indexOf('gecko') != -1);
+        this.isIe = (userAgent.indexOf("msie")!=-1);
+        this.isOpera = (userAgent.indexOf("opera")!=-1);
+        this.addScript(theImgPrefix + "myParser.js");
+        this.addScript(theImgPrefix + "canvas/tlsFont.js");
+        if (this.isIe)
+            //this.addScript(theImgPrefix + "excanvas/excanvas.js");
+            this.addScript(theImgPrefix + "canvas/tlsVmlFont.js");
         else
-            myUnicode.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
-        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + ".js");
-        myUnicode.addScript(theImgPrefix + "svg/" + myUnicode.fontData + "Rendered.js");
-        myUnicode.imgPrefix = theImgPrefix;
-        if (myUnicode.checkFinished == false) myUnicode.check();
-        myUnicode.parseDoc();
-        myUnicode.retryCount = 0;
-        if (myUnicode.isOpera) myUnicode.countThreshold = 0;
-    },
-    addScript: function(src)
+            this.addScript(theImgPrefix + "canvas/tlsCanvasFont.js");
+        this.addScript(theImgPrefix + "svg/" + this.fontData + ".js");
+        this.addScript(theImgPrefix + "svg/" + this.fontData + "Rendered.js");
+        this.imgPrefix = theImgPrefix;
+        if (this.checkFinished == false) this.check();
+        this.parseDoc();
+        this.retryCount = 0;
+        if (this.isOpera) this.countThreshold = 0;
+    };
+TlsMyUnicode.prototype.addScript= function(src)
     {
         var head = document.getElementsByTagName("head")[0];
         var scripts = head.getElementsByTagName("script");
@@ -322,58 +334,58 @@ var myUnicode = {
         script.setAttribute("type","text/javascript");
         script.setAttribute("src", src);
         head.appendChild(script);
-    },
+    };
     /** normal entry point to start conversion from unicode to images */
-    parseDoc : function()
+TlsMyUnicode.prototype.parseDoc = function()
     {
-        if (myUnicode.checkFinished && myUnicode.isSupported == false)
+        if (this.checkFinished && this.isSupported == false)
         {
             try
             {
                 // wait for the script additions to take affect
-                //if (mySvgFont.hasFontData(myUnicode.svgFont) == false)
-                if (tlsFontCache.hasFont(myUnicode.fontData) == false)
+                //if (mySvgFont.hasFontData(this.svgFont) == false)
+                if (tlsFontCache.hasFont(this.fontData) == false)
                 {
                     setTimeout("myUnicode.parseDoc()", 500);
-                    myUnicode.retryCount++;
+                    this.retryCount++;
                     return;
                 }
             }
             catch (notDefException)
             { 
                 setTimeout("myUnicode.parseDoc()", 500);
-                myUnicode.retryCount++;
+                this.retryCount++;
                 return;
             }
 
-            //myUnicode.createNotice();
-            myUnicode.nodeCount = 0;
-            myUnicode.parseDocWorker();
+            //this.createNotice();
+            this.nodeCount = 0;
+            this.parseDocWorker();
         }
-    },
+    };
     /** normal entry port to convert just part of a document from unicode to 
     * images 
     * @param node the node to parse
     */
-    parseNodeIfNeeded : function(node)
+TlsMyUnicode.prototype.parseNodeIfNeeded = function(node)
     {
-        if (myUnicode.checkFinished && myUnicode.isSupported == false)
+        if (this.checkFinished && this.isSupported == false)
         {
             if ((typeof tlsFontCache != "undefined" && 
-                tlsFontCache.hasFont(myUnicode.fontData) == true))
+                tlsFontCache.hasFont(this.fontData) == true))
             {
-                myUnicode.parseNode(node);
+                this.parseNode(node);
             }
         }
-    },
+    };
     /** call back from parseDoc */
-    parseDocWorker : function ()
+TlsMyUnicode.prototype.parseDocWorker = function ()
     {
-        myUnicode.parseNode(document.getElementsByTagName("body").item(0));
-    },
+        this.parseNode(document.getElementsByTagName("body").item(0));
+    };
     /** createNotice at top (bottom if fixed is supported) while conversion is 
     * running */
-    createNotice : function ()
+TlsMyUnicode.prototype.createNotice = function ()
     {
         var notice = document.getElementById("myParseNotice");
         if (notice)
@@ -412,89 +424,91 @@ var myUnicode = {
         var body = document.getElementsByTagName("body")[0];
         frag.appendChild(notice);
         notice.appendChild(myMsg);
-        myUnicode.parseText(myMsg, new String(myMsg.data));
+        this.parseText(myMsg, new String(myMsg.data));
         notice.appendChild(msg);
         var br;
         if (document.createElementNS) br = document.createElementNS("http://www.w3.org/1999/xhtml","br");
         else br = document.createElement("br");
         notice.appendChild(br);
         body.insertBefore(frag, body.firstChild);
-    },
-    hideNotice : function ()
+    };
+TlsMyUnicode.prototype.hideNotice = function ()
     {
         var notice = document.getElementById('myParseNotice');
         if (notice) 
         {
             notice.style.display = "none";
-            for (var i = myUnicode.noticeNodeOffset; i < notice.childNodes.length; i++)
+            for (var i = this.noticeNodeOffset; i < notice.childNodes.length; i++)
             {
                 notice.removeChild(notice.childNodes[i]);
             }
         }
-    },
+    };
     /** creates a div overlay ontop of a text input/textarea for displaying
     * images of the input contents 
     */
-    addOverlay : function (node)
+TlsMyUnicode.prototype.addOverlay = function (node)
     {
         if (myKeyboardMover != undefined)
         {
             myK.addOverlay(node);
         }
         //else alert("no myOverlay");
-    },
-    parseNextNode :function()
+    };
+TlsMyUnicode.prototype.parseNextNode = function()
     {
-        if (myUnicode.queue.length > 0)
+        if (this.queue.length > 0)
         {
-            var nParser = myUnicode.queue[0];
+            var nParser = this.queue[0];
             nParser.parse();
-            myUnicode.queue.shift();
-            //if (myUnicode.parseCount++ %10 == 0)
-            if (myUnicode.conversionCount > myUnicode.countThreshold)
+            this.parseCount++;
+            this.queue.shift();
+            if (this.conversionCount > this.countThreshold || this.parseCount > 100)
             {
-                myUnicode.conversionCount = 0;
+                this.conversionCount = 0;
+                this.parseCount = 0;
                 setTimeout("myUnicode.parseNextNode()",1);
-                myUnicode.createNotice();
+                this.createNotice();
                 var notice = document.getElementById('myParseNotice');
-                if (notice.childNodes.length > 100)
-                    for (var i = notice.childNodes.length - 1; i > myUnicode.noticeNodeOffset; i--)
+                if (notice.childNodes.length > 80)
+                    for (var i = notice.childNodes.length - 1; i > this.noticeNodeOffset; i--)
                         notice.removeChild(notice.childNodes[i]);
                 notice.appendChild(document.createTextNode("."));
             }
             else 
-                myUnicode.parseNextNode();
+                this.parseNextNode();
         }
         else
         {
-            myUnicode.conversionCount = 0;
-            myUnicode.hideNotice();
+            this.conversionCount = 0;
+            this.parseCount = 0;
+            this.hideNotice();
         }
-    },
+    };
     /** parse an element node and all its children */
-    parseNode : function (node)
+TlsMyUnicode.prototype.parseNode = function (node)
     {
-        myUnicode.queueNode(new MyNodeParser(node));
-    },
+        this.queueNode(new MyNodeParser(node));
+    };
     /** callback from MyNodeParser */
-    queueNode : function (nodeParser)
+TlsMyUnicode.prototype.queueNode = function (nodeParser)
     {
-        myUnicode.queue.push(nodeParser);
-        if (myUnicode.queue.length == 1)
-            myUnicode.parseNextNode();
-    },
+        this.queue.push(nodeParser);
+        if (this.queue.length == 1)
+            this.parseNextNode();
+    };
 
     /** tests whether the code point is in the range where images may be needed */
-    inRange : function(code)
+TlsMyUnicode.prototype.inRange = function(code)
     {
         if (code == 0x25cc) return true; // hack for dotted circle
-        if ((code >= myUnicode.codeStart) &&
-            (code < myUnicode.codeEnd))
+        if ((code >= this.codeStart) &&
+            (code < this.codeEnd))
             return true;
         return false;
-    },
+    };
     /** parses a text node and converts it to images if required */
-    parseText : function(node, text)
+TlsMyUnicode.prototype.parseText = function(node, text)
     {
         if (text == undefined) return;
 
@@ -511,24 +525,24 @@ var myUnicode = {
         {
             var code = text.charCodeAt(i);
             
-            if (myUnicode.inRange(text.charCodeAt(i)))
+            if (this.inRange(text.charCodeAt(i)))
             {
                 if (typeof docFrag == "undefined")
                 {
                     docFrag = document.createDocumentFragment();
                     var prefix = document.createTextNode(text.substring(0,i));
                     docFrag.appendChild(prefix);
-                    myUnicode.conversionCount++;
+                    this.conversionCount++;
                     // these don't change between strings, so set them once
-                    if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(myUnicode.fontData))
+                    if (typeof tlsFontCache != "undefined" && tlsFontCache.hasFont(this.fontData))
                     {
-                        if (!myUnicode.canvasFont)
+                        if (!this.canvasFont)
                         {
-                            TlsDebug().print("Loaded font: " + myUnicode.fontData);
-                            if (myUnicode.isIe)
-                                myUnicode.canvasFont = new TlsVmlFont(tlsFontCache[myUnicode.fontData]);
+                            TlsDebug().print("Loaded font: " + this.fontData);
+                            if (this.isIe)
+                                this.canvasFont = new TlsVmlFont(tlsFontCache[this.fontData]);
                             else
-                                myUnicode.canvasFont = new TlsCanvasFont(tlsFontCache[myUnicode.fontData]);
+                                this.canvasFont = new TlsCanvasFont(tlsFontCache[this.fontData]);
                         }
                     }
                 }
@@ -536,7 +550,7 @@ var myUnicode = {
                     for (j = i + 1; j < i + text.length; j++)
                     {
                         code = text.charCodeAt(j);
-                        if (myUnicode.inRange(code) == false) break;
+                        if (this.inRange(code) == false) break;
                         if (typeof myParser != 'undefined' && myParser.canBreakAfter(text, j - 1))
                         {
                             break;
@@ -547,14 +561,14 @@ var myUnicode = {
                         var textColor = document.fgColor;
                         var backColor = document.bgColor;
 
-                        if (typeof myUnicode.canvasFont != "undefined")
+                        if (typeof this.canvasFont != "undefined")
                         {
-                            var computedStyle = myUnicode.canvasFont.computedStyle(node.parentNode);
+                            var computedStyle = this.canvasFont.computedStyle(node.parentNode);
                             //TlsDebug().dump(computedStyle,2);
                             if (computedStyle && computedStyle.color)
                             {
                                 textColor = computedStyle.color;
-                                if (myUnicode.isIe) 
+                                if (this.isIe) 
                                 {
                                     if (computedStyle.backgroundColor)
                                         backColor = computedStyle.backgroundColor;
@@ -565,8 +579,8 @@ var myUnicode = {
                             else if (node.parentNode.style.color.specified)
                                 textColor = node.parentNode.style.color;
 
-                            var fontSize = myUnicode.canvasFont.nodeFontSize(node.parentNode);
-                            if (myUnicode.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))//(myUnicode.isIe)?backColor:undefined
+                            var fontSize = this.canvasFont.nodeFontSize(node.parentNode);
+                            if (this.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))//(this.isIe)?backColor:undefined
                             {
                                 i = j - 1;
                             }
@@ -591,7 +605,7 @@ var myUnicode = {
         if (docFrag != undefined)
         {
             var parent = node.parentNode;
-			if (myUnicode.isIe && parent.getAttribute("href"))
+			if (this.isIe && parent.getAttribute("href"))
 			{
 				for (var j = 0; j < docFrag.childNodes.length; j++)
 				{
@@ -607,15 +621,15 @@ var myUnicode = {
 			}
             if (parent) parent.replaceChild(docFrag, node);
         }
-    },
-    
+    };
+
     /** Choose which image size to use for the given node type 
     * This could be modified to look at the specified style, or class on the
     * node, but currently, this is ignored.
     */
-    chooseFontIndex : function(node)
+TlsMyUnicode.prototype.chooseFontIndex = function(node)
     {
-        var index = myUnicode.defaultFont;
+        var index = this.defaultFont;
     if (! node.tagName) return index;
         var elementName = node.tagName.toLowerCase();
         while (elementName == "a" || elementName == "span" || 
@@ -624,15 +638,16 @@ var myUnicode = {
             node = node.parentNode;
             elementName = node.tagName.toLowerCase();
         }
-        if (elementName == "h1") index = myUnicode.h1Font;
-        else if (elementName == "h2") index = myUnicode.h2Font;
-        else if (elementName == "h3") index = myUnicode.h3Font;
-        else if (elementName == "h4") index = myUnicode.h4Font;
-        else if (elementName == "sup") index = myUnicode.supFont;
-        else if (elementName == "sub") index = myUnicode.subFont;
-        else if (elementName == "th") index = myUnicode.thFont;
-        //else if (elementName == "dt") index = myUnicode.thFont;
+        if (elementName == "h1") index = this.h1Font;
+        else if (elementName == "h2") index = this.h2Font;
+        else if (elementName == "h3") index = this.h3Font;
+        else if (elementName == "h4") index = this.h4Font;
+        else if (elementName == "sup") index = this.supFont;
+        else if (elementName == "sub") index = this.subFont;
+        else if (elementName == "th") index = this.thFont;
+        //else if (elementName == "dt") index = this.thFont;
         return index;
     }
-};
+
+var myUnicode = new TlsMyUnicode();
 

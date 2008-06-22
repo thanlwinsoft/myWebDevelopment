@@ -1041,7 +1041,7 @@ toUnicodes: function(text)
             // default size if this was zero
             if (inputDim.height < 1) inputDim.height = 20;
             if (inputDim.width < 1) inputDim.width = 100;
-            var iconsWidth = 16 * (lang.length + 1) + 2;
+            var iconsWidth = 16 * (lang.length + 1) + 4;
             inputDim.width += iconsWidth;
             
             inputFrag = document.createDocumentFragment();
