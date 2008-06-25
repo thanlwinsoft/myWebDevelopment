@@ -82,19 +82,18 @@ Note: the <span>s must be before the script, so they are available as the page l
 <p>You are free to use this on your own website without charge or waranty provided you add a link of acknowledgement to <a href="http://www.thanlwinsoft.org/">www.thanlwinsoft.org</a>.</p>
 <p>To use this script on your site you need to:
 </p>
-<ul><li>include a few scripts e.g. in the /styles directory</li> 
-<li>add 2 spans with the test text</li>
+<ul><li>include a few scripts e.g. unzip myWebDevelopment.zip in the /styles directory</li>
 <li>add an onload function</li>
 </ul>
+<h1>မြန်မာစကား</h1>
 <pre>
 ...
 &lt;meta content="text/html; charset=UTF-8" http-equiv="content-type" /&gt;
 &lt;script type="text/javascript" src="/styles/myDetection.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="/styles/xmlRequest.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
-&lt;body  onload="myUnicode.initParse('/styles/');" &gt;
-&lt;span style="font-family: 'Padauk','Myanmar3','Parabaik'" id="myWidth2"&gt;ကက&lt;/span&gt;
-&lt;span style="font-family: 'Padauk','Myanmar3','Parabaik'" id="myWidth1"&gt;က္က&lt;/span&gt;
+&lt;body  onload="myUnicode.initParse('/styles/myWebDevelopment/');" &gt;
+
 ...
 </pre>
 <p>Change the styles directory as appropriate for your website. 

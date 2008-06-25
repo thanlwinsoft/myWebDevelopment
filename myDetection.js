@@ -580,6 +580,8 @@ TlsMyUnicode.prototype.parseText = function(node, text)
                                 textColor = node.parentNode.style.color;
 
                             var fontSize = this.canvasFont.nodeFontSize(node.parentNode);
+                            TlsDebug().print("fontsize:" + fontSize + " computed:" + 
+                                computedStyle.fontSize);
                             if (this.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))//(this.isIe)?backColor:undefined
                             {
                                 i = j - 1;

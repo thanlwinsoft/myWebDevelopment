@@ -194,6 +194,10 @@ TlsFont.prototype.nodeFontSize = function(node)
 		var fontSizeText = String(computedStyle.fontSize);
 		if (fontSizeText.indexOf("px") > -1) 
 			fontSize = fontSizeText.substring(0, fontSizeText.indexOf("px"));
+		else if (fontSizeText.indexOf("pt") > -1)// pt scaling at 96dpi/72
+		    fontSize = 1.333 * Number(fontSizeText.substring(0, fontSizeText.indexOf("pt")));
+		else if (fontSizeText.indexOf("em") > -1)
+		    fontSize = fontSize * Number(fontSizeText.substring(0, fontSizeText.indexOf("em")));
 	}
 	return fontSize;
 };
