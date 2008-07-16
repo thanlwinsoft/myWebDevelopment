@@ -93,7 +93,7 @@ MyNodeParser.prototype.parse = function()
         var tag = node.tagName.toLowerCase();
         if (node.tagName.toLowerCase() == "input")
         {
-                if (node.getAttribute("type").toLowerCase() == "text")
+                if (node.getAttribute("type") && node.getAttribute("type").toLowerCase() == "text")
                 {
                     myUnicode.addOverlay(node);
                 }
@@ -136,7 +136,7 @@ MyNodeParser.prototype.parse = function()
                 {
                     // nodes with ids can be parsed in batches to avoid 
                     // timeouts on long documents
-                    if (myCommon.getId(child) != "myDebug")
+                    if (myCommon.getId(child) != "myDebug" && node.getAttribute("class") != "tlsNoConvert")
                       myUnicode.queueNode(new MyNodeParser(child));
                 }
                 else if (child.nodeType == 8) {} // ignore comments
@@ -584,6 +584,11 @@ TlsMyUnicode.prototype.parseText = function(node, text)
                                 computedStyle.fontSize);
                             if (this.canvasFont.appendText(docFrag, fontSize, text.substring(i,j), textColor, undefined))//(this.isIe)?backColor:undefined
                             {
+                                var enableTextCopy = document.createElement("img");
+                                enableTextCopy.setAttribute("src",this.imgPrefix + "null.gif");
+                                enableTextCopy.setAttribute("alt",text.substring(i,j));
+                                enableTextCopy.style.width = enableTextCopy.style.height = "0px";
+                                docFrag.appendChild(enableTextCopy);
                                 i = j - 1;
                             }
                             else return;// something failed, best not to replace anything

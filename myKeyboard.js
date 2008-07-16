@@ -1068,15 +1068,30 @@ toUnicodes: function(text)
                 //inputOuterDiv.appendChild(langIcon);
                 iconSpan.appendChild(langIcon);
             }
+            iconSpan.appendChild(document.createElement('br'));
             var keyboardIcon = document.createElement('img');
             keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
             keyboardIcon.setAttribute('id', nodeId + "_keyboardDialog");
             keyboardIcon.setAttribute('alt', "Show Keyboard");
             keyboardIcon.setAttribute('title', "Show Keyboard");
+            keyboardIcon.myK_nodeId = nodeId;
             keyboardIcon.onclick = function() {myK.toggleAlphabetWindow(this.myK_nodeId);};
             //keyboardIcon.style.cssFloat = "right";
             keyboardIcon.style.cursor = "pointer";
             iconSpan.appendChild(keyboardIcon);
+            var showInputIcon = document.createElement('img');
+            showInputIcon.setAttribute('src', myK.pathStem + "showInput.png");
+            showInputIcon.setAttribute('id', nodeId + "_showInput");
+            showInputIcon.setAttribute('alt', "Show Input Form");
+            showInputIcon.setAttribute('title', "Show Input Form");
+            showInputIcon.myK_nodeId = nodeId;
+            showInputIcon.onclick = function() {
+                myK.toggle(this.myK_nodeId);
+                myK.toggle(this.myK_nodeId + "_innerDiv");
+            };
+            //showInputIcon.style.cssFloat = "right";
+            showInputIcon.style.cursor = "pointer";
+            iconSpan.appendChild(showInputIcon);
 
             iconSpan.style.cssFloat = "right";
 			iconSpan.style.styleFloat = "right";
