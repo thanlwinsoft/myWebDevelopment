@@ -1039,7 +1039,7 @@ toUnicodes: function(text)
             var parentNode = node.parentNode;
             var inputDim = myKeyboardMover.initItemPos(node);
             // default size if this was zero
-            if (inputDim.height < 1) inputDim.height = 20;
+            if (inputDim.height < 32) inputDim.height = 32;
             if (inputDim.width < 1) inputDim.width = 100;
             var iconsWidth = 16 * (lang.length + 1) + 4;
             inputDim.width += iconsWidth;
@@ -1065,10 +1065,23 @@ toUnicodes: function(text)
                 langIcon.onclick = function() {myK.toggleLangKeyboard(this.myK_lang,this.myK_nodeId);}
                 //langIcon.style.cssFloat = "right";
                 langIcon.style.cursor = "pointer";
+                langIcon.style.padding = "0px";
+                langIcon.style.margin = "0px";
+                langIcon.style.fontSize = "16px";
+                langIcon.style.verticalAlign = "top";
                 //inputOuterDiv.appendChild(langIcon);
                 iconSpan.appendChild(langIcon);
             }
-            iconSpan.appendChild(document.createElement('br'));
+            var lineBreak = document.createElement('br');
+            lineBreak.style.fontSize = "16px";
+            lineBreak.style.lineHeight = "16px";
+            iconSpan.appendChild(lineBreak);
+            // not sure why firefox needs these so small
+            iconSpan.style.fontSize = "16px";
+            iconSpan.style.padding = "0px";
+            iconSpan.style.margin = "0px";
+            iconSpan.style.lineHeight = "16px";
+            iconSpan.style.verticalAlign = "top";
             var keyboardIcon = document.createElement('img');
             keyboardIcon.setAttribute('src', myK.pathStem + "alphabetWindowOff.png");
             keyboardIcon.setAttribute('id', nodeId + "_keyboardDialog");
@@ -1078,12 +1091,16 @@ toUnicodes: function(text)
             keyboardIcon.onclick = function() {myK.toggleAlphabetWindow(this.myK_nodeId);};
             //keyboardIcon.style.cssFloat = "right";
             keyboardIcon.style.cursor = "pointer";
+            keyboardIcon.style.padding = "0px";
+            keyboardIcon.style.margin = "0px";
+            keyboardIcon.style.fontSize = "16px";
+            keyboardIcon.style.verticalAlign = "top";
             iconSpan.appendChild(keyboardIcon);
             var showInputIcon = document.createElement('img');
             showInputIcon.setAttribute('src', myK.pathStem + "showInput.png");
             showInputIcon.setAttribute('id', nodeId + "_showInput");
-            showInputIcon.setAttribute('alt', "Show Input Form");
-            showInputIcon.setAttribute('title', "Show Input Form");
+            showInputIcon.setAttribute('alt', "Show Input Form/Image");
+            showInputIcon.setAttribute('title', "Show Input Form/Image");
             showInputIcon.myK_nodeId = nodeId;
             showInputIcon.onclick = function() {
                 myK.toggle(this.myK_nodeId);
@@ -1091,6 +1108,10 @@ toUnicodes: function(text)
             };
             //showInputIcon.style.cssFloat = "right";
             showInputIcon.style.cursor = "pointer";
+            showInputIcon.style.padding = "0px";
+            showInputIcon.style.margin = "0px";
+            showInputIcon.style.fontSize = "16px";
+            showInputIcon.style.verticalAlign = "top";
             iconSpan.appendChild(showInputIcon);
 
             iconSpan.style.cssFloat = "right";
@@ -1117,6 +1138,7 @@ toUnicodes: function(text)
             inputInnerDiv.style.borderStyle = "solid";
             inputInnerDiv.style.backgroundColor = "white";
             inputInnerDiv.style.dispay = "inline-block";
+            inputInnerDiv.style.textAlign = "left";
             inputInnerDiv.style.overflow = "auto";
             inputInnerDiv.style.width = (inputDim.width - iconsWidth) + "px";
             inputInnerDiv.style.height = inputDim.height + "px";

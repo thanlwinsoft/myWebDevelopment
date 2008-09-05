@@ -1,4 +1,5 @@
 #!/bin/bash
+#### LEGACY DON'T NEED REAL IMAGES ANY MORE
 FONT=Padauk
 if test $# -gt 0
 then WORDLISTS=$@

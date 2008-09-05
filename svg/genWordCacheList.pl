@@ -224,7 +224,7 @@ while ($line = <KNOWN>)
 }
 close(KNOWN);
 #fprintf(STDERR $words);
-
+printf STDERR "loaded words\n";
 # CMVT
 for ($c = 0; $c<=$#consonants; $c++)
 {
@@ -272,9 +272,10 @@ for ($k = 0; $k<=$#killed; $k++)
     {
         $match = $killed[$k] . $stacker . $consonants[$c];
         # $k ==0 is dotted circle
-        if ($k == 0 || $words =~ /.*$match.*/)
+        #printf(STDERR "try $match\n");
+        if ($k == 0 || $words =~ /$match/)
         {
-            #printf( "$match");
+            #printf(STDERR "found $match\n");
             for ($v = 0; $v<=$#vowels; $v++)
             {
             for ($t = 0; $t<=$#tones; $t++)
@@ -321,6 +322,7 @@ print <<'EOT';
 က္ချ
 န္တျ
 န္တျ
+န္သု
 သ္တြ
 င်္
 ါ်

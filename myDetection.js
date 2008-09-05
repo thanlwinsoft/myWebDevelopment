@@ -588,6 +588,7 @@ TlsMyUnicode.prototype.parseText = function(node, text)
                                 enableTextCopy.setAttribute("src",this.imgPrefix + "null.gif");
                                 enableTextCopy.setAttribute("alt",text.substring(i,j));
                                 enableTextCopy.style.width = enableTextCopy.style.height = "0px";
+                                enableTextCopy.style.borderStyle = "none";
                                 docFrag.appendChild(enableTextCopy);
                                 i = j - 1;
                             }
