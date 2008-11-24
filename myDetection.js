@@ -449,7 +449,7 @@ TlsMyUnicode.prototype.hideNotice = function ()
     */
 TlsMyUnicode.prototype.addOverlay = function (node)
     {
-        if (myKeyboardMover != undefined)
+        if (typeof myKeyboardMover != "undefined")
         {
             myK.addOverlay(node);
         }

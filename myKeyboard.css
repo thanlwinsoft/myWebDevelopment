@@ -195,7 +195,7 @@ div.myKeyInput {
 
 svg, canvas {
     display: inline;
-    vertical-align: top;
+    vertical-align: middle !important;
     overflow: visible;
 }
 
