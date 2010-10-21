@@ -1,5 +1,5 @@
 /*
-Copyright 2005,2006 ThanLwinSoft.org
+Copyright 2005,2006,2010 ThanLwinSoft.org
 
 You are free to use this on your website and modify it 
 subject to a Creative Commons license. 
@@ -18,12 +18,12 @@ Change History:
 24-07-2006    KRS    Modified for new Unicode Proposal
 23-07-2006    KRS    Keyboard can now be dragged around browser window
 01-01-2008    KRS    Enable characters to be typed with normal keyboard
-
+21-10-2010    KRS    Change U+1037 to normalized position
 */
 
 /**
-* The algorithm used here uses the syllable structure from Unicode 4
-* Chapter 10.3 and the new Unicode Proposal that is in the Pipeline.
+* The algorithm used here uses the syllable structure from Unicode Technical
+* Note 11r3.
 * The only difference is that medial ya and ra are combined
 * since they never occur together in modern Burmese.
 * 
@@ -68,8 +68,15 @@ positionNodes : new Array(['kinzi'], "", "", ['medYa', 'medRa'],
                           ['medWa'], ['medHa'],
                           ['u1031'], ['u102d', 'u102e', 'u1032'], 
                           ['u102f', 'u1030'], 
-                          ['u102c', 'u102b'], ['u1036'], ['killer'], 
-                          ['u1037'], ['u1038'],[]),
+                          ['u102c', 'u102b'], ['u1036'],
+                          ['u1037'], ['killer'], ['u1038'],[]),
+// keep these indices in sync with the positionNodes array
+kinziPos : 0,
+consPos : 1,
+stackPos : 2,
+ePos : 6,
+aPos : 9,
+asatPos : 12,
 /** 
 * Initialise path to keyboard files and register keyboard
 * @param path to files
@@ -133,7 +140,7 @@ typeChar: function(charValue, pos)
     oldText = myK.findOldText(inputElement, cursor);
   }
   
-  if (pos == 1)
+  if (pos == myK.consPos)
   {
     if (myK.consMode == 0)
     {
@@ -152,7 +159,7 @@ typeChar: function(charValue, pos)
     }
     else
     {
-      myK.currentSyllable[2] = "\u1039" + charValue;
+      myK.currentSyllable[myK.stackPos] = "\u1039" + charValue;
       myK.toggleStack(myK.lang);
       myK.disable('stack');
       myK.disable('kinzi');
@@ -164,25 +171,25 @@ typeChar: function(charValue, pos)
     myK.disable('stack');
     myK.disable('kinzi');
   }
-  else if (pos == 2 && charValue.length == 1) // u1039
+  else if (pos == myK.stackPos && charValue.length == 1) // u1039
   {
-    if (oldText.prefix.length > 0 &&
-        myK.currentSyllable[1] != '' && myK.syllableToString().length == 1)
+  	if (oldText.prefix.length > 0 &&
+        myK.currentSyllable[myK.consPos] != '' && myK.syllableToString().length == 1)
     {
         // stack the previous consonant
-        var lowerCons = charValue + myK.currentSyllable[1];
+        var lowerCons = charValue + myK.currentSyllable[myK.consPos];
         // move back one character and find the previous syllable
         cursor.selectionStart = --cursor.selectionEnd;
         oldText.prefix = myK.findEndSyllable(oldText.prefix, false);
-        if (myK.currentSyllable[2] == '')
+        if (myK.currentSyllable[myK.stackPos] == '')
         {
-            myK.currentSyllable[2] = lowerCons;
+            myK.currentSyllable[myK.stackPos] = lowerCons;
         }
         else // can't have multiple stacks
         {
             oldText.prefix += myK.syllableToString();
             myK.resetSyllable();
-            myK.currentSyllable[1] = lowerCons.charAt(1);
+            myK.currentSyllable[myK.consPos] = lowerCons.charAt(1);
         }
     }
   }
@@ -190,7 +197,7 @@ typeChar: function(charValue, pos)
   {
     
     // u1031
-    if (pos == 6 && myK.currentSyllable[1] != "")
+    if (pos == myK.ePos && myK.currentSyllable[myK.consPos] != "")
     {
       oldText.prefix = oldText.prefix + myK.syllableToString();
       myK.resetSyllable();
@@ -198,12 +205,12 @@ typeChar: function(charValue, pos)
     }
     else
     {
-	  // special case for contrations
-	  if (myK.currentSyllable[11] == "\u103a" && pos > 2 && pos < 9)
-	  {
-		myK.currentSyllable[2] = myK.currentSyllable[11];
-		myK.currentSyllable[11] = "";
-	  }
+			// special case for contrations
+			if (myK.currentSyllable[myK.asatPos] == "\u103a" && pos > myK.stackPos && pos < myK.aPos)
+			{
+				myK.currentSyllable[myK.stackPos] = myK.currentSyllable[myK.asatPos];
+				myK.currentSyllable[myK.asatPos] = "";
+			}
       myK.currentSyllable[pos] = characters;
       var ids = myK.positionNodes[pos];
       for (var j = 0; j < ids.length; j++)
@@ -213,6 +220,12 @@ typeChar: function(charValue, pos)
     }
   }
   var newSyllable = myK.syllableToString();
+  // check substitution table for composed/erroneous sequences
+  if (myKeyMapper[myK.lang + "_substitutions"] &&
+      myKeyMapper[myK.lang + "_substitutions"][newSyllable])
+  {
+    newSyllable = myKeyMapper[myK.lang + "_substitutions"][newSyllable]
+  }
   inputElement.value = oldText.prefix + newSyllable + oldText.suffix;
   // Move cursor to end of syllable
   var cursor = oldText.prefix.length + newSyllable.length;
@@ -393,31 +406,31 @@ findEndSyllable: function(oldText, forDelete)
     {
       var order = myK.getCharOrder(oldText, charIndex);
       charIndex -= myK.lastTokenLength;
-      if ((prevOrder == 1 && order == 0) ||
-          (prevOrder > 1))
+      if ((prevOrder == myK.consPos && order == myK.kinziPos) ||
+          (prevOrder > myK.consPos))
       {
         // need to delete the first syllable we find
         if (deleted)
         {
-		  // special case for contractions
-		  if (order == 11 && prevOrder > 2 && prevOrder < 9)
-		  {
-			order = 2;
-		  }
+		  		// special case for contractions
+					if (order == myK.asatPos && prevOrder > myK.stackPos && prevOrder < myK.aPos)
+					{
+						order = myK.stackPos;
+					}
           myK.currentSyllable[order] = oldText.substr(charIndex + 1,
                                                 myK.lastTokenLength);
           var ids = myK.positionNodes[order];
-          if (order != 6) 
+          if (order != myK.ePos)
           {
             for (var j = 0; j < ids.length; j++)
             {
                 myK.disable(ids[j]);
             }
           }
-          if (order == 2 || order == 0) 
+          if (order == myK.stackPos || order == myK.kinziPos)
           {
             myK.disable('stack');
-            if (myK.consMode == 1) toggleStack(''); 
+            if (myK.consMode == 1) toggleStack('');
           }
           prevOrder = order;
         }
@@ -432,7 +445,7 @@ findEndSyllable: function(oldText, forDelete)
         charIndex += myK.lastTokenLength;
         break;
       }                       
-      if (order == 0) break;                          
+      if (order == myK.kinziPos) break;
     }
   }
   //alert("findEndSyllable " + oldText.substring(0, charIndex + 1) + " " + myK.toUnicodes(myK.syllableToString()));
@@ -561,10 +574,10 @@ getCharOrder: function(theText, charIndex)
     case '\u1036':
       order = 10;
       break;
-    case '\u103a':
+    case '\u1037':
       order = 11;
       break;
-    case '\u1037':
+    case '\u103a':
       order = 12;
       break;
     case '\u1038':
@@ -637,12 +650,15 @@ disable: function(id)
 */
 enable: function(id)
 {
-  var element = document.getElementById(id);
-  if  (element)
-    element.style.display = "";
-  element = document.getElementById(myK.lang + "_" + id);
-  if  (element)
-    element.style.display = "";
+	if (id.length)
+	{
+		var element = document.getElementById(id);
+		if  (element)
+		  element.style.display = "";
+		element = document.getElementById(myK.lang + "_" + id);
+		if  (element)
+		  element.style.display = "";
+  }
 },
 
 /**
@@ -759,18 +775,18 @@ toggleStack: function(prefix)
     myK.consMode = 1;
     for (var i = 0; i < myK.stackableCons.length; i++)
     {
-      var element = document.getElementById(prefix + "_" + myK.stackableCons[i]);
-      if (element)
-    {
-      var text = new String(element.firstChild.nodeValue);
-      var u25cc = document.createTextNode('\u1039' + text);
-      element.replaceChild(u25cc, element.firstChild);
-    }
+        var element = document.getElementById(prefix + "_" + myK.stackableCons[i]);
+        if (element)
+        {
+          var text = new String(element.firstChild.nodeValue);
+          var u25cc = document.createTextNode('\u1039' + text);
+          element.replaceChild(u25cc, element.firstChild);
+        }
     }
     for (var i = 0; i < myK.nonStackableCons.length; i++)
     {
       var element = document.getElementById(prefix + "_" + myK.nonStackableCons[i]);
-    if (element)
+      if (element)
           element.style.display = "none";
     }
   }
@@ -866,19 +882,23 @@ toggleLangKeyboard: function(lang, nodeId)
 */
 switchInput: function(newId)
 {
+	if (newId == null || newId.length == 0) return;
 	//if (myK.inputId == newId) return;
-  var oldInput = document.getElementById(myK.inputId);
-  if (oldInput)
-  {
-    var oldCursor = document.getElementById(myK.inputId + "_cursor");
-    if (oldCursor) oldCursor.style.display = "none";
-    
-    var icon = document.getElementById(myK.inputId + "_keyboardDialog");
-    if (icon)
-        icon.setAttribute("src",myK.pathStem + "alphabetWindowOff.png");
-    icon = document.getElementById(myK.inputId + "_" + myK.lang);
-    if (icon)
-        icon.setAttribute("src",myK.pathStem + myK.lang + myK.keyboardOffIcon);
+	if (myK.inputId.length > 0)
+	{
+		var oldInput = document.getElementById(myK.inputId);
+		if (oldInput)
+		{
+		  var oldCursor = document.getElementById(myK.inputId + "_cursor");
+		  if (oldCursor) oldCursor.style.display = "none";
+		  
+		  var icon = document.getElementById(myK.inputId + "_keyboardDialog");
+		  if (icon)
+		      icon.setAttribute("src",myK.pathStem + "alphabetWindowOff.png");
+		  icon = document.getElementById(myK.inputId + "_" + myK.lang);
+		  if (icon)
+		      icon.setAttribute("src",myK.pathStem + myK.lang + myK.keyboardOffIcon);
+		}
   }
   myK.inputId = newId;
   myK.resetSyllable();
@@ -966,53 +986,6 @@ toUnicodes: function(text)
   return codes;
 },
 
-//    requestA: 0,
-//    requestB: 0,
-//    requestC: 0,
-/**
-    * A very versatile method of getting a file and getting around the browsers
-    * attempt to open the file associated with the file type.
-    * Unfortunately, latest browers don't allow this to work for file: urls
-    * even though the owner document is also a file: url
-    * Note the actual file is displayed in the call back docReady not this method.
-    * @param id of pre to insert source file contents
-    * @param name of file to retreive
-    *//*
-    getSourceFile : function(name, func)
-    {
-        // TBD: handle multilple requests better - max 3 at present
-        var returnFunc = myK.keyboardReadyA;
-        var request = xmlRequest.getRequestObject();
-        if (myK.requestA)
-        {
-            if (myK.requestB)
-            {
-                if (myK.requestC)
-                {
-                    alert("4 keyboard requests not supported");
-                    return;
-                }
-                else
-                {
-                    myK.requestC = request;
-                    returnFunc = myK.keyboardReadyC;
-                }
-            }
-            else
-            {
-                myK.requestB = request;
-                returnFunc = myK.keyboardReadyB;
-            }
-        }
-        else
-        {
-            myK.requestA = request;
-        }
-        
-        request.open('get',name, true);
-        request.onreadystatechange = returnFunc;
-        request.send("");
-    },*/
     langIcon: function(type, index, lang)
     {
         return "myK." + type + index + lang + "Icon";
@@ -1115,7 +1088,7 @@ toUnicodes: function(text)
             iconSpan.appendChild(showInputIcon);
 
             iconSpan.style.cssFloat = "right";
-			iconSpan.style.styleFloat = "right";
+            iconSpan.style.styleFloat = "right";
             inputOuterDiv.appendChild(iconSpan);
 
             inputFrag.appendChild(inputOuterDiv);
@@ -1211,29 +1184,7 @@ toUnicodes: function(text)
             }
         }
     },
-/*
-    keyboardReadyA: function(e)
-    {
-        if (myK.requestA.readyState == 4)
-        {
-            myK.appendKeyboard(myK.requestA.responseText);
-        }
-    },
-    keyboardReadyB: function(e)
-    {
-        if (myK.requestB.readyState == 4)
-        {
-            myK.appendKeyboard(myK.requestB.responseText);
-        }
-    },
-    keyboardReadyC: function(e)
-    {
-        if (myK.requestC.readyState == 4)
-        {
-            myK.appendKeyboard(myK.requestC.responseText);
-        }
-    },
-*/
+
     appendKeyboard: function(docText)
     {
 //        alert(document.getElementsByTagName('title')[0].innerHTML);
@@ -1791,12 +1742,21 @@ var myKeyMapper = {
         A:"ဗ",S:"ှ",D:"ီ",F:"င်္",G:"ွ",H:"ံ",J:"ဲ",K:"ု",L:"ူ",_58:"ါ်",_34:"ဓ",
         Z:"ဇ",X:"ဌ",C:"ဃ",V:"ဠ",B:"ဦ",N:"ဈ",M:"ဪ",_60:",",_62:"၎",_63:"၊"
     },
-    
-    // TODO Sgaw Karen
+    my_substitutions : {
+	    "\u101E\u103C":"ဩ",
+	    "\u101E\u103C\u1031\u102C\u103A":"ဪ",
+	    "\u1025\u103A":"ဉ်",
+	    "\u1025\u102E":"ဦ",
+	    "\u1005\u103B":"ဈ"
+    },
+
+    // TODO Sgaw Karen and other Myanmar languages
     ksw_map : {  
         //:"",:"",:"",:"",
     },
     ksw_mapShift : {
+    },
+    ksw_substitutions : {
     },
 
     /** Add onclick handlers to the keys in the table layout 
@@ -1898,17 +1858,16 @@ var myKeyMapper = {
         var theChar = String.fromCharCode(key);
         if (myK.lang != '' && key > 20)
         {
-            var lookup = myK.lang + "_map" + 
-                (evt.shiftKey ? "Shift." + theChar : "." + theChar.toLowerCase());
+            var mapName = myK.lang + "_map" + (evt.shiftKey ? "Shift" : "");
+            var keyId = (evt.shiftKey ? theChar : theChar.toLowerCase());
             if (key < 'A'.charCodeAt(0) || key > 'z'.charCodeAt(0) || 
                 (key > 'Z'.charCodeAt(0) && key < 'a'.charCodeAt(0)))
             {
-                lookup = myK.lang + "_map" + 
-                    (evt.shiftKey ? "Shift._" : "._") + key;
+                keyId = "_" + key;
             }
             try
             {
-                var keyCodeMap = eval("myKeyMapper." + lookup);
+                var keyCodeMap = myKeyMapper[mapName][keyId];
                 if (keyCodeMap != undefined)
                 {
                     myK.typeChar(keyCodeMap, myK.getCharOrder(keyCodeMap, 0));

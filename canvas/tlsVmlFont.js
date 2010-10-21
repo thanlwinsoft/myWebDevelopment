@@ -1,3 +1,7 @@
+// Copyright: Keith Stribley 2008 http://www.ThanLwinSoft.org/
+// License: GNU Lesser General Public License, version 2.1 or later.
+// http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
 // This code uses several ideas from http://excanvas.sourceforge.net/
 // but is tailored specifically for vml in the hope it will improve performance
 

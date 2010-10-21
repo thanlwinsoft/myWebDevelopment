@@ -22,6 +22,7 @@ To get around these problems you can use a visual keyboard like this.
 <!--[if IE]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="../canvas/tlsFont.js"></script>
 <script type="text/javascript" src="../canvas/tlsCanvasFont.js"></script>
+<script type="text/javascript" src="tlsGlyphDisplay.js"></script>
 <script type="text/javascript" src="../svg/Padauk.js"></script>
 <script type="text/javascript" src="../svg/PadaukRendered.js"></script>
 <link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
@@ -36,9 +37,16 @@ To get around these problems you can use a visual keyboard like this.
 }
 #glyphProperties { padding: 10px; }
 </style>
+<script type="text/javascript">
+<!--
+
+var glyphDisplay = new TlsGlyphDisplay('Padauk', 'cv');
+
+-->
+</script>
 </head>
 <!-- Put the myUnicode before myK to ensure the path is correct for images within the keyboard. -->
-<body id='body' onload="setTimeout(displayGlyph, 100);">
+<body id='body' onload="glyphDisplay.play();">
 <h1>Dynamic Canvas font</h1>
 <div>
 </div>
@@ -54,110 +62,14 @@ To get around these problems you can use a visual keyboard like this.
 <tr><td>Advance: </td><td id="advance"></td></tr>
 </table>
 <p>
-<span class="playControl" onclick="increment=((increment==1)? -1:1);if (!play) { play=true; displayGlyph();}">Reverse</span>
-<span class="playControl" onclick="gId-=increment;increment=0;displayGlyph();displayGlyph();play=false;increment=1;">Pause</span>
-<span class="playControl" onclick="if (!play){play=true;displayGlyph();}">Play</span>
+<span class="playControl" onclick="glyphDisplay.reverse();">Reverse</span>
+<span class="playControl" onclick="glyphDisplay.pause();">Pause</span>
+<span class="playControl" onclick="glyphDisplay.play();">Play</span>
+<span class="playControl" onclick="glyphDisplay.chooseGlyph(this);">Glyph</span>
 </p>
 </div>
 <p style="clear: both; margin-bottom: 1em;">&nbsp;</p>
-<script type="text/javascript">
-<!--
-var play = true;
-var increment = 1;
-if (!tlsFontCache["Padauk"]) alert("Padauk not found");
-var myCanvasFont = new TlsCanvasFont(tlsFontCache["Padauk"]);
-var gId = Math.round(myCanvasFont.font.data.glyphs.length * Math.random());//99;
 
-function displayGlyph()
-{
-if (!play) return;
-
-if (gId >= myCanvasFont.font.data.glyphs.length)
-{
-    gId = 0;
-}
-else if (gId < 0)
-{
-    gId = myCanvasFont.font.data.glyphs.length - 1;
-}
-var svgContainer = document.getElementById("svgContainer");
-
-var cv = document.getElementById("cv");
-var ctx = cv.getContext("2d");
-ctx.save();
-myCanvasFont.fill = false;
-myCanvasFont.stroke = true;
-
-// erase canvas
-//ctx.fillStyle="rgba(255,255,255,0.8)";
-// omit the zero for alpha in opera
-ctx.fillStyle="rgba(255,255,255,.8)";
-ctx.fillRect(0,0,400,200);
-// axes
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.strokeStyle = "rgb(0,255,0)";
-ctx.moveTo(100,0);
-ctx.lineTo(100,200);
-ctx.moveTo(0,150);
-ctx.lineTo(400,150);
-ctx.stroke();
-
-var em = myCanvasFont.font.data.unitsPerEm;
-var scaling = 100 / em;
-ctx.translate(100,150);
-ctx.scale(scaling, -scaling);
-
-// ascent, descent
-ctx.lineWidth = 2;
-ctx.strokeStyle = "rgb(255,0,0)";
-ctx.beginPath();
-ctx.moveTo(-em,myCanvasFont.font.data.ascent);
-ctx.lineTo(3*em,myCanvasFont.font.data.ascent);
-ctx.moveTo(-em,myCanvasFont.font.data.descent);
-ctx.lineTo(3*em,myCanvasFont.font.data.descent);
-ctx.stroke();
-
-ctx.fillStyle = "rgb(255,0,255)";
-ctx.strokeStyle = "rgb(0,0,255)";
-var lineScaling = scaling;
-if (typeof G_vmlCanvasManager != "undefined") lineScaling = 1;
-ctx.lineWidth = 2/lineScaling;
-
-var charGlyph = [0,0,gId,myCanvasFont.font.data.glyphs[gId].a];
-//myCanvasFont.getGlyph(text);
-var run = myCanvasFont.drawGlyphs(ctx,charGlyph, 0, 0);
-
-// advance
-ctx.lineWidth = 2/lineScaling;
-ctx.strokeStyle = "rgb(50,50,50)";
-ctx.beginPath();
-var advance = ((charGlyph.length>0)? charGlyph[charGlyph.length - 1]:0);
-ctx.moveTo(advance,1.5*em);
-ctx.lineTo(advance,-0.5*em);
-ctx.stroke();
-ctx.restore();
-
-// update info
-document.getElementById("glyphId").innerHTML = gId;
-document.getElementById("glyphName").innerHTML = myCanvasFont.font.data.glyphs[gId].n;
-document.getElementById("advance").innerHTML = myCanvasFont.font.data.glyphs[gId].a;
-var text = myCanvasFont.font.data.glyphs[gId].u;
-var codes = "";
-var hexCodes = "";
-for (var i = 0; i < text.length; i++) { codes += text.charCodeAt(i) + " ";
-hexCodes += text.charCodeAt(i).toString(16) + " ";
-}
-document.getElementById("unicodeDec").innerHTML = codes;
-document.getElementById("unicodeHex").innerHTML = hexCodes.toUpperCase();
-
-// increment glyph
-gId += increment;
-
-setTimeout(displayGlyph,1000);
-}
--->
-</script>
 <!--
 <p onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</p>
 <div id="tlsDebug" style="display:none;"></div>
@@ -165,7 +77,7 @@ setTimeout(displayGlyph,1000);
 
 <hr />
 <p>You browser must support Canvas for this example to work. It is known to work in Firefox and Opera.
-In IE it should work with the help of <a href="http://sourceforge.net/projects/iecanvas">IECanvas</a></p>
+In IE it should work using VML.</p>
 <p>You are free to use this on your own website without charge or waranty, though it would be appreciated you could add a link of acknowledgement to 
 <a href="http://www.thanlwinsoft.org/"><img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/>www.thanlwinsoft.org</a>.
 </p>

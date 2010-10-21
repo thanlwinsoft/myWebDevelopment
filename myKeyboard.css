@@ -81,7 +81,8 @@ div.keyboard {
   background-color: #ffffff; /* background */
   margin: 0px;
   z-index: 10;
-  border-radius: 5px;
+  min-width: 400px;
+  -ie-border-radius: 5px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   opacity: 0.5;
@@ -188,7 +189,7 @@ div.keyboard p.keyboardTab {
 p.keyboardTab span { padding-left: 2px; padding-right: 2px; }
 
 div.myKeyInput { 
-    border-radius: 5px;
+    -ie-border-radius: 5px;
     -moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 }
