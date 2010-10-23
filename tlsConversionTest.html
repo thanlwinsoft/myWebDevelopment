@@ -110,21 +110,19 @@ function TlsConversionTestLoader(converterName, dataFile)
                 var parentDiv = document.getElementById("wordListTest");
                 var table = document.createElement("table");
                 var converter = tlsMyanmarConverters[converterName.toLowerCase()];
+                var errorCount = 0;
                 parentDiv.appendChild(table);
-                alert(lines.length);
                 for (var i = 0; i < lines.length; i++)
                 {
                     var row = document.createElement("tr");
+                    var rowNum = document.createElement("td");
                     var inText = document.createElement("td");
                     var outText = document.createElement("td");
                     var reverseText = document.createElement("td");
-                    table.appendChild(row);
-                    row.appendChild(inText);
-                    row.appendChild(outText);
-                    row.appendChild(reverseText);
                     inText.style.fontFamily = "Padauk,ThanLwin,Myanmar3";
                     reverseText.style.fontFamily = inText.style.fontFamily;
                     outText.style.fontFamily = converterName;
+                    rowNum.appendChild(document.createTextNode(String(i+1)));
                     inText.appendChild(document.createTextNode(lines[i]));
                     var converted = converter.convertFromUnicode(lines[i]);
                     var reversed = converter.convertToUnicode(converted);
@@ -133,7 +131,18 @@ function TlsConversionTestLoader(converterName, dataFile)
                     if (reversed != lines[i])
                     {
                         row.style.backgroundColor = "#c00";
+                        errorCount++;
                     }
+                    row.appendChild(rowNum);
+                    row.appendChild(inText);
+                    row.appendChild(outText);
+                    row.appendChild(reverseText);
+                    table.appendChild(row);
+                }
+                if (errorCount > 0)
+                {
+                    parentDiv.insertBefore(document.createTextNode("Error count: " +
+                        errorCount), table);
                 }
             }
             catch(e)

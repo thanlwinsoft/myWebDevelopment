@@ -174,7 +174,8 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
     // now some post processing
     if (syllable["asat"])
     {
-        if (syllable["yayit"] || syllable["yapin"] || syllable["wasway"] || syllable["lVowel"])
+        if (!syllable["eVowel"] && (syllable["yayit"] || syllable["yapin"] || syllable["wasway"] ||
+           syllable["lVowel"]))
         {
             syllable["contraction"] = syllable["asat"];
             delete syllable["asat"];
@@ -308,9 +309,27 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         }
     }
     // check for code points which may not have a direct mapping
-    if (unicodeSyllable["cons"] == "ဉ" && unicodeSyllable["asat"])
+    if (unicodeSyllable["cons"] == "ဉ")
     {
-        syllable["cons"] = this.data["cons"]["ဥ"];
+        if (unicodeSyllable["asat"])
+        {
+            syllable["cons"] = this.data["cons"]["ဥ"];
+        }
+        else if (unicodeSyllable["hatoh"])
+        {
+            syllable["hatoh"] = this.data["hatoh"]["ှ_small"];
+        }
+        else if (unicodeSyllable["stack"])
+        {
+            syllable["cons"] = this.data["cons"]["ဉ_alt"];
+        }
+    }
+    else if (unicodeSyllable["cons"] == "ဠ")
+    {
+        if (unicodeSyllable["hatoh"])
+        {
+            syllable["hatoh"] = this.data["hatoh"]["ှ_small"];
+        }
     }
     else if (unicodeSyllable["cons"] == "ဈ" && this.data["cons"]["ဈ"].length == 0)
     {
@@ -346,6 +365,7 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         {
             syllable["cons"] = this.data["cons"][unicodeSyllable["cons"] + "_alt"];
         }
+        
     }
     else if (unicodeSyllable["cons"] == "ရ")
     {
@@ -445,7 +465,7 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         delete syllable["hatoh"];
         syllable["wasway"] = this.data["wasway"]["ွှ_lig"];
     }
-    if (syllable["hatoh"] && syllable["lVowel"])
+    if (syllable["hatoh"] && syllable["lVowel"] && !syllable["yapin"] && !syllable["yayit"])
     {
         syllable["hatoh"] = this.data["hatoh"]["ှ" + unicodeSyllable["lVowel"] + "_lig"];
         delete syllable["lVowel"];
@@ -469,16 +489,34 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         syllable["aVowel"] = this.data["aVowel"]["ါ်_lig"];
         delete syllable["asat"];
     }
-    if (unicodeSyllable["lDot"] && !(unicodeSyllable["yayit"] || unicodeSyllable["lig"] ||
+    if (unicodeSyllable["lDot"] && (unicodeSyllable["aVowel"] ||
+        !(unicodeSyllable["yayit"] || unicodeSyllable["lig"] ||
         unicodeSyllable["stack"] || unicodeSyllable["yapin"] || unicodeSyllable["wasway"] ||
         unicodeSyllable["hatoh"] || unicodeSyllable["lVowel"] || unicodeSyllable["cons"] == "ဍ" ||
         unicodeSyllable["cons"] == "ဋ" || unicodeSyllable["cons"] == "ဌ" ||
-        unicodeSyllable["cons"] == "ဈ"))
+        unicodeSyllable["cons"] == "ဈ" ||  unicodeSyllable["cons"] == "ရ")))
     {
-        // TODO work out when to use _alt variant
-        syllable["lDot"] = this.data["lDot"]["့_left"];
+        if (unicodeSyllable["cons"] == "န")
+            syllable["lDot"] = this.data["lDot"]["့_alt"];        
+        else
+            syllable["lDot"] = this.data["lDot"]["့_left"];
     }
-    var outputOrder = new Array("eVowel","yayit","lig","cons","stack","yapin","kinzi",
+    if (unicodeSyllable["lDot"] && !syllable["yayit"] && !(unicodeSyllable["cons"] == "ရ") &&
+        ((syllable["hatoh"] && syllable["hatoh"].length == 1 && !syllable["lVowel"]) || 
+         (syllable["lVowel"] && syllable["lVowel"] == this.data["lVowel"]["ု"])))
+    {
+        syllable["lDot"] = this.data["lDot"]["့_alt"];
+    }
+    if (syllable["asat"])
+    {
+        if (!syllable["eVowel"] && (syllable["yayit"] || syllable["yapin"] || syllable["wasway"] ||
+           syllable["lVowel"]))
+        {
+            syllable["contraction"] = syllable["asat"];
+            delete syllable["asat"];
+        }
+    }
+    var outputOrder = new Array("eVowel","yayit","lig","cons","stack","contraction","yapin","kinzi",
         "wasway","hatoh","uVowel","lVowel","anusvara","aVowel","asat","lDot","visarga");
     var outputText = "";
     for (var i = 0; i < outputOrder.length; i++)
