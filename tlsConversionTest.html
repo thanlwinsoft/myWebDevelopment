@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2010 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Test Conversion to Myanmar Unicode</title>
+<style>
+    @font-face { 
+        font-family: "Zawgyi-One";
+        src: local("Zawgyi-One"), url("fonts/Zawgyi-One-20071204.ttf");
+    }
+    @font-face { 
+        font-family: "Padauk";
+        src: local("Padauk"), url("fonts/Padauk.ttf");
+    }
+    .myUniTest {
+        font-family: Myanmar3, Padauk, Parabaik;
+        font-size: 1em; /* don't make it so small that rounding errors give problems */
+        color: white; /* should be same as background to make it invisible */
+    }
+    .myWarning {
+        color: red;
+    }
+    .myText {
+        font-family: Padauk, ThanLwin, Myanmar3, Parabaik;
+        font-size: 1em;
+    }
+    .myTextMsg {
+        text-align: center;
+    }
+    .myGood {
+        color: green;
+    }
+    .myThanLwin {
+        display: block;
+        text-align: right;
+        font-size: small;
+    }
+    .thanlwinsoft {
+      display: block;
+      text-align: right;
+      font-size: small;
+      border-top-style: solid;
+      border-top-width: 1px;
+      border-top-color: black;
+    }
+    .button {
+        cursor:pointer;
+        -moz-border-radius: 5px;
+        -ms-border-radius: 5px;
+        -o-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-color: black;
+        border-style: solid;
+        border-width: 1px;
+    }
+    textarea { width: 500px; height: 100px; }
+    .button:hover { background-color: #f0f0f0; }
+
+</style>
+<!--[if IE]>
+<style>vml\: * { behavior:url(#default#VML); display:inline-block }</style>
+<xml:namespace ns="urn:schemas-microsoft-com:vml" prefix="vml" />
+<![endif]-->
+<script type="text/javascript" src="common/tlsDebug.js"></script>
+<script type="text/javascript" src="converters/tlsMyanmarConverter.js"></script>
+<script type="text/javascript" src="converters/tlsConverterList.js"></script>
+<script type="text/javascript" src="xmlRequest.js"></script>
+<script type="text/javascript" src="mySource.js"></script>
+<script type="text/javascript">
+
+function setFont(font, theId)
+{
+    var elem = document.getElementById(theId);
+    if (elem)
+    {
+        if (font == "Unicode")
+            elem.style.fontFamily = "Padauk,ThanLwin,Myanmar3";
+        else
+            elem.style.fontFamily = font;
+    }
+}
+function initFonts()
+{
+    setFont(document.getElementById("initialEncoding").value, "textToConvert");
+    setFont(document.getElementById("initialEncoding").value, "reverseConversion");
+    setFont(document.getElementById("targetEncoding").value, "convertedText");        
+}
+function TlsConversionTestLoader(converterName, dataFile)
+{
+    this.converterName = converterName;
+    this.req = new XMLHttpRequest();
+    this.req.open("GET", dataFile, true);
+    this.req.overrideMimeType('text/plain; charset=utf-8');
+    //this.req.onreadystatechange = this;
+    this.handleEvent = function(theEvent) {
+        if (this.req.readyState == 4 && (this.req.status == 200 || this.req.status == 0))
+        {
+            try
+            {
+                var data = new String(this.req.responseText);
+                var lines = data.split("\n");
+                var parentDiv = document.getElementById("wordListTest");
+                var table = document.createElement("table");
+                var converter = tlsMyanmarConverters[converterName.toLowerCase()];
+                parentDiv.appendChild(table);
+                alert(lines.length);
+                for (var i = 0; i < lines.length; i++)
+                {
+                    var row = document.createElement("tr");
+                    var inText = document.createElement("td");
+                    var outText = document.createElement("td");
+                    var reverseText = document.createElement("td");
+                    table.appendChild(row);
+                    row.appendChild(inText);
+                    row.appendChild(outText);
+                    row.appendChild(reverseText);
+                    inText.style.fontFamily = "Padauk,ThanLwin,Myanmar3";
+                    reverseText.style.fontFamily = inText.style.fontFamily;
+                    outText.style.fontFamily = converterName;
+                    inText.appendChild(document.createTextNode(lines[i]));
+                    var converted = converter.convertFromUnicode(lines[i]);
+                    var reversed = converter.convertToUnicode(converted);
+                    outText.appendChild(document.createTextNode(converted));
+                    reverseText.appendChild(document.createTextNode(reversed));
+                    if (reversed != lines[i])
+                    {
+                        row.style.backgroundColor = "#c00";
+                    }
+                }
+            }
+            catch(e)
+            {
+                var debug = new TlsDebug();
+                debug.print(e);
+                for (var f in e)
+                {
+                    debug.print(f + ":" + e[f]);
+                }
+            }
+        }
+    };
+    this.req.addEventListener("readystatechange", this, true);
+    this.load = function() { this.req.send(); }
+}
+</script>
+<link type="text/css" rel="stylesheet" href="mySource.css"/>
+</head>
+<body onload="initFonts()">
+
+<h1>Myanmar Unicode Conversion Test</h1>
+
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<!-- Creative Commons License -->
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">
+<!--
+<img alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.gif" />
+-->
+</a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
+<!-- /Creative Commons License -->
+</p>
+<form action="">
+<textarea id="textToConvert" ></textarea>
+<select id="initialEncoding" name="initialEncoding" onchange="setFont(this.value, 'textToConvert');setFont(this.value, 'reverseConversion');">
+<option value="Unicode">Unicode</option>
+<option value="Zawgyi-One">ZawGyi</option>
+</select>
+<select id="targetEncoding" name="targetEncodiing" onchange="setFont(this.value, 'convertedText');">
+<option value="Zawgyi-One">ZawGyi</option>
+<option value="Unicode">Unicode</option>
+</select>
+<span onclick="tlsConvert('textToConvert', document.getElementById('initialEncoding').value, 'convertedText', document.getElementById('targetEncoding').value);tlsConvert('convertedText', document.getElementById('targetEncoding').value, 'reverseConversion', document.getElementById('initialEncoding').value)" class="button">Convert</span>
+<br />
+<textarea id="convertedText" ></textarea>
+<br />
+<textarea id="reverseConversion" ></textarea>
+</form>
+<p><span class="button" onclick="(new TlsConversionTestLoader('Zawgyi-One','converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
+<div id="wordListTest">
+</div>
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
+</License>
+
+</rdf:RDF>
+
+-->
+<div class="source" style="display:none;">
+<h2>HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js">
+</pre>
+</div>
+<p><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show DHTML</span>|
+<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
+</p>
+<div id="tlsDebug" style="display:none;"></div>
+</body>
+</html>

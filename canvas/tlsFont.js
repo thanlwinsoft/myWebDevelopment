@@ -1,55 +1,6 @@
 // Copyright: Keith Stribley 2008 http://www.ThanLwinSoft.org/
 // License: GNU Lesser General Public License, version 2.1 or later.
 // http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
-var tlsAlertOnce  = true;
-function TlsDebug()
-{
-    this.debug = document.getElementById("tlsDebug");
-    this.indent = "";
-    this.dumpLevel = 0;
-    this.print = function(t)
-    {
-        if (this.debug) 
-        {
-            this.debug.appendChild(document.createTextNode(t));
-            this.debug.appendChild(document.createElement("br"));
-        }
-        return this;
-    }
-    this.clear = function() { if (this.debug) this.debug.innerHTML = ""; return this; };
-    this.dump = function(obj, levels) {
-        var indent = this.indent;
-        if (levels == undefined) levels = 1;
-        this.dumpLevel++;
-        var i = 0;
-        for (var p in obj)
-        {
-            this.print(this.indent + p + ":" + obj[p]);
-            if (typeof obj[p] == "object" && this.dumpLevel < levels) 
-            {
-                this.indent = indent + "\u00A0\u00A0";
-                this.dump(obj[p], levels - 1);
-                this.indent = indent;
-            }
-            if (++i > 100) 
-            {
-                this.print("Only printed first 100 properties."); break; 
-            }
-        }
-        this.dumpLevel--;
-        return this;
-    };
-    return this;
-}
-
-var tlsUserAgent = (function() 
-{
-    var userAgent = navigator.userAgent.toLowerCase();
-    this.isGecko = (userAgent.indexOf('gecko') != -1);
-    this.isIe = (userAgent.indexOf("msie")!=-1);
-    this.isOpera = (userAgent.indexOf("opera")!=-1);
-    return this;
-})();
 
 var tlsFontCache = new function ()
 {
