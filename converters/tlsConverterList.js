@@ -18,7 +18,7 @@ function TlsConversionLoader(converterName, converterData)
             catch(e)
             {
                 var debug = new TlsDebug();
-                debug.print(e);
+                debug.print(e + " " + this.converterName);
                 for (var f in e)
                 {
                     debug.print(f + ":" + e[f]);
@@ -30,9 +30,10 @@ function TlsConversionLoader(converterName, converterData)
     this.load = function() { this.req.send(); }
 }
 
-var zawgyiLoader = new TlsConversionLoader("zawgyi-one", "zawgyi.json");
-zawgyiLoader.load();
-
-
-
+var tlsZawgyiLoader = new TlsConversionLoader("zawgyi-one", "zawgyi.json");
+tlsZawgyiLoader.load();
+var tlsWininnwaLoader = new TlsConversionLoader("wininnwa", "wininnwa.json");
+tlsWininnwaLoader.load();
+var tlsWwin_BurmeseLoader = new TlsConversionLoader("wwin_burmese1", "wwin_burmese.json");
+tlsWwin_BurmeseLoader.load();
 

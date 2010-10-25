@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+Testing for Myanmar Unicode Support
+
+Copyright 2010 www.ThanLwinsoft.org
+This work is licensed under a Creative Commons Attribution-ShareAlike 2.5 License.
+http://creativecommons.org/licenses/by-sa/2.5/
+
+-->
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Test Conversion to Myanmar Unicode</title>
+<style>
+    .myUniTest {
+        font-family: Myanmar3, Padauk, Parabaik;
+        font-size: 1em; /* don't make it so small that rounding errors give problems */
+        color: white; /* should be same as background to make it invisible */
+    }
+    .myWarning {
+        color: red;
+    }
+    .myText {
+        font-family: Padauk, ThanLwin, Myanmar3, Parabaik;
+        font-size: 1em;
+    }
+    .myTextMsg {
+        text-align: center;
+    }
+    .myGood {
+        color: green;
+    }
+    .myThanLwin {
+        display: block;
+        text-align: right;
+        font-size: small;
+    }
+    .thanlwinsoft {
+      display: block;
+      text-align: right;
+      font-size: small;
+      border-top-style: solid;
+      border-top-width: 1px;
+      border-top-color: black;
+    }
+    .button {
+        cursor:pointer;
+        -moz-border-radius: 5px;
+        -ms-border-radius: 5px;
+        -o-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-color: black;
+        border-style: solid;
+        border-width: 1px;
+    }
+    .button:hover { background-color: #f0f0f0; }
+</style>
+<!--[if IE]>
+<style>vml\: * { behavior:url(#default#VML); display:inline-block }</style>
+<xml:namespace ns="urn:schemas-microsoft-com:vml" prefix="vml" />
+<![endif]-->
+<script type="text/javascript" src="../common/tlsDebug.js"></script>
+<script type="text/javascript" src="../converters/tlsMyanmarConverter.js"></script>
+<script type="text/javascript" src="../converters/tlsConverterList.js"></script>
+<script type="text/javascript" src="../xmlRequest.js"></script>
+<script type="text/javascript" src="../mySource.js"></script>
+<link type="text/css" rel="stylesheet" href="../myKeyboard.css"/>
+<link type="text/css" rel="stylesheet" href="../mySource.css"/>
+</head>
+<body>
+
+<h1>Myanmar Unicode Conversion Test</h1>
+
+<p class='thanlwinsoft'>Myanmar Unicode technology from <a class="myText" href='http://www.thanlwinsoft.org'>သံ‌လွင်Soft.org <img src='../ThanLwinIcon.png' alt='ThanLwinSoft'/></a><br/>
+<!-- Creative Commons License -->
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">
+<!--
+<img alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.gif" />
+-->
+</a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>.
+<!-- /Creative Commons License -->
+</p>
+<form action="">
+<textarea id="textToConvert" ></textarea>
+<span onclick="tlsConvert('textToConvert', 'zawgyi', 'convertedText', 'unicode')" class="button">Convert</span>
+<br />
+<textarea id="convertedText" ></textarea>
+</form>
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
+</License>
+
+</rdf:RDF>
+
+-->
+<div class="source" style="display:none;">
+<h2>HTML Source</h2>
+<pre id="source" >
+</pre>
+</div>
+<div class="source"  style="display:none;">
+<h2>Javascript Source</h2>
+<pre id="js">
+</pre>
+</div>
+<p><span onclick="var dbg = document.getElementById('tlsDebug'); dbg.style.display=(dbg.style.display=='none')?'':'none';" style="cursor:pointer;">±Debug</span>|
+<span onclick="TlsDebug().clear();TlsDebug().print(document.body.innerHTML);" style="cursor:pointer;">Show DHTML</span>|
+<span onclick="TlsDebug().clear();" style="cursor:pointer;">Clear</span>
+</p>
+<div id="tlsDebug" style="display:none;"></div>
+</body>
+</html>

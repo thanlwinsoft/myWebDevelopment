@@ -20,6 +20,14 @@ http://creativecommons.org/licenses/by-sa/2.5/
         font-family: "Padauk";
         src: local("Padauk"), url("fonts/Padauk.ttf");
     }
+    @font-face { 
+        font-family: "WinInnwa";
+        src: local("WinInnwa"), url("fonts/winnwa.ttf");
+    }
+    @font-face { 
+        font-family: "Wwin_Burmese1";
+        src: local("Wwin_Burmese1"), url("fonts/ww_burn1.ttf");
+    }
     .myUniTest {
         font-family: Myanmar3, Padauk, Parabaik;
         font-size: 1em; /* don't make it so small that rounding errors give problems */
@@ -63,7 +71,7 @@ http://creativecommons.org/licenses/by-sa/2.5/
     }
     textarea { width: 500px; height: 100px; }
     .button:hover { background-color: #f0f0f0; }
-
+    table { font-size: 14pt; }
 </style>
 <!--[if IE]>
 <style>vml\: * { behavior:url(#default#VML); display:inline-block }</style>
@@ -180,10 +188,14 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <textarea id="textToConvert" ></textarea>
 <select id="initialEncoding" name="initialEncoding" onchange="setFont(this.value, 'textToConvert');setFont(this.value, 'reverseConversion');">
 <option value="Unicode">Unicode</option>
-<option value="Zawgyi-One">ZawGyi</option>
+<option value="Zawgyi-One">ZawGyi-One</option>
+<option value="WinInnwa">WinInnwa</option>
+<option value="Wwin_Burmese1">Wwin_Burmese1</option>
 </select>
 <select id="targetEncoding" name="targetEncodiing" onchange="setFont(this.value, 'convertedText');">
-<option value="Zawgyi-One">ZawGyi</option>
+<option value="Zawgyi-One">ZawGyi-One</option>
+<option value="WinInnwa">WinInnwa</option>
+<option value="Wwin_Burmese1">Wwin_Burmese1</option>
 <option value="Unicode">Unicode</option>
 </select>
 <span onclick="tlsConvert('textToConvert', document.getElementById('initialEncoding').value, 'convertedText', document.getElementById('targetEncoding').value);tlsConvert('convertedText', document.getElementById('targetEncoding').value, 'reverseConversion', document.getElementById('initialEncoding').value)" class="button">Convert</span>
@@ -192,7 +204,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <br />
 <textarea id="reverseConversion" ></textarea>
 </form>
-<p><span class="button" onclick="(new TlsConversionTestLoader('Zawgyi-One','converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
+<p><span class="button" onclick="(new TlsConversionTestLoader(document.getElementById('targetEncoding').value, 'converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
 <div id="wordListTest">
 </div>
 <!--

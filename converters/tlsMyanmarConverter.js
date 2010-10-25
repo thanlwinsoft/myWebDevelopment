@@ -22,6 +22,7 @@ function TlsMyanmarConverter(sourceEncoding, data)
 TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
 {
     var pattern = "";
+    var escapeRe = new RegExp("([\\^\\$\\\\\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|])", "g");
     if (!this.reverse) this.reverse = new Object();
     for (var i = 0; i < sequence.length; i++)
     {
@@ -41,7 +42,7 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
                     if (underscore == -1)
                     {
                         this.reverse[sequence[i]][this.data[sequence[i]][j]] = j;
-                        alternates.push(j);
+                        alternates.push(j.replace(escapeRe, "\\$1"));
                     }
                     else
                     {
@@ -50,7 +51,8 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
                 }
                 else
                 {
-                    alternates.push(this.data[sequence[i]][j]);
+                    var escapedAlternate = this.data[sequence[i]][j].replace(escapeRe, "\\$1");
+                    alternates.push(escapedAlternate);
                 }
             }
         }
@@ -58,19 +60,43 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
         if (sequence[i] == "cons") pattern += "(";
         else if (sequence[i] == "lig") pattern += "(";
         pattern += "(";
+        var subPattern = "";
         for (var k = 0; k < alternates.length; k++)
         {
-            if (k == 0) pattern += alternates[k];
-            else pattern += "|" + alternates[k];
+            if (k == 0) subPattern += alternates[k];
+            else subPattern += "|" + alternates[k];
         }
-        pattern += ")";
+        if (sequence[i] == "stack")
+        {
+            this.legacyStackPattern = new RegExp(subPattern);
+        }
+        if (sequence[i] == "kinzi")
+        {
+            this.legacyKinziPattern = new RegExp(subPattern);
+        }
+        if (sequence[i] == "lig")
+        {
+            this.legacyLigPattern = new RegExp(subPattern);
+        }
+        pattern += subPattern + ")";
         if (sequence[i] == "cons") {}
         else if (sequence[i] == "lig") { pattern += "|" }
         else if (sequence[i] == "stack" && sequence[i-1] == "cons") { pattern += "?))"; }
+        else if (sequence[i] == "wasway" || sequence[i] == "hatoh" ||
+            sequence[i] == "uVowel" || sequence[i] == "lVowel")
+        {
+            if (isUnicode)
+                pattern += "?";
+            else
+                pattern += "*"; // these are frequently multi-typed
+        }
         else { pattern += "?"; }
     }
     if (isUnicode) this.debug.print("unicode pattern: " + pattern);
-    else this.debug.print("legacy pattern: " + pattern);    
+    else
+    {   //^ $ \ . * + ? ( ) [ ] { } |
+        this.debug.print("legacy pattern: " + pattern);
+    }
     return new RegExp(pattern, "g");
 }
 
@@ -122,12 +148,22 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
                 if (syllable[component].charAt(1) == "ွ")
                 {
                     syllable["wasway"] = "ွ";
+                    if (syllable[component].length > 2)
+                    {
+                        if (syllable[component].charAt(2) == "ှ")
+                            syllable["hatoh"] = "ှ";
+                        else
+                        {
+                            this.debug.print("Unhandled yapin ligature: " + syllable[component]);
+                        }
+                    }
+                    syllable[component] = syllable[component].substring(0, 1);
                 }
-                if (syllable[component].charAt(1) == "ှ" || syllable[component].length > 2)
+                else if (syllable[component].charAt(1) == "ှ" || syllable[component].length > 2)
                 {
                     syllable["hatoh"] = "ှ";
+                    syllable[component] = syllable[component].substring(0, 1);
                 }
-                syllable[component] = syllable[component].substring(0, 1);
             }
             else if (component == "yayit")
             {
@@ -135,6 +171,18 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
                     syllable["wasway"] = "ွ";
                 else if (syllable[component].charAt(1) == "ု")
                     syllable["lVowel"] = "ု";
+                else if (syllable[component].charAt(1) == "ိ" &&
+                    syllable[component].charAt(2) == "ု")
+                {
+                    syllable["uVowel"] = "ိ";
+                    syllable["lVowel"] = "ု";                
+                }
+                else this.debug.print("unhandled yayit ligature: " + syllable[component]);
+                syllable[component] = syllable[component].substring(0, 1);
+            }
+            else if (component == "wasway")
+            {
+                syllable["hatoh"] = syllable[component].substring(1,2);
                 syllable[component] = syllable[component].substring(0, 1);
             }
             else if (component == "hatoh")
@@ -161,7 +209,15 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
                     syllable["uVowel"] = syllable[component].charAt(3);
                 syllable[component] = syllable[component].substring(0, 3);
             }
-            else if (component == "cons" || component == "stack" || component == "lig")
+            else if (component == "cons")
+            {
+                if (syllable[component].charAt(1) == "ာ")
+                {
+                    syllable["aVowel"] = syllable[component].charAt(1);
+                    syllable[component] = syllable[component].substring(0, 1);
+                }
+            }
+            else if (component == "stack" || component == "lig")
             {
                 // should be safe to ignore, since the relative order is correct
             }
@@ -209,24 +265,36 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
             delete syllable["yayit"];
         }
     }
-    else if (syllable["number"] == "၀")
+    else if (syllable["cons"] == "၀")
     {
         // convert zero to wa except in numbers
-        if (matchData[0].length > 0 && (matchData.index == 0 ||
-            inputData.charAt(matchData.index-1) < 0x1040 ||
-            inputData.charAt(matchData.index-1) > 0x1049))
+        if ((matchData[0].length == 1 && matchData.index > 0 &&
+            inputText.charAt(matchData.index-1) == this.data["cons"]["အ"]) ||
+            (matchData[0].length > 1 && (matchData.index == 0 ||
+            inputText.charCodeAt(matchData.index-1) < 0x1040 ||
+            inputText.charCodeAt(matchData.index-1) > 0x1049)) ||
+            (inputText.length > matchData.index + matchData[0].length &&
+             (inputText.charAt(matchData.index + matchData[0].length).match(this.legacyLigPattern) ||
+             (inputText.charCodeAt(matchData.index + matchData[0].length) >= 0x1000 &&
+              inputText.charCodeAt(matchData.index + matchData[0].length) <= 0x1021) ||
+             inputText.charAt(matchData.index + matchData[0].length) == this.data["cons"]["ဿ"])) ||
+            (inputText.length > matchData.index + matchData[0].length + 1 &&
+             (inputText.charAt(matchData.index + matchData[0].length + 1) == this.data["asat"]["်"] ||
+             inputText.charAt(matchData.index + matchData[0].length + 1).match(this.legacyStackPattern) ||
+             inputText.charAt(matchData.index + matchData[0].length + 1).match(this.legacyKinziPattern))) ||
+            (inputText.length > matchData.index + matchData[0].length + 2 &&
+             inputText.charAt(matchData.index + matchData[0].length + 2) == this.data["asat"]["်"] &&
+             inputText.charAt(matchData.index + matchData[0].length + 1) == this.data["asat"]["့"]))
         {
-            delete syllable["number"];
-            syllable["cons"] == "ဝ";
+            syllable["cons"] = "ဝ";
         }
     }
-    else if (syllable["number"] == "၄" && inputData.length >= matchData.index + matchData[0].length + 3)
+    else if (syllable["cons"] == "၄" && inputData.length >= matchData.index + matchData[0].length + 3)
     {
         // check for lagaun
         if (inputData.substr(matchData.index + matchData[0].length, 3) ==
           this.data["cons"]["င"] + this.data["asat"]["်"] + this.data["visarga"]["း"])
         {
-            delete syllable["number"];
             syllable["cons"] == "၎";
         }
     }
@@ -251,7 +319,7 @@ TlsMyanmarConverter.prototype.convertFromUnicode = function(inputText)
     {
         outputText += inputText.substring(pos, match.index);
         pos = this.unicodePattern.lastIndex;
-        this.debug.print("From Unicode Match: " + match);
+        //this.debug.print("From Unicode Match: " + match);
         outputText += this.fromUnicodeMapper(inputText, match);
         match = this.unicodePattern.exec(inputText);
     }
@@ -315,14 +383,22 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         {
             syllable["cons"] = this.data["cons"]["ဥ"];
         }
-        else if (unicodeSyllable["hatoh"])
-        {
-            syllable["hatoh"] = this.data["hatoh"]["ှ_small"];
-        }
         else if (unicodeSyllable["stack"])
         {
             syllable["cons"] = this.data["cons"]["ဉ_alt"];
         }
+        else if (unicodeSyllable["aVowel"] && this.data["cons"]["ဉာ_lig"])
+        {
+            syllable["cons"] = this.data["cons"]["ဉာ_lig"];
+            delete syllable["aVowel"];
+        }
+        // this hatoh can occur with aVowel, so no else
+        if (unicodeSyllable["hatoh"])
+        {
+            syllable["hatoh"] = this.data["hatoh"]["ှ_small"];
+        }
+        
+        
     }
     else if (unicodeSyllable["cons"] == "ဠ")
     {
@@ -378,6 +454,14 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
             syllable["cons"] = this.data["cons"][unicodeSyllable["cons"] + "_tall"];
         }
     }
+    else if (unicodeSyllable["cons"] == "ဦ")
+    {
+        if (this.data["cons"]["ဦ"].length == 0)
+        {
+            syllable["cons"] = this.data["cons"]["ဥ"];
+            syllable["uVowel"] = this.data["uVowel"]["ီ"];
+        }
+    }
     // stack with narrow upper cons
     if ((unicodeSyllable["cons"] == "ခ" || unicodeSyllable["cons"] == "ဂ" ||
         unicodeSyllable["cons"] == "င" ||  unicodeSyllable["cons"] == "စ" ||
@@ -400,19 +484,24 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         }
         else // assume we have the ligatures
         {
-            var key = "ျ" + (unicodeSyllable["wasway"])? "ွ":"" +
-                (unicodeSyllable["hatoh"])? "ှ":"" + "_lig";
+            var key = "ျ" + (unicodeSyllable["wasway"]? "ွ":"") +
+                (unicodeSyllable["hatoh"]? "ှ":"") + "_lig";
             if (this.data["yapin"][key])
             {
                 syllable["yapin"] = this.data["yapin"][key];
                 if (unicodeSyllable["wasway"]) delete syllable["wasway"];
                 if (unicodeSyllable["hatoh"]) delete syllable["hatoh"];
             }
+            else
+            {
+                this.debug.print(key + " not found");
+            }
         }
     }
     if (unicodeSyllable["yayit"])
     {
-        var variant = "_wide";
+        var widthVariant = "_wide";
+        var upperVariant = "";
         if (unicodeSyllable["cons"] == "ခ" || unicodeSyllable["cons"] == "ဂ" ||
         unicodeSyllable["cons"] == "င" ||  unicodeSyllable["cons"] == "စ" ||
         unicodeSyllable["cons"] == "ဎ" || unicodeSyllable["cons"] == "ဒ" ||
@@ -420,44 +509,91 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
         unicodeSyllable["cons"] == "ပ" || unicodeSyllable["cons"] == "ဖ" ||
         unicodeSyllable["cons"] == "ဗ" || unicodeSyllable["cons"] == "မ" ||
         unicodeSyllable["cons"] == "ဝ")
-            variant = "_narrow";
+            widthVariant = "_narrow";
         if (unicodeSyllable["uVowel"] || unicodeSyllable["kinzi"] || unicodeSyllable["anusvara"])
-            variant = "_upper" + variant;
+            upperVariant = "_upper";
         if (unicodeSyllable["wasway"])
         {
-            if (this.data["yayit"]["ြ_lower_wide"].length)
+            if (unicodeSyllable["hatoh"])
             {
-                variant = "_lower" + variant;
-                syllable["yayit"] = this.data["yayit"]["ြ" + variant];
+                if (this.data["wasway"]["ွှ_small"].length)
+                {
+                    if (this.data["yayit"]["ြ" + upperVariant + widthVariant].length)
+                    {
+                        syllable["yayit"] = this.data["yayit"]["ြ" + upperVariant + widthVariant];
+                    }
+                    else
+                    {
+                        if (widthVariant == "_narrow")
+                            widthVariant = "";
+                        syllable["yayit"] = this.data["yayit"]["ြ" + widthVariant];
+                    }
+                    syllable["wasway"] = this.data["wasway"]["ွှ_small"];
+                    delete syllable["hatoh"];
+                }
+                else if (this.data["yayit"]["ြ_lower" + widthVariant].length)
+                {
+                    if (this.data["yayit"]["ြ_lower" + upperVariant + widthVariant].length)
+                        syllable["yayit"] = this.data["yayit"]["ြ_lower" + upperVariant + widthVariant];
+                    else
+                        syllable["yayit"] = this.data["yayit"]["ြ_lower" + widthVariant];
+                } 
             }
-            else if (unicodeSyllable["hatoh"])
+            else if (this.data["yayit"]["ြွ" + upperVariant + widthVariant].length)
             {
-                if (variant == "_narrow") variant = "";
-                syllable["yayit"] = this.data["yayit"]["ြ" + variant];
-                syllable["wasway"] = this.data["wasway"]["ွှ_small"];
-                delete syllable["hatoh"];
-            }
-            else
-            {
-                syllable["yayit"] = this.data["yayit"]["ြွ" + variant];
+                syllable["yayit"] = this.data["yayit"]["ြွ" + upperVariant + widthVariant];
                 delete syllable["wasway"];
             }
+            else if (this.data["yayit"]["ြွ" + widthVariant].length)
+            {
+                syllable["yayit"] = this.data["yayit"]["ြွ" + widthVariant];
+                delete syllable["wasway"];
+            }            
+            else if (this.data["yayit"]["ြ_lower_wide"].length)
+            {
+                if (this.data["yayit"]["ြ" + "_lower" + upperVariant + widthVariant].length)
+                    syllable["yayit"] = this.data["yayit"]["ြ" + "_lower" + upperVariant + widthVariant];
+                else
+                    syllable["yayit"] = this.data["yayit"]["ြ" + "_lower" + widthVariant];
+            }    
         }
         else if (unicodeSyllable["hatoh"])
         {
-            if (variant == "_narrow") variant = "";
-            syllable["yayit"] = this.data["yayit"]["ြ" + variant];
+            if (upperVariant.length == 0 && widthVariant == "_narrow") widthVariant = "";
+            if (this.data["yayit"]["ြ" + upperVariant + widthVariant].length)
+            {
+                syllable["yayit"] = this.data["yayit"]["ြ" + upperVariant + widthVariant];
+            }
+            else if (this.data["yayit"]["ြ" + widthVariant].length)
+            {
+                syllable["yayit"] = this.data["yayit"]["ြ" + widthVariant];
+            }
+            else
+            {
+                syllable["yayit"] = this.data["yayit"]["ြ"];
+            }
             syllable["hatoh"] = this.data["hatoh"]["ှ_small"];
         }
-        else if (unicodeSyllable["lVowel"] && this.data["yayit"]["ြု_wide"])
+        else if (unicodeSyllable["lVowel"] == "ု" && this.data["yayit"]["ြု_wide"])
         {
-            syllable["yayit"] = this.data["yayit"]["ြု" + variant];
+            if (syllable["uVowel"] == this.data["uVowel"]["ိ"] && this.data["yayit"]["ြို" + widthVariant])
+            {
+                syllable["yayit"] = this.data["yayit"]["ြို" + widthVariant];
+                delete syllable["uVowel"];
+            }
+            else
+            {
+                if (this.data["yayit"]["ြု" + upperVariant + widthVariant].length)
+                    syllable["yayit"] = this.data["yayit"]["ြု" + upperVariant + widthVariant];
+                else
+                    syllable["yayit"] = this.data["yayit"]["ြု" + widthVariant];
+            }
             delete syllable["lVowel"];
         }
         else
         {
-            if (variant == "_narrow") variant = "";
-            syllable["yayit"] = this.data["yayit"]["ြ" + variant];
+            if (upperVariant.length == 0 && widthVariant == "_narrow") widthVariant = "";
+            syllable["yayit"] = this.data["yayit"]["ြ" + upperVariant + widthVariant];
         }
     }
     if (syllable["wasway"] && syllable["hatoh"])
@@ -536,6 +672,10 @@ function tlsConvert(sourceId, sourceEncoding, targetId, targetEncoding)
     targetEncoding = targetEncoding.toLowerCase();
     try
     {
+        if (sourceEncoding == targetEncoding)
+        {
+            targetElement.value = sourceElement.value;
+        }
         if (sourceEncoding == "unicode")
         {
             var converter = tlsMyanmarConverters[targetEncoding];
