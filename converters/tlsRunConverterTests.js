@@ -1,10 +1,23 @@
-// This is designed to be run using rhino from the command line
+// Copyright: Keith Stribley 2010 http://www.ThanLwinSoft.org/
+// License: GNU Lesser General Public License, version 2.1 or later.
+// http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+// These tests are designed to be run using rhino from the command line
+// rhino tlsRunConverterTests.js
 load("../common/tlsDebug.js");
 load("tlsMyanmarConverter.js");
-load("conv.js"); // use genConvScript.sh to generate
-new TlsMyanmarConverter('zawgyi-one', zawgyiData);
-new TlsMyanmarConverter('wininnwa', wininnwaData);
-new TlsMyanmarConverter('wwin_burmese1', wwin_burmeseData);
+
+if (typeof JSON == "undefined")
+{
+    var JSON = new Object();
+    // this is a crude implementation, which does no validity checking, but ok for testing
+    JSON.parse = function(data) { eval("var jsonData = " + data + ";"); return jsonData; }
+}
+new TlsMyanmarConverter(JSON.parse(readFile("zawgyi.json", "UTF-8")));
+new TlsMyanmarConverter(JSON.parse(readFile("wininnwa.json", "UTF-8")));
+new TlsMyanmarConverter(JSON.parse(readFile("wwin_burmese.json", "UTF-8")));
+
+var wordList = readFile("my_HeadwordSyllables.txt", "UTF-8").split(new RegExp("\\n", "g"));
 
 function runTest(conv)
 {

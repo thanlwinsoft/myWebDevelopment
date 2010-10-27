@@ -1,12 +1,29 @@
+// Copyright: Keith Stribley 2010 http://www.ThanLwinSoft.org/
+// License: GNU Lesser General Public License, version 2.1 or later.
+// http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
+/** map to hold converters keyed by legacy encoding (font) name */
 var tlsMyanmarConverters = new Object();
 
-function TlsMyanmarConverter(sourceEncoding, data)
+/**
+* Class to handle converting Myanmar (Burmese) text to/from Myanmar Unicode 5.1.
+* Myanmar Unicode text is assumed to conform to UTN11r3.
+* @param label for legacy encoding
+* @param data - hierarchical maps for each component of syllable for Unicode to legacy conversion
+*/
+function TlsMyanmarConverter(data)
 {
-    this.debug = new TlsDebug();
-    this.sourceEncoding = sourceEncoding;
-    this.targetEncoding = 'unicode';
+    if (typeof TlsDebug != "undefined")
+    {
+        this.debug = new TlsDebug();
+    }
+    else
+    {
+        this.debug = new Object();
+        this.debug.print = function(text) {};
+    }
     this.data = data;
+    this.sourceEncoding = this.data.fonts[0];
     // null is used as a place holder for the ((lig)|((cons)|(numbers)(stack)?)) groups
     this.unicodeSequence = new Array("kinzi",null,"lig",null,"cons","stack","asat","yapin","yayit",
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","lDot","visarga");
@@ -15,7 +32,13 @@ function TlsMyanmarConverter(sourceEncoding, data)
         "uVowel","lVowel","anusvara","uVowel","lVowel","aVowel","lDot","asat","lDot","visarga","lDot");
     this.unicodePattern = this.buildRegExp(this.unicodeSequence, true);
     this.legacyPattern = this.buildRegExp(this.legacySequence, false);
-    tlsMyanmarConverters[sourceEncoding] = this;
+    this.fontFamily = "";
+    for (var i = 0; i < this.data.fonts.length; i++)
+    {
+        if (i > 0) this.fontFamily += ",";
+        this.fontFamily += "'" + this.data.fonts[i] + "'";
+        tlsMyanmarConverters[this.data.fonts[i].toLowerCase()] = this;
+    }
     return this;
 }
 
@@ -24,6 +47,11 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
     var pattern = "";
     var escapeRe = new RegExp("([\\^\\$\\\\\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|])", "g");
     if (!this.reverse) this.reverse = new Object();
+    if (! this.minCodePoint)
+    {
+        this.minCodePoint = this.data["cons"]["က"].charCodeAt(0);
+        this.maxCodePoint = this.minCodePoint;
+    }
     for (var i = 0; i < sequence.length; i++)
     {
         var alternates = new Array();
@@ -33,7 +61,13 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
         for (var j in this.data[sequence[i]])
         {
             if (this.data[sequence[i]][j] && this.data[sequence[i]][j].length > 0)
-            {                
+            {
+                for (var k = 0; k < this.data[sequence[i]][j].length; k++)
+                {
+                    var codePoint = this.data[sequence[i]][j].charCodeAt(k);
+                    if (codePoint > this.maxCodePoint) this.maxCodePoint = codePoint;
+                    if (codePoint < this.minCodePoint) this.minCodePoint = codePoint;
+                }
                 if (isUnicode)
                 {   
                     // items with an underscore suffix are not put into the regexp
@@ -100,6 +134,9 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
     return new RegExp(pattern, "g");
 }
 
+/**
+* @internal
+*/
 TlsMyanmarConverter.prototype.sortLongestFirst = function(a,b)
 {
     if (a.length > b.length) return -1;
@@ -109,6 +146,11 @@ TlsMyanmarConverter.prototype.sortLongestFirst = function(a,b)
     return 0;
 }
 
+/**
+* Convert text to Unicode
+* @param inputText in legacy encoding
+* @return converted text in Unicode 5.1
+*/
 TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
 {
     var outputText = "";
@@ -119,7 +161,7 @@ TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
     {
         outputText += inputText.substring(pos, match.index);
         pos = this.legacyPattern.lastIndex;
-        this.debug.print("To Unicode Match: " + match);
+        this.debug.dbgMsg(this.debug.DEBUG, "To Unicode Match: " + match);
         outputText += this.toUnicodeMapper(inputText, match);
         match = this.legacyPattern.exec(inputText);
     }
@@ -127,6 +169,9 @@ TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
     return outputText;
 }
 
+/**
+* @internal
+*/
 TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
 {
     var syllable = new Object();
@@ -289,10 +334,10 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
             syllable["cons"] = "ဝ";
         }
     }
-    else if (syllable["cons"] == "၄" && inputData.length >= matchData.index + matchData[0].length + 3)
+    else if (syllable["cons"] == "၄" && inputText.length >= matchData.index + matchData[0].length + 3)
     {
         // check for lagaun
-        if (inputData.substr(matchData.index + matchData[0].length, 3) ==
+        if (inputText.substr(matchData.index + matchData[0].length, 3) ==
           this.data["cons"]["င"] + this.data["asat"]["်"] + this.data["visarga"]["း"])
         {
             syllable["cons"] == "၎";
@@ -309,6 +354,11 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
     return outputText;
 }
 
+/**
+* Convert text from Unicode into a legacy encoding.
+* @param inputText in Unicode 5.1
+* @return text in legacy encoding
+*/
 TlsMyanmarConverter.prototype.convertFromUnicode = function(inputText)
 {
     var outputText = "";
@@ -319,7 +369,7 @@ TlsMyanmarConverter.prototype.convertFromUnicode = function(inputText)
     {
         outputText += inputText.substring(pos, match.index);
         pos = this.unicodePattern.lastIndex;
-        //this.debug.print("From Unicode Match: " + match);
+        this.debug.dbgMsg(this.debug.DEBUG, "From Unicode Match: " + match);
         outputText += this.fromUnicodeMapper(inputText, match);
         match = this.unicodePattern.exec(inputText);
     }
@@ -327,6 +377,9 @@ TlsMyanmarConverter.prototype.convertFromUnicode = function(inputText)
     return outputText;
 }
 
+/**
+* @internal
+*/
 TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
 {
     var unicodeSyllable = new Object();
@@ -663,6 +716,85 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
     return outputText;
 }
 
+/**
+* Compute the frequency of characters matching a Myanmar syllable
+* compared to the number of characters in the code point range of the converter.
+* @param inputText to match against
+* @param isUnicode true to match with genuine Unicode pattern, false to match legacy
+*/
+TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
+{
+    var re = this.legacyPattern;
+    if (isUnicode)
+    {
+        utn11 = new TlsMyanmarUtn11();
+        re = utn11.pattern;
+    }
+    var legacyRange = "[" + String.fromCharCode(this.minCodePoint) + "-" + 
+        String.fromCharCode(this.maxCodePoint) + "]+";
+    this.debug.print(legacyRange + " " + this.minCodePoint + " " + this.maxCodePoint);
+    var codeRange = isUnicode? new RegExp("[က-႟ꩠ-ꩻ]+", "g") : new RegExp(legacyRange, "g");
+    re.lastIndex = 0;
+    var pos = 0;
+    var matchCharCount = 0;
+    var nonMyanmarCount = 0;
+    var nonMyanmarSubstrings;
+    var match = re.exec(inputText);
+    while (match)
+    {
+        var nonMatched = inputText.substring(pos, match.index);
+        var strippedNonMatched = nonMatched.replace(codeRange, "");
+        nonMyanmarCount += strippedNonMatched.length;
+        pos = re.lastIndex;
+        matchCharCount += match[0].length;
+        match = re.exec(inputText);
+    }
+    if (pos != inputText.length)
+    {
+        var nonMatched = inputText.substring(pos, inputText.length);
+        var strippedNonMatched = nonMatched.replace(codeRange, "");
+        nonMyanmarCount += strippedNonMatched.length;
+    }
+    var freq = (matchCharCount)? matchCharCount / (inputText.length - nonMyanmarCount) : 0;
+    this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
+        " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
+        " length=" + inputText.length);
+    return freq;
+}
+
+function TlsMyanmarUtn11()
+{
+    this.kinzi = "((င|ရ|ၚ)်\u1039)?";
+    this.cons = "(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ဣ|ဤ|ဥ|ဦ|ဧ|ဩ|ဪ|ဿ|၀|၁|၂|၃|၄|၅|၆|၇|၈|၉|၌|၍|၎|၏|ၐ|ၑ|ၒ|ၓ|ၔ|ၕ|ၚ|ၛ|ၜ|ၝ|ၡ|ၥ|ၦ|ၮ|ၯ|ၰ|ၵ|ၶ|ၷ|ၸ|ၹ|ၺ|ၻ|ၼ|ၽ|ၾ|ၿ|ႀ|ႁ|ႎ|႐|႑|႒|႓|႔|႕|႖|႗|႘|႙|႟|ꩠ|ꩡ|ꩢ|ꩣ|ꩤ|ꩥ|ꩦ|ꩧ|ꩨ|ꩩ|ꩪ|ꩫ|ꩬ|ꩭ|ꩮ|ꩯ|ꩱ|ꩲ|ꩳ|ꩴ|ꩵ|ꩶ|꩷|꩸|꩹|ꩺ)";
+    this.stack = "(\u1039(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ၚ|ၛ|ၜ|ၝ)){0,2}";
+    this.asat = "(\u103A)?";
+    this.medialY = "(ျ|ၞ|ၟ)?";
+    this.medialR = "(ြ)?";
+    this.medialW = "(ွ|ႂ)?";
+    this.medialH = "(ှ|ၠ)?";
+    this.eVowel = "(\u1031\u1031|\u1084\u1031|\u1031|\u1084)?";
+    this.uVowel = "(ိ|ီ|ဲ|ဳ|ဴ|ဵ|ံ|ၱ|ၲ|ၳ|ၴ|ႅ|ႝ)?";
+    this.lVowel = "(ု|ူ)?";
+    this.karenVowel = "(ၢ|့)?";
+    this.shanVowel = "(ႆ)?";
+    this.aVowel = "(ါ|ာ|ၢ|ၣ|ၧ|ၨ|ႃ)?";
+    this.anusvara = "(ဲ|ံ)?";
+    this.pwoTone = "(ၤ|ၩ|ၪ|ၫ|ၬ|ၭ)?";
+    this.lowerDot = "(့)?";
+    this.monH = "(ှ)?";
+    this.visarga = "(း|ႇ|ႈ|ႉ|ႊ|ႋ|ႌ|ႍ|ႏ|ႚ|ႛ|ႜ)?";
+    this.redup = "(ႝꩰ)?";
+    this.section = "(၊|။)?";
+    this.pattern = new RegExp(this.kinzi + this.cons + this.stack + this.asat  +this.medialY + this.medialR + this.medialW + this.medialH + this.asat + this.eVowel + this.uVowel + this.lVowel + this.karenVowel + this.shanVowel + this.aVowel + this.anusvara + this.pwoTone + this.lowerDot + this.monH + this.asat + this.visarga + this.redup + this.section, "g");
+    return this;
+}
+
+/** Convert the text in a given element from source to target encoding
+* @param sourceId textarea from which to take the text
+* @param sourceEncoding
+* @param targetId textarea in which to place result
+* @param targetEncoding
+*/
 function tlsConvert(sourceId, sourceEncoding, targetId, targetEncoding)
 {
     var debug = new TlsDebug();
@@ -704,4 +836,5 @@ function tlsConvert(sourceId, sourceEncoding, targetId, targetEncoding)
         }
     }
 }
+
 

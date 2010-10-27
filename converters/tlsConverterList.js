@@ -1,8 +1,8 @@
 
 
-function TlsConversionLoader(converterName, converterData)
+function TlsConversionLoader(converterData)
 {
-    this.converterName = converterName;
+    this.converterName = converterData.replace(".json","");
     this.req = new XMLHttpRequest();
     this.req.open("GET", "converters/" + converterData, true);
     this.req.overrideMimeType('text/plain; charset=utf-8');
@@ -13,7 +13,7 @@ function TlsConversionLoader(converterName, converterData)
             try
             {
                 var data = JSON.parse( this.req.responseText );
-                new TlsMyanmarConverter(this.converterName, data);
+                new TlsMyanmarConverter(data);
             }
             catch(e)
             {
@@ -30,10 +30,10 @@ function TlsConversionLoader(converterName, converterData)
     this.load = function() { this.req.send(); }
 }
 
-var tlsZawgyiLoader = new TlsConversionLoader("zawgyi-one", "zawgyi.json");
+var tlsZawgyiLoader = new TlsConversionLoader("zawgyi.json");
 tlsZawgyiLoader.load();
-var tlsWininnwaLoader = new TlsConversionLoader("wininnwa", "wininnwa.json");
+var tlsWininnwaLoader = new TlsConversionLoader("wininnwa.json");
 tlsWininnwaLoader.load();
-var tlsWwin_BurmeseLoader = new TlsConversionLoader("wwin_burmese1", "wwin_burmese.json");
+var tlsWwin_BurmeseLoader = new TlsConversionLoader("wwin_burmese.json");
 tlsWwin_BurmeseLoader.load();
 

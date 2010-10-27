@@ -79,6 +79,7 @@ http://creativecommons.org/licenses/by-sa/2.5/
 <![endif]-->
 <script type="text/javascript" src="common/tlsDebug.js"></script>
 <script type="text/javascript" src="converters/tlsMyanmarConverter.js"></script>
+<script type="text/javascript" src="converters/tlsMyanmarConverterData.js"></script>
 <script type="text/javascript" src="converters/tlsConverterList.js"></script>
 <script type="text/javascript" src="xmlRequest.js"></script>
 <script type="text/javascript" src="mySource.js"></script>
@@ -167,6 +168,26 @@ function TlsConversionTestLoader(converterName, dataFile)
     this.req.addEventListener("readystatechange", this, true);
     this.load = function() { this.req.send(); }
 }
+
+function convertTextAreas()
+{
+    tlsConvert('textToConvert', document.getElementById('initialEncoding').value, 'convertedText', document.getElementById('targetEncoding').value);
+    tlsConvert('convertedText', document.getElementById('targetEncoding').value, 'reverseConversion', document.getElementById('initialEncoding').value);
+    if (tlsMyanmarConverters[document.getElementById('initialEncoding').value.toLowerCase()])
+    {
+        var converter = tlsMyanmarConverters[document.getElementById('initialEncoding').value.toLowerCase()];
+        converter.matchFrequency(document.getElementById('textToConvert').value, false);
+        converter.matchFrequency(document.getElementById('convertedText').value, true);
+        converter.matchFrequency(document.getElementById('reverseConversion').value, false);
+    }
+    else if (document.getElementById('initialEncoding').value.toLowerCase() == 'unicode')
+    {
+        var converter = tlsMyanmarConverters[document.getElementById('targetEncoding').value.toLowerCase()];
+        converter.matchFrequency(document.getElementById('textToConvert').value, true);
+        converter.matchFrequency(document.getElementById('convertedText').value, false);
+        converter.matchFrequency(document.getElementById('reverseConversion').value, true);
+    }
+}
 </script>
 <link type="text/css" rel="stylesheet" href="mySource.css"/>
 </head>
@@ -198,13 +219,14 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <option value="Wwin_Burmese1">Wwin_Burmese1</option>
 <option value="Unicode">Unicode</option>
 </select>
-<span onclick="tlsConvert('textToConvert', document.getElementById('initialEncoding').value, 'convertedText', document.getElementById('targetEncoding').value);tlsConvert('convertedText', document.getElementById('targetEncoding').value, 'reverseConversion', document.getElementById('initialEncoding').value)" class="button">Convert</span>
+<span onclick="convertTextAreas();" class="button">Convert</span>
 <br />
 <textarea id="convertedText" ></textarea>
 <br />
 <textarea id="reverseConversion" ></textarea>
 </form>
 <p><span class="button" onclick="(new TlsConversionTestLoader(document.getElementById('targetEncoding').value, 'converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
+
 <div id="wordListTest">
 </div>
 <!--
