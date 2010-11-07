@@ -727,7 +727,7 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
     var re = this.legacyPattern;
     if (isUnicode)
     {
-        utn11 = new TlsMyanmarUtn11();
+        var utn11 = new TlsMyanmarUtn11();
         re = utn11.pattern;
     }
     var legacyRange = "[" + String.fromCharCode(this.minCodePoint) + "-" + 
@@ -760,6 +760,16 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
         " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
         " length=" + inputText.length);
     return freq;
+}
+
+TlsMyanmarConverter.prototype.getFontFamily = function (isUnicode)
+{
+    return (isUnicode)? "'Padauk','ThanLwin','Myanmar3','Parabaik'" : this.fontFamily;
+}
+
+TlsMyanmarConverter.prototype.isPseudoUnicode = function()
+{
+    return (this.minCodePoint == 0x1000);
 }
 
 function TlsMyanmarUtn11()
