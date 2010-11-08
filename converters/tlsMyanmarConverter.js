@@ -340,8 +340,17 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
         if (inputText.substr(matchData.index + matchData[0].length, 3) ==
           this.data["cons"]["င"] + this.data["asat"]["်"] + this.data["visarga"]["း"])
         {
-            syllable["cons"] == "၎";
+            syllable["cons"] = "၎";
         }
+    }
+     else if (syllable["cons"] == "၇" && (syllable["eVowel"]||syllable["uVowel"]||syllable["lVowel"]||syllable["anusvara"]||
+		syllable["aVowel"]||syllable["lDot"]||syllable["asat"]||syllable["wasway"]||syllable["hatoh"]))
+    {
+        // check for lagaun
+       // if (inputText.substr(matchData.index + matchData[0].length, 3) ==
+         // this.data["cons"]["င"] + this.data["asat"]["်"] + this.data["visarga"]["း"])
+            syllable["cons"] = "ရ";
+	    this.debug.print("7 found instead of ရ: " + inputText);
     }
     var outputOrder = new Array("kinzi","lig","cons","numbers","stack","contraction","yapin","yayit",
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","visarga");
