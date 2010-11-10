@@ -206,13 +206,14 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <!-- /Creative Commons License -->
 </p>
 <form action="">
-<textarea id="textToConvert" ></textarea>
+<label for="initialEncoding">Initial font</label>
 <select id="initialEncoding" name="initialEncoding" onchange="setFont(this.value, 'textToConvert');setFont(this.value, 'reverseConversion');">
 <option value="Unicode">Unicode</option>
 <option value="Zawgyi-One">ZawGyi-One</option>
 <option value="WinInnwa">WinInnwa</option>
 <option value="Wwin_Burmese1">Wwin_Burmese1</option>
 </select>
+<label for="initialEncoding">Target font</label>
 <select id="targetEncoding" name="targetEncodiing" onchange="setFont(this.value, 'convertedText');">
 <option value="Zawgyi-One">ZawGyi-One</option>
 <option value="WinInnwa">WinInnwa</option>
@@ -221,9 +222,10 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 </select>
 <span onclick="convertTextAreas();" class="button">Convert</span>
 <br />
-<textarea id="convertedText" ></textarea>
+<textarea id="textToConvert" title="Text to Convert"></textarea>
+<textarea id="convertedText" title="Converted text"></textarea>
 <br />
-<textarea id="reverseConversion" ></textarea>
+<textarea id="reverseConversion" title="Result of reverse conversion"></textarea>
 </form>
 <p><span class="button" onclick="(new TlsConversionTestLoader(document.getElementById('targetEncoding').value, 'converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
 
