@@ -942,12 +942,14 @@ registerKeyboard: function(langArray)
     var textareaNodes = document.getElementsByTagName('textarea');
     for (var i = 0; i < textareaNodes.length; i++)
     {
+        if (textareaNodes[i].hasAttribute('readonly')) continue;
         myK.wrapInput(textareaNodes[i], 'textarea', i, langArray);
         inputCount++;
     }
     var inputNodes = document.getElementsByTagName('input');
     for (var j = 0; j < inputNodes.length; j++)
     {
+        if (inputNodes[j].hasAttribute('readonly')) continue;
         if (inputNodes[j].getAttribute('type') == 'text')
         {
             myK.wrapInput(inputNodes[j], 'input', j, langArray);
