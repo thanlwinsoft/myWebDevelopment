@@ -23,13 +23,14 @@ function TlsMyanmarConverter(data)
         this.debug.print = function(text) {};
     }
     this.data = data;
+    this.useZwsp = false;
     this.sourceEncoding = this.data.fonts[0];
     // null is used as a place holder for the ((lig)|((cons)|(numbers)(stack)?)) groups
     this.unicodeSequence = new Array("kinzi",null,"lig",null,"cons","stack","asat","yapin","yayit",
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","lDot","visarga");
     this.legacySequence = new Array("eVowel","yayit",null,"lig",null,"cons","stack","kinzi",
         "uVowel","anusvara","asat","stack","yapin","wasway","hatoh","wasway","yapin","kinzi",
-        "uVowel","lVowel","anusvara","uVowel","lVowel","aVowel","lDot","asat","lDot","visarga","lDot");
+        "uVowel","lDot","lVowel","anusvara","uVowel","lVowel","aVowel","stack","lDot","asat","lDot","visarga","lDot");
     this.unicodePattern = this.buildRegExp(this.unicodeSequence, true);
     this.legacyPattern = this.buildRegExp(this.legacySequence, false);
     this.fontFamily = "";
@@ -65,8 +66,11 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
                 for (var k = 0; k < this.data[sequence[i]][j].length; k++)
                 {
                     var codePoint = this.data[sequence[i]][j].charCodeAt(k);
-                    if (codePoint > this.maxCodePoint) this.maxCodePoint = codePoint;
-                    if (codePoint < this.minCodePoint) this.minCodePoint = codePoint;
+		    if (codePoint != 0x20)
+		    {
+                    	if (codePoint > this.maxCodePoint) this.maxCodePoint = codePoint;
+                    	if (codePoint < this.minCodePoint) this.minCodePoint = codePoint;
+		    }
                 }
                 if (isUnicode)
                 {   
@@ -117,7 +121,7 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
         else if (sequence[i] == "lig") { pattern += "|" }
         else if (sequence[i] == "stack" && sequence[i-1] == "cons") { pattern += "?))"; }
         else if (sequence[i] == "wasway" || sequence[i] == "hatoh" ||
-            sequence[i] == "uVowel" || sequence[i] == "lVowel")
+            sequence[i] == "uVowel" || sequence[i] == "lVowel" ||sequence[i] == "aVowel")
         {
             if (isUnicode)
                 pattern += "?";
@@ -156,13 +160,16 @@ TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
     var outputText = "";
     var pos = 0;
     this.legacyPattern.lastIndex = 0;
+    var prevSyllable = null;
     var match = this.legacyPattern.exec(inputText);
     while (match)
     {
+        if (match.index != pos) prevSyllable = null;
         outputText += inputText.substring(pos, match.index);
         pos = this.legacyPattern.lastIndex;
         this.debug.dbgMsg(this.debug.DEBUG, "To Unicode Match: " + match);
-        outputText += this.toUnicodeMapper(inputText, match);
+        prevSyllable = this.toUnicodeMapper(inputText, match, prevSyllable);
+        outputText += prevSyllable;
         match = this.legacyPattern.exec(inputText);
     }
     if (pos < inputText.length) outputText += inputText.substring(pos, inputText.length);
@@ -172,7 +179,7 @@ TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
 /**
 * @internal
 */
-TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
+TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData, prevSyllable)
 {
     var syllable = new Object();
     for (var g = 1; g < matchData.length; g++)
@@ -355,6 +362,12 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData)
     var outputOrder = new Array("kinzi","lig","cons","numbers","stack","contraction","yapin","yayit",
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","visarga");
     var outputText = "";
+    if (this.useZwsp && !syllable["kinzi"] && !syllable["lig"] &&
+        !syllable["stack"] && !syllable["contraction"] && !syllable["asat"] &&
+        (prevSyllable != "​အ") && (prevSyllable != null))
+        {
+        outputText += "\u200B";
+        }
     for (var i = 0; i < outputOrder.length; i++)
     {
         if (syllable[outputOrder[i]])
