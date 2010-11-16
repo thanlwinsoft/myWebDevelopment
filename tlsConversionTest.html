@@ -188,10 +188,18 @@ function convertTextAreas()
         converter.matchFrequency(document.getElementById('reverseConversion').value, true);
     }
 }
+
+function setZwsp(use)
+{
+    for(var i in tlsMyanmarConverters)
+    {
+        tlsMyanmarConverters[i].useZwsp = use;
+    }
+}
 </script>
 <link type="text/css" rel="stylesheet" href="mySource.css"/>
 </head>
-<body onload="initFonts()">
+<body onload="initFonts();">
 
 <h1>Myanmar Unicode Conversion Test</h1>
 
@@ -224,6 +232,8 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 <textarea id="convertedText" ></textarea>
 <br />
 <textarea id="reverseConversion" ></textarea>
+<br />
+<input type="checkbox" name="zwsp" onchange="setZwsp(this.checked);" >zero width space</input>
 </form>
 <p><span class="button" onclick="(new TlsConversionTestLoader(document.getElementById('targetEncoding').value, 'converters/my_HeadwordSyllables.txt')).load();">Run word list test</span></p>
 
