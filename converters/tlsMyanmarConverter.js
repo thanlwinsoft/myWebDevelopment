@@ -754,7 +754,7 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
     }
     var legacyRange = "[" + String.fromCharCode(this.minCodePoint) + "-" + 
         String.fromCharCode(this.maxCodePoint) + "]+";
-    this.debug.print(legacyRange + " " + this.minCodePoint + " " + this.maxCodePoint);
+    //this.debug.print(legacyRange + " " + this.minCodePoint + " " + this.maxCodePoint);
     var codeRange = isUnicode? new RegExp("[က-႟ꩠ-ꩻ]+", "g") : new RegExp(legacyRange, "g");
     re.lastIndex = 0;
     var pos = 0;
@@ -778,9 +778,9 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
         nonMyanmarCount += strippedNonMatched.length;
     }
     var freq = (matchCharCount)? matchCharCount / (inputText.length - nonMyanmarCount) : 0;
-    this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
-        " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
-        " length=" + inputText.length);
+    //this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
+    //    " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
+    //    " length=" + inputText.length);
     return freq;
 }
 
