@@ -30,7 +30,8 @@ function TlsMyanmarConverter(data)
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","lDot","visarga");
     this.legacySequence = new Array("eVowel","yayit",null,"lig",null,"cons","stack","kinzi",
         "uVowel","anusvara","asat","stack","yapin","wasway","hatoh","wasway","yapin","kinzi",
-        "uVowel","lDot","lVowel","anusvara","uVowel","lVowel","aVowel","stack","lDot","asat","lDot","visarga","lDot");
+        "uVowel","lDot","lVowel","anusvara","uVowel","lVowel","aVowel","stack",
+        "lDot","visarga","asat","lDot","visarga","lDot");
     this.unicodePattern = this.buildRegExp(this.unicodeSequence, true);
     this.legacyPattern = this.buildRegExp(this.legacySequence, false);
     this.fontFamily = "";
@@ -778,9 +779,9 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
         nonMyanmarCount += strippedNonMatched.length;
     }
     var freq = (matchCharCount)? matchCharCount / (inputText.length - nonMyanmarCount) : 0;
-    //this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
-    //    " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
-    //    " length=" + inputText.length);
+    this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
+        " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
+        " length=" + inputText.length);
     return freq;
 }
 
