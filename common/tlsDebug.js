@@ -60,16 +60,5 @@ function TlsDebug()
 
 //TlsDebug.prototype.msgLevel = (TlsDebug.INFO | TlsDebug.WARN | TlsDebug.FATAL);
 
-var tlsUserAgent = (function() 
-{
-    if (typeof navigator != "undefined")
-    {
-        var userAgent = navigator.userAgent.toLowerCase();
-        this.isGecko = (userAgent.indexOf('gecko') != -1);
-        this.isIe = (userAgent.indexOf("msie")!=-1);
-        this.isOpera = (userAgent.indexOf("opera")!=-1);
-        this.isWebkit = (userAgent.indexOf("webkit")!=-1);
-    }
-    return this;
-})();
+
 
