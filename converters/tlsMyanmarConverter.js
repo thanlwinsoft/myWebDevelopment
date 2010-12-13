@@ -30,7 +30,7 @@ function TlsMyanmarConverter(data)
         "wasway","hatoh","eVowel","uVowel","lVowel","anusvara","aVowel","lDot","asat","lDot","visarga");
     this.legacySequence = new Array("eVowel","yayit",null,"lig",null,"cons","stack","kinzi",
         "uVowel","anusvara","asat","stack","yapin","wasway","hatoh","wasway","yapin","kinzi",
-        "uVowel","lDot","lVowel","anusvara","uVowel","lVowel","aVowel","stack",
+        "uVowel","lDot","lVowel","lDot","anusvara","uVowel","lVowel","aVowel","stack",
         "lDot","visarga","asat","lDot","visarga","lDot");
     this.unicodePattern = this.buildRegExp(this.unicodeSequence, true);
     this.legacyPattern = this.buildRegExp(this.legacySequence, false);
@@ -122,7 +122,8 @@ TlsMyanmarConverter.prototype.buildRegExp = function(sequence, isUnicode)
         else if (sequence[i] == "lig") { pattern += "|" }
         else if (sequence[i] == "stack" && sequence[i-1] == "cons") { pattern += "?))"; }
         else if (sequence[i] == "wasway" || sequence[i] == "hatoh" ||
-            sequence[i] == "uVowel" || sequence[i] == "lVowel" ||sequence[i] == "aVowel")
+            sequence[i] == "uVowel" || sequence[i] == "lVowel" ||sequence[i] == "aVowel" ||
+            sequence[i] == "lDot" || sequence[i] == "visarga")
         {
             if (isUnicode)
                 pattern += "?";
@@ -158,23 +159,49 @@ TlsMyanmarConverter.prototype.sortLongestFirst = function(a,b)
 */
 TlsMyanmarConverter.prototype.convertToUnicode = function(inputText)
 {
-    var outputText = "";
+    return this.convertToUnicodeSyllables(inputText).outputText;
+}
+
+
+/**
+* Convert text to Unicode
+* @param inputText in legacy encoding
+* @return converted text in Unicode 5.1
+*/
+TlsMyanmarConverter.prototype.convertToUnicodeSyllables = function(inputText)
+{
+    var outputText = new String();
+    var syllables = new Array();
     var pos = 0;
     this.legacyPattern.lastIndex = 0;
     var prevSyllable = null;
     var match = this.legacyPattern.exec(inputText);
     while (match)
     {
-        if (match.index != pos) prevSyllable = null;
-        outputText += inputText.substring(pos, match.index);
+        if (match.index != pos) 
+        {
+            prevSyllable = null;
+            var nonMatched = inputText.substring(pos, match.index);
+            outputText += nonMatched;
+            syllables.push(nonMatched);
+        }
         pos = this.legacyPattern.lastIndex;
         this.debug.dbgMsg(this.debug.DEBUG, "To Unicode Match: " + match);
         prevSyllable = this.toUnicodeMapper(inputText, match, prevSyllable);
+        syllables.push(prevSyllable);
         outputText += prevSyllable;
         match = this.legacyPattern.exec(inputText);
     }
-    if (pos < inputText.length) outputText += inputText.substring(pos, inputText.length);
-    return outputText;
+    if (pos < inputText.length)
+    {
+        var nonMatched = inputText.substring(pos, inputText.length);
+        outputText += nonMatched;
+        syllables.push(nonMatched);
+    }
+    var ret = new Object();
+    ret.outputText = outputText;
+    ret.syllables = syllables;
+    return ret;
 }
 
 /**
@@ -384,6 +411,7 @@ TlsMyanmarConverter.prototype.toUnicodeMapper = function(inputText, matchData, p
 */
 TlsMyanmarConverter.prototype.convertFromUnicode = function(inputText)
 {
+    inputText = inputText.replace(/[\u200B\u2060]/g, '');
     var outputText = "";
     var pos = 0;
     this.unicodePattern.lastIndex = 0;
@@ -748,6 +776,8 @@ TlsMyanmarConverter.prototype.fromUnicodeMapper = function(inputText, matchData)
 TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
 {
     var re = this.legacyPattern;
+    var retValue = new Object();
+    retValue.syllables = new Array();
     if (isUnicode)
     {
         var utn11 = new TlsMyanmarUtn11();
@@ -766,9 +796,12 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
     while (match)
     {
         var nonMatched = inputText.substring(pos, match.index);
+        if (nonMatched.length)
+            retValue.syllables.push(nonMatched);
         var strippedNonMatched = nonMatched.replace(codeRange, "");
         nonMyanmarCount += strippedNonMatched.length;
         pos = re.lastIndex;
+        retValue.syllables.push(match[0]);
         matchCharCount += match[0].length;
         match = re.exec(inputText);
     }
@@ -777,12 +810,14 @@ TlsMyanmarConverter.prototype.matchFrequency = function(inputText, isUnicode)
         var nonMatched = inputText.substring(pos, inputText.length);
         var strippedNonMatched = nonMatched.replace(codeRange, "");
         nonMyanmarCount += strippedNonMatched.length;
+        retValue.syllables.push(nonMatched);
     }
     var freq = (matchCharCount)? matchCharCount / (inputText.length - nonMyanmarCount) : 0;
     this.debug.print("match uni=" + isUnicode + " freq=" + freq + " match count=" + matchCharCount +
         " unmatched=" + (inputText.length - nonMyanmarCount - matchCharCount) +
         " length=" + inputText.length);
-    return freq;
+    retValue.freq = freq;
+    return retValue;
 }
 
 TlsMyanmarConverter.prototype.getFontFamily = function (isUnicode)
@@ -797,29 +832,65 @@ TlsMyanmarConverter.prototype.isPseudoUnicode = function()
 
 function TlsMyanmarUtn11()
 {
-    this.kinzi = "((င|ရ|ၚ)်\u1039)?";
-    this.cons = "(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ဣ|ဤ|ဥ|ဦ|ဧ|ဩ|ဪ|ဿ|၀|၁|၂|၃|၄|၅|၆|၇|၈|၉|၌|၍|၎|၏|ၐ|ၑ|ၒ|ၓ|ၔ|ၕ|ၚ|ၛ|ၜ|ၝ|ၡ|ၥ|ၦ|ၮ|ၯ|ၰ|ၵ|ၶ|ၷ|ၸ|ၹ|ၺ|ၻ|ၼ|ၽ|ၾ|ၿ|ႀ|ႁ|ႎ|႐|႑|႒|႓|႔|႕|႖|႗|႘|႙|႟|ꩠ|ꩡ|ꩢ|ꩣ|ꩤ|ꩥ|ꩦ|ꩧ|ꩨ|ꩩ|ꩪ|ꩫ|ꩬ|ꩭ|ꩮ|ꩯ|ꩱ|ꩲ|ꩳ|ꩴ|ꩵ|ꩶ|꩷|꩸|꩹|ꩺ)";
-    this.stack = "(\u1039(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ၚ|ၛ|ၜ|ၝ)){0,2}";
-    this.asat = "(\u103A)?";
-    this.medialY = "(ျ|ၞ|ၟ)?";
-    this.medialR = "(ြ)?";
-    this.medialW = "(ွ|ႂ)?";
-    this.medialH = "(ှ|ၠ)?";
-    this.eVowel = "(\u1031\u1031|\u1084\u1031|\u1031|\u1084)?";
-    this.uVowel = "(ိ|ီ|ဲ|ဳ|ဴ|ဵ|ံ|ၱ|ၲ|ၳ|ၴ|ႅ|ႝ)?";
-    this.lVowel = "(ု|ူ)?";
-    this.karenVowel = "(ၢ|့)?";
-    this.shanVowel = "(ႆ)?";
-    this.aVowel = "(ါ|ာ|ၢ|ၣ|ၧ|ၨ|ႃ)?";
-    this.anusvara = "(ဲ|ံ)?";
-    this.pwoTone = "(ၤ|ၩ|ၪ|ၫ|ၬ|ၭ)?";
-    this.lowerDot = "(့)?";
-    this.monH = "(ှ)?";
-    this.visarga = "(း|ႇ|ႈ|ႉ|ႊ|ႋ|ႌ|ႍ|ႏ|ႚ|ႛ|ႜ)?";
-    this.redup = "(ႝꩰ)?";
-    this.section = "(၊|။)?";
+    this.kinzi = "((င|ရ|ၚ)်\u1039)?";//1
+    this.cons = "(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ဣ|ဤ|ဥ|ဦ|ဧ|ဩ|ဪ|ဿ|၀|၁|၂|၃|၄|၅|၆|၇|၈|၉|၌|၍|၎|၏|ၐ|ၑ|ၒ|ၓ|ၔ|ၕ|ၚ|ၛ|ၜ|ၝ|ၡ|ၥ|ၦ|ၮ|ၯ|ၰ|ၵ|ၶ|ၷ|ၸ|ၹ|ၺ|ၻ|ၼ|ၽ|ၾ|ၿ|ႀ|ႁ|ႎ|႐|႑|႒|႓|႔|႕|႖|႗|႘|႙|႟|ꩠ|ꩡ|ꩢ|ꩣ|ꩤ|ꩥ|ꩦ|ꩧ|ꩨ|ꩩ|ꩪ|ꩫ|ꩬ|ꩭ|ꩮ|ꩯ|ꩱ|ꩲ|ꩳ|ꩴ|ꩵ|ꩶ|꩷|꩸|꩹|ꩺ)";//3
+    this.stack = "(\u1039(က|ခ|ဂ|ဃ|င|စ|ဆ|ဇ|ဈ|ဉ|ည|ဋ|ဌ|ဍ|ဎ|ဏ|တ|ထ|ဒ|ဓ|န|ပ|ဖ|ဗ|ဘ|မ|ယ|ရ|လ|ဝ|သ|ဟ|ဠ|အ|ၚ|ၛ|ၜ|ၝ)){0,2}";//4
+    this.asat = "(\u103A)?";//6,11,22
+    this.medialY = "(ျ|ၞ|ၟ)?";//7
+    this.medialR = "(ြ)?";//8
+    this.medialW = "(ွ|ႂ)?";//9
+    this.medialH = "(ှ|ၠ)?";//10
+    // asat 11
+    this.eVowel = "(\u1031\u1031|\u1084\u1031|\u1031|\u1084)?";//12
+    this.uVowel = "(ိ|ီ|ဲ|ဳ|ဴ|ဵ|ံ|ၱ|ၲ|ၳ|ၴ|ႅ|ႝ)?";//13
+    this.lVowel = "(ု|ူ)?";//14
+    this.karenVowel = "(ၢ|့)?";//15
+    this.shanVowel = "(ႆ)?";//16
+    this.aVowel = "(ါ|ာ|ၢ|ၣ|ၧ|ၨ|ႃ)?";//17
+    this.anusvara = "(ဲ|ံ)?";//18
+    this.pwoTone = "(ၤ|ၩ|ၪ|ၫ|ၬ|ၭ)?";//19
+    this.lowerDot = "(့)?";//20
+    this.monH = "(ှ)?";//21
+    // asat 22
+    this.visarga = "(း|ႇ|ႈ|ႉ|ႊ|ႋ|ႌ|ႍ|ႏ|ႚ|ႛ|ႜ)?";//23
+    this.redup = "(ႝꩰ)?";//24
+    this.section = "(၊|။)?";//25
     this.pattern = new RegExp(this.kinzi + this.cons + this.stack + this.asat  +this.medialY + this.medialR + this.medialW + this.medialH + this.asat + this.eVowel + this.uVowel + this.lVowel + this.karenVowel + this.shanVowel + this.aVowel + this.anusvara + this.pwoTone + this.lowerDot + this.monH + this.asat + this.visarga + this.redup + this.section, "g");
     return this;
+}
+
+TlsMyanmarUtn11.prototype.findSyllables = function(inputText)
+{
+    var syllables = new Array();
+    var pos = 0;
+    var match = this.pattern.exec(inputText);
+    while (match)
+    {
+        var nonMatched = inputText.substring(pos, match.index);
+        if (nonMatched.length)
+            syllables.push(nonMatched);
+        pos = this.pattern.lastIndex;
+        // check for asat or virama and append to previous syllable
+        if (syllables.length && ((match[1] != null || match[4] != null ||
+            match[6] != null || match[11] != null || match[22] != null) ||
+            (syllables[syllables.length-1] == "အ")))
+        {
+            var lastSyl = syllables.pop();
+            lastSyl += match[0];
+            syllables.push(lastSyl);
+        }
+        else
+        {
+            syllables.push(match[0]);
+        }
+        match = this.pattern.exec(inputText);
+    }
+    if (pos != inputText.length)
+    {
+        var nonMatched = inputText.substring(pos, inputText.length);
+        syllables.push(nonMatched);
+    }
+    return syllables;
 }
 
 /** Convert the text in a given element from source to target encoding
